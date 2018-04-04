@@ -1,0 +1,131 @@
+/*
+
+WHAT IS THIS?
+
+This module demonstrates simple uses of Botkit's `hears` handler functions.
+
+In these examples, Botkit is configured to listen for certain phrases, and then
+respond immediately with a single line response.
+
+*/
+
+var wordfilter = require('wordfilter');
+
+module.exports = function(controller) {
+
+    /* Collect some very simple runtime stats for use in the uptime/debug command */
+    var stats = {
+        triggers: 0,
+        convos: 0,
+    }
+
+    controller.on('heard_trigger', function() {
+        stats.triggers++;
+    });
+
+    controller.on('conversationStarted', function() {
+        stats.convos++;
+    });
+
+
+    controller.hears(['fuck','butthole','asshole','jerk','dick','moron','prick','idiot','fuck puddle','putz','fuckface'], 'direct_message, direct_mention, ambient', function(bot, message) {
+	     if(message.channel == "G99D12CCA") {
+        bot.createConversation(message, function(err, convo) {
+		    var message_options = [
+      			"Are you calling me a " + message.text,
+      			":waving:",
+      			"Shhh",
+      			":shushing_face:",
+      			"I know what you are, but what am I?",
+      			"Do you need some soap to put into your mouth?",
+      			"Are you talking to me?",
+      			"Is that your real face or are you still celebrating Halloween?",
+      			"Your bus leaves in 10 minutes... Be under it.",
+      			"Why don't you go into that corner and finish evolving?",
+      			"I'm sorry, I don't speak Orc.",
+      			"Sorry, I can't understand what you're saying... I'm wearing a moron filter.",
+      			"And yet your misses still prefers me to you.",
+      			"I'm impressed; I've never met such a small mind inside such a big head before.",
+      			"What's wrong, don't you get any attention back home?",
+      			"Did your mother never tell you not to drink on an empty head?",
+      			":eggplant: :punch:"
+      			]
+		var random_index = Math.floor(Math.random() * message_options.length)
+		var chosen_message = message_options[random_index]
+                convo.say(chosen_message);
+                convo.activate();
+	});
+	} else {
+		bot.reply(message, "I only heckle in #dev channel");
+           }
+
+    });
+
+    controller.hears(['paul Hi','Hi paul'], 'direct_message, direct_mention, ambient', function(bot, message) {
+
+        bot.createConversation(message, function(err, convo) {
+                convo.say("Shhh :shushing_face:");
+                convo.activate();
+        });
+
+    });
+    controller.hears(['Hmm'], 'direct_message, direct_mention, ambient', function(bot, message) {
+
+	    	    bot.createConversation(message, function(err, convo) {
+					    convo.say(":thinking_face:");
+              convo.say("¯\\_(ツ)_/¯");
+					    convo.activate();
+				});
+      });
+
+    controller.hears(['pound sand'], 'direct_message, direct_mention, ambient', function(bot, message) {
+          bot.api.users.info({user: message.user}, (error, response) => {
+              let {name, real_name} = response.user;
+              console.log(name, real_name);
+                bot.createConversation(message, function(err, convo) {
+                                        convo.say("You pound sand!");
+                                        convo.say("Hi " + real_name + " :waving: ");
+                                        convo.activate();
+                                });
+          })
+      });
+
+    controller.hears(['grr'], 'direct_message, direct_mention, ambient', function(bot, message) {
+                bot.createConversation(message, function(err, convo) {
+                                        convo.say("Don't beat me!");
+                                        convo.activate();
+                                });
+                });
+
+    controller.hears(['set reminder'], 'direct_message, direct_mention', function(bot, message) {
+
+    /*  bot.say({
+          channel: "#tech-validation",
+          text: "A new entry for <b> customer </b> has been added to the tech validation tracker."
+      });*/
+    bot.api.users.info({user: message.user}, (error, response) => {
+          let {id, name, real_name} = response.user;
+          console.log(id, name, real_name);
+          bot.api.reminders.add({text: "update validation tracker for <customer>"},{time: "Weekly"},{user: id}, (error, response) => {
+                  console.log(error, response);
+                  convo.say(response);
+                })
+              })
+      });
+
+    controller.hears(['^say (.*)','^say'], 'direct_message,direct_mention', function(bot, message) {
+        if (message.match[1]) {
+
+            if (!wordfilter.blacklisted(message.match[1])) {
+                bot.reply(message, message.match[1]);
+            } else {
+                bot.reply(message, '_sigh_');
+            }
+        } else {
+            bot.reply(message, 'I will repeat whatever you say.')
+        }
+    });
+
+
+};
+

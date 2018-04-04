@@ -60,17 +60,19 @@ if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
   // process.exit(1);
 }
 
-var Botkit = require('botkit');
+var Botkit = require('botkit')
 var debug = require('debug')('botkit:main');
 
 var bot_options = {
     clientId: process.env.clientId,
     clientSecret: process.env.clientSecret,
-    // debug: true,
+    token: 'xoxb-316483430950-saP6xXBGg9nZmgCCtaZqKf3h',
+    //debug: true,
     scopes: ['bot'],
     studio_token: process.env.studio_token,
     studio_command_uri: process.env.studio_command_uri
 };
+console.log(bot_options)
 
 // Use a mongo database if specified, otherwise store in a JSON file local to the app.
 // Mongo is automatically configured when deploying to Heroku
@@ -80,6 +82,7 @@ if (process.env.MONGO_URI) {
 } else {
     bot_options.json_file_store = __dirname + '/.data/db/'; // store user data in a simple JSON format
 }
+
 
 // Create the Botkit controller, which controls all instances of the bot.
 var controller = Botkit.slackbot(bot_options);
@@ -166,10 +169,6 @@ if (!process.env.clientId || !process.env.clientSecret) {
   }
 }
 
-
-
-
-
 function usage_tip() {
     console.log('~~~~~~~~~~');
     console.log('Botkit Starter Kit');
@@ -179,3 +178,14 @@ function usage_tip() {
     console.log('Get a Botkit Studio token here: https://studio.botkit.ai/')
     console.log('~~~~~~~~~~');
 }
+/*
+controller.hears(['help'], 'direct_message,direct_mention,mention', (bot, message) => {
+	    bot.reply(message, {
+		            text: `You can ask me things like:
+		        "Create a new org for a POC" or "I need you to create a new org"
+		        "I need a new org for London POC"
+		        "List my orgs" or "Get my orgs"
+		        "Please heckle Eric"`
+		        });
+});
+*/
