@@ -1,5 +1,26 @@
-.db
+
+json
 .env
-node_modules
-components/routes/_*
-.sass-cache/*
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Packages #
+############
+*.7z
+*.dmg
+*.gz
+*.iso
+*.rar
+*.tar
+*.zip
+
+# Hidden and gitignore folder #
+############
+.*
+!/.gitignore
