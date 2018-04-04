@@ -16,7 +16,7 @@ controller = Botkit.slackbot({
 
 // connect the bot to a stream of messages
 controller.spawn({
-	token: 'xoxb-316483430950-saP6xXBGg9nZmgCCtaZqKf3h'
+	token: process.env.SLACK_API_TOKEN
 }).startRTM(function(err, bot) {
   require('./model/users-model').init(controller, bot);
   require('./model/standup-model').init(controller, bot);
