@@ -10,10 +10,6 @@ respond immediately with a single line response.
 */
 
 var wordfilter = require('wordfilter');
-const projectId = "spry-water-668";
-const datasetId = "vmc_set_tech_validations";
-const tableId = "pocs_and_pilots";
-
 let fields = require("../json/valFields");
 let color = "#009cdb";
 
@@ -66,6 +62,13 @@ module.exports = function(controller) {
             break;
           case "Customer_Name":
             convo.ask("What's the customer's new name?", (response, convo) => {
+                updateValue = response.text;
+                confTask(response, convo);
+                convo.next();
+            });
+            break;
+          case "SE_Specialist":
+            convo.ask("Name of the SET Member?", (response, convo) => {
                 updateValue = response.text;
                 confTask(response, convo);
                 convo.next();
@@ -141,6 +144,43 @@ module.exports = function(controller) {
                     }
                   }
                   ]);
+            break;
+          case "Type":
+            convo.ask({
+              attachments:[
+                          {
+                              title: 'Is this a POC or Paid Pilot?',
+                              callback_id: 'type',
+                              attachment_type: 'default',
+                              color: color,
+                              actions: [
+                                  {
+                                      "name":"type",
+                                      "text": "Type...",
+                                      "type": "select",
+                                      "options": [
+                                        {
+                                          "text": "POC",
+                                          "value": "POC"
+                                        },
+                                        {
+                                          "text": "Paid Pilot",
+                                          "value": "Paid Pilot"
+                                        }]
+                                  }
+                              ]
+                          }
+                      ]
+                  },[
+                    {
+                      default: true,
+                    callback: function(response, convo) {
+                      updateValue = response.text;
+                      confTask(response, convo);
+                      convo.next();
+                    }
+                  }
+                ]);
             break;
           case "Compliance":
               convo.ask({
@@ -323,24 +363,27 @@ module.exports = function(controller) {
     };
 
     let confTask = (response, convo) => {
-      if(updateValue == 'Complete Won') {
-        bot.reply(message, {
-          text: "Don't forget to update Cloud Specialist, Customer Success member and projected number of hosts."
-        });
-        bot.say({
-            channel: "#tech-validation",
-            text: customer + " has been updated as a win!"
-        });
-      }
-      updateCustomer(datasetId, tableId, customer, updateField, updateValue, projectId, function(res) {
-        if (res.length != 0) {
+      //update info
+      updateCustomer(customer, updateField, updateValue, function(res) {
+        console.log("response: " + res);
+        if (res == 0) {
           bot.reply(message, {
-            text: "I couldn't find any info on " + customer + " or the update failed."
+            text: "I couldn't find any info on " + customer + " or the the update failed."
           });
         }
         else {
           bot.reply(message, {
             text: "Your info has been updated!"
+          });
+        }
+        //let us know if more fields need to be updated if marked complete won.
+        if(updateValue == 'Complete Won') {
+          bot.reply(message, {
+            text: "Don't forget to update Cloud Specialist, Customer Success member and projected number of hosts."
+          });
+          bot.say({
+              channel: "#tech-validation",
+              text: customer + " has been updated as a win!"
           });
         }
       });//end of function
@@ -350,52 +393,68 @@ module.exports = function(controller) {
       bot.startConversation(message, askField);
     });
 
-
     //function to get customer tracker information
-    function updateCustomer(datasetId, tableId, customer, updateField, updateValue, projectId, callback) {
-      // Imports the Google Cloud client library
+    function updateCustomer(customer, updateField, updateValue, callback) {
+      // Imports the mssql query
+      const sql = require('mssql')
+			const config = {
+		    user: process.env.sql_user,
+		    password: process.env.sql_password,
+		    server: process.env.sql_server, // You can use 'localhost\\instance' to connect to named instance
+		    database: process.env.sql_database,
+		    options: {
+		        encrypt: false // Use this if you're on Windows Azure
+		    	}
+				}
+			let sqlQuery;
       customer = customer.toLowerCase();
       customer = customer.replace("*","%");
+      //get date in mm/dd/yyyy format
+      var today = new Date();
+      var dd = today.getDate();
+      var mm = today.getMonth()+1; //January is 0!
+      var yyyy = today.getFullYear();
 
-      const BigQuery = require('@google-cloud/bigquery');
-      let sqlQuery;
+      if(dd<10) {
+          dd = '0'+dd
+      }
 
-      // Creates a client
-      const bigquery = new BigQuery({
-        projectId: projectId,
-      });
+      if(mm<10) {
+          mm = '0'+mm
+      }
+
+      var upDate = mm + '/' + dd + '/' + yyyy;
+
       // Update val tracker
       if (updateField == 'Notes') {
-        sqlQuery = `UPDATE vmc_set_tech_validations.pocs_and_pilots
-          SET notes = CONCAT(notes, '\\r\\n',CAST(CURRENT_DATE() as string),'-', '${updateValue}')
+        sqlQuery = `UPDATE dbo.pocs_and_pilots
+          SET notes = CONCAT(notes, CHAR(13),CAST(CONVERT(date, getdate()) as nvarchar),'-', '${updateValue}')
+              ,date_updated = '${upDate}'
           WHERE lower(customer_name) like '${customer}'`;
         }
       else {
-        sqlQuery = `UPDATE vmc_set_tech_validations.pocs_and_pilots
+        sqlQuery = `UPDATE dbo.pocs_and_pilots
           SET ${updateField} = '${updateValue}'
+              ,date_updated = '${upDate}'
           WHERE lower(customer_name) like '${customer}'`;
       }
+      sql.connect(config, err => {
+			    console.log("connect error: " + err);
 
-      console.log(sqlQuery);
-      // Query options list: https://cloud.google.com/bigquery/docs/reference/v2/jobs/query
-      const options = {
-        query: sqlQuery,
-        useLegacySql: false, // Use standard SQL syntax for queries.
-      };
+			    // Query
 
-      // Runs the query
-      bigquery
-        .dataset(datasetId)
-        .query(options)
-        .then(results => {
-          const rows = results[0];
-          console.log(rows);
-          return callback(rows);
-        })
-        .catch(err => {
-          console.error('ERROR:', err);
-          return callback('ERROR:', err);
-        });
+			    new sql.Request().query(sqlQuery, (err, result) => {
+			        // ... error checks
+							sql.close();
+			        console.log(result.rowsAffected);
+							return callback(result.rowsAffected);
+			    })
+
+			})
+
+			sql.on('error', err => {
+			    console.log("on error:" + err);
+			})
     }
 }; /* the end */
 

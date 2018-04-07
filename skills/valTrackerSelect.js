@@ -10,9 +10,6 @@ respond immediately with a single line response.
 */
 
 var wordfilter = require('wordfilter');
-const projectId = "spry-water-668";
-const datasetId = "vmc_set_tech_validations";
-const tableId = "pocs_and_pilots";
 var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
 		  '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
 		  '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
@@ -23,7 +20,16 @@ var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
 		  '#4D8066', '#809980', '#E6FF80', '#1AFF33', '#999933',
 		  '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3',
 		  '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
-
+const sql = require('mssql')
+const config = {
+  user: process.env.sql_user,
+  password: process.env.sql_password,
+  server: process.env.sql_server, // You can use 'localhost\\instance' to connect to named instance
+  database: process.env.sql_database,
+  options: {
+      encrypt: false // Use this if you're on Windows Azure
+  	}
+	}
 module.exports = function(controller) {
 
     /* Collect some very simple runtime stats for use in the uptime/debug command */
@@ -46,7 +52,7 @@ module.exports = function(controller) {
       var searchType = 0; //SE Search
       bot.reply(message, "Please hold.....");
       bot.createConversation(message, function(err, convo) {
-        selectCustomer(datasetId, tableId, seName, searchType, projectId, function(res) {
+        selectCustomer(seName, searchType, function(res) {
         if (res.length == 0) {
           bot.reply(message, {
             text: "I couldn't find any info on " + seName + "."
@@ -156,8 +162,8 @@ module.exports = function(controller) {
       var customer = message.match[1];
       var searchType = 1; //customer search
       bot.reply(message, "Please hold.....");
-      bot.createConversation(message, function(err, convo) {
-        selectCustomer(datasetId, tableId, customer, searchType, projectId, function(res) {
+      //bot.createConversation(message, function(err, convo) {
+        selectCustomer(customer, searchType, function(res) {
         if (res.length == 0) {
           bot.reply(message, {
             text: "I couldn't find any info on " + customer + "."
@@ -165,11 +171,12 @@ module.exports = function(controller) {
         }
         else {
           var jsonParse = JSON.stringify(res);
+					console.log("return: " + jsonParse);
           var jsonStr = JSON.parse(jsonParse);
 
           for (var i = 0; i < jsonStr.length; i++) {
-            if (jsonStr[i].Actual_Start_Date == null) {var startDate = "None"} else {var startDate = jsonStr[i].Actual_Start_Date.value}
-            if (jsonStr[i].End_Date == null) {var endDate = ""} else {var endDate = jsonStr[i].End_Date.value}
+          //  if (jsonStr[i].Actual_Start_Date == null) {var startDate = "None"} else {var startDate = jsonStr[i].Actual_Start_Date.value}
+            //if (jsonStr[i].End_Date == null) {var endDate = ""} else {var endDate = jsonStr[i].End_Date.value}
 
           	bot.reply(message, {
               	text: "Here's what I found for " + jsonStr[i].Customer_Name,
@@ -197,17 +204,18 @@ module.exports = function(controller) {
                                               },
                                               {
                                                 "title": "Use Cases",
+																								//"value": jsonStr[i].use_case.replace("|","\n"),
                                                 "value": jsonStr[i].Primary_Use_Case + "\n" + jsonStr[i].Secondary_Use_Case,
                                                 "short": true
                                               },
                                               {
                                                 "title": "Start Date",
-                                                "value": startDate,
+                                                "value": jsonStr[i].Actual_Start_Date,
                                                 "short": true
                                               },
                                               {
                                                 "title": "End Date",
-                                                "value": endDate,
+                                                "value": jsonStr[i].End_Date,
                                                 "short": true
                                               },
                                               {
@@ -245,6 +253,11 @@ module.exports = function(controller) {
                                                 "value": jsonStr[i].Cloud_Specialist,
                                                 "short": true
                                               },
+																							{
+																								"title": "Pre-flight Complete?",
+																								"value": jsonStr[i].pre_flight,
+																								"short": true
+																							},
                                               {
                                                 "title": "Notes",
                                                 "value": jsonStr[i].Notes,
@@ -258,50 +271,42 @@ module.exports = function(controller) {
               }
          });
          //convo.say("Here's the invite: {{vars.createorg}}")
-      });
+      //});
     });
     //function to get customer tracker information
-    function selectCustomer(datasetId, tableId, customer, searchType, projectId, callback) {
-      // Imports the Google Cloud client library
-      customer = customer.toLowerCase();
-      const BigQuery = require('@google-cloud/bigquery');
-      let sqlQuery;
+    function selectCustomer(customer, searchType, callback) {
 
-      // Creates a client
-      const bigquery = new BigQuery({
-        projectId: projectId,
-      });
-      if (searchType == 1) {
+			let sqlQuery;
+			if (searchType == 1) {
         // Search by customer name
-        sqlQuery = `SELECT *
-                      FROM vmc_set_tech_validations.pocs_and_pilots
-                      WHERE lower(customer_name) like '%${customer}%'`;
+				sqlQuery = `SELECT *
+											,(SELECT CASE WHEN count(*) >= 1 THEN 'Yes' ELSE 'No' END from [dbo].[pre_flight_checklist] where customer_name like '%${customer}%') as pre_flight
+                      FROM dbo.pocs_and_pilots
+                      WHERE lower(Customer_name) like '%${customer}%'`;
                   }
       else {
         //search by SE
         sqlQuery = `SELECT *
-                      FROM vmc_set_tech_validations.pocs_and_pilots
+                      FROM dbo.pocs_and_pilots
                       WHERE lower(SE_Specialist) like '%${customer}%'`;
       }
-      // Query options list: https://cloud.google.com/bigquery/docs/reference/v2/jobs/query
-      const options = {
-        query: sqlQuery,
-        useLegacySql: false, // Use standard SQL syntax for queries.
-      };
+			sql.connect(config, err => {
+			    console.log("connect error: " + err);
 
-      // Runs the query
-      bigquery
-        .dataset(datasetId)
-        .query(options)
-        .then(results => {
-          const rows = results[0];
-          console.log(rows);
-          return callback(rows);
-        })
-        .catch(err => {
-          console.error('ERROR:', err);
-          return callback('ERROR:', err);
-        });
+			    // Query
+
+			    new sql.Request().query(sqlQuery, (err, result) => {
+			        // ... error checks
+							sql.close();
+			        console.log(result.recordset);
+							return callback(result.recordset);
+			    })
+
+			})
+
+			sql.on('error', err => {
+			    console.log("on error:" + err);
+			})
     }
 }; /* the end */
 

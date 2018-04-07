@@ -10,10 +10,6 @@ respond immediately with a single line response.
 */
 
 var wordfilter = require('wordfilter');
-const projectId = "spry-water-668";
-const datasetId = "vmc_set_tech_validations";
-const tableId = "pocs_and_pilots";
-
 let fields = require("../json/valFields");
 
 module.exports = function(controller) {
@@ -393,8 +389,8 @@ module.exports = function(controller) {
 
     let askStartDate = (response, convo) => {
 
-        convo.ask("Expected start date? (yyyy-mm-dd)", (response, convo) => {
-            startDate = '"' + response.text + '"';
+        convo.ask("Expected start date? (mm-dd-yyyy)", (response, convo) => {
+            startDate = "'" + response.text + "'";
             askEndDate(response, convo);
             convo.next();
         });
@@ -402,8 +398,8 @@ module.exports = function(controller) {
 
     let askEndDate = (response, convo) => {
 
-        convo.ask("Expected end date? (yyyy-mm-dd)", (response, convo) => {
-            endDate = '"' + response.text + '"';
+        convo.ask("Expected end date? (mm-dd-yyyy)", (response, convo) => {
+            endDate = "'" + response.text + "'";
             askNotes(response, convo);
             convo.next();
         });
@@ -413,7 +409,11 @@ module.exports = function(controller) {
 
         convo.ask("Details of " + custType + " and next steps", (response, convo) => {
             notes = response.text;
-            askOrgInvite(response, convo);
+            if(custType = "POC"){
+              askOrgInvite(response, convo);
+            } else {
+              askOrg(response, convo);
+            }
             convo.next();
         });
     };
@@ -493,34 +493,52 @@ module.exports = function(controller) {
           let {name, real_name} = response.user;
           console.log(name, real_name);
 
-         var estDate = new Date(Date.now()).toLocaleString();
-         var seName = "Chris Lennon"; //temp
-         var inputRes = '[{"Customer_Name": "' + customer + '",'
-                    + '"SFDC_OPPTY_ID": "'  + sfOpp + '",'
-                    + '"Type": "' + custType + '",'
-                    + '"SE_Specialist": "' + real_name + '",'
-                   + '"Primary_Use_Case": "' + priUC + '",'
-                   + '"Secondary_Use_Case": "' + secUC + '",'
-                   //+ '"Tertiary_Use_Case": "' + triUC + '",'
-                   + '"Primary_AWS_Region": "' + depReg + '",'
-                   + '"Secondary_AWS_Region": "' + desiredReg + '",'
-                   + '"Compliance": "' + compType + '",'
-                   + '"Status": "' + statusType + '",'
-                   + '"Datetime_Inserted": "' + estDate + '",'
-                   + '"Actual_Start_Date": ' + startDate + ','
-                   + '"End_date": ' + endDate + ','
-                   + '"Notes": "' + notes + '",'
-                   + '"ORG_ID": "' + orgId + '"}]';
+          //get date in mm/dd/yyyy format
+          var today = new Date();
+          var dd = today.getDate();
+          var mm = today.getMonth()+1; //January is 0!
+          var yyyy = today.getFullYear();
+
+          if(dd<10) {
+              dd = '0'+dd
+          }
+
+          if(mm<10) {
+              mm = '0'+mm
+          }
+
+          var estDate = mm + '/' + dd + '/' + yyyy;
+
+          var rows = "('" + sfOpp + "','"
+                      + customer + "','"
+                      + custType + "','"
+                      + real_name + "','"
+                      + priUC + "','"
+                      + secUC + "','"
+                      + depReg + "','"
+                      + desiredReg + "','"
+                      + compType + "','"
+                      + statusType + "','"
+                      + estDate + "','"
+                      + estDate + "',"
+                      + startDate + ","
+                      + endDate + ",'"
+                      + notes + "','"
+                      + orgId + "',0)";
           //convo.say("Here's what I gathered: " + inputRes);
           //convo.say("Thanks for the input :smile:  Your " + custType + " information for " + customer + " has been added to Mode Analytics (not really).");
-           const projectId = "spry-water-668";
-           const datasetId = "vmc_set_tech_validations";
-           const tableId = "pocs_and_pilots";
-           const rows = JSON.parse(inputRes);
-           insertRowsAsStream(datasetId, tableId, rows, projectId,function(res) {
-             bot.reply(message, {
-                 text: res
-             });
+           //const rows = JSON.parse(inputRes);
+           insertRowsAsStream(rows, function(res) {
+             if (res == 0) {
+               bot.reply(message, {
+                 text: customer + " was not added for whatever reason."
+               });
+             }
+             else {
+               bot.reply(message, {
+                 text: "Your info has been added!"
+               });
+             }
              bot.say({
                  channel: "#tech-validation",
                  text: "A new entry for " + customer + " has been added to the tech validation tracker."
@@ -534,38 +552,59 @@ module.exports = function(controller) {
 
 });
 /*  function to insert data into bigquery */
-function insertRowsAsStream(datasetId, tableId, rows, projectId,callback) {
-  // [START bigquery_insert_stream]
-  // Imports the Google Cloud client library
-  const BigQuery = require('@google-cloud/bigquery');
-
-  // Creates a client
-  const bigquery = new BigQuery({
-    projectId: projectId,
-  });
-
-  // Inserts data into a table
-  bigquery
-    .dataset(datasetId)
-    .table(tableId)
-    .insert(rows)
-    .then(() => {
-      console.log(`Inserted ${rows.length} rows`);
-      return callback(`Your info has been updated`);
-    })
-    .catch(err => {
-      if (err && err.name === 'PartialFailureError') {
-        if (err.errors && err.errors.length > 0) {
-          console.log('Insert errors:');
-          err.errors.forEach(err => console.error(err));
-          return callback('ERROR:', err);
-        }
-      } else {
-        console.error('ERROR:', err);
-        return callback('ERROR:', err);
+function insertRowsAsStream(rows, callback) {
+  // Imports the mssql query
+  const sql = require('mssql')
+  const config = {
+    user: process.env.sql_user,
+    password: process.env.sql_password,
+    server: process.env.sql_server, // You can use 'localhost\\instance' to connect to named instance
+    database: process.env.sql_database,
+    options: {
+        encrypt: false // Use this if you're on Windows Azure
       }
-    });
-  // [END bigquery_insert_stream]
+    }
+  let sqlQuery;
+
+  // insert val tracker
+    sqlQuery = `INSERT INTO [dbo].[pocs_and_pilots]
+           ([SFDC_OPPTY_ID]
+           ,[Customer_Name]
+           ,[Type]
+           ,[SE_Specialist]
+           ,[Primary_Use_Case]
+           ,[Secondary_Use_Case]
+           ,[Primary_AWS_Region]
+           ,[Secondary_AWS_Region]
+           ,[Compliance]
+           ,[Status]
+           ,[Date_Inserted]
+           ,[date_updated]
+           ,[Actual_Start_Date]
+           ,[End_Date]
+           ,[Notes]
+           ,[ORG_ID]
+           ,[id])
+     VALUES ${rows}`;
+ console.log(sqlQuery);
+  sql.connect(config, err => {
+      // Query
+      new sql.Request().query(sqlQuery, (err, result) => {
+          // ... error checks
+          sql.close();
+          console.log(result, err)
+          if(err == null) {
+            return callback(err);
+          } else {
+          return callback(result.rowsAffected);
+        }
+      })
+
+  })
+
+  sql.on('error', err => {
+      console.log(err)
+  })
 }
 
   /* Utility function to get invite to create org */
