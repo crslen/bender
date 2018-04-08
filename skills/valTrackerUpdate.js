@@ -427,13 +427,13 @@ module.exports = function(controller) {
 
       // Update val tracker
       if (updateField == 'Notes') {
-        sqlQuery = `UPDATE dbo.pocs_and_pilots
+        sqlQuery = `UPDATE dbo.tech_validation
           SET notes = CONCAT(notes, CHAR(13),CAST(CONVERT(date, getdate()) as nvarchar),'-', '${updateValue}')
               ,date_updated = '${upDate}'
           WHERE lower(customer_name) like '${customer}'`;
         }
       else {
-        sqlQuery = `UPDATE dbo.pocs_and_pilots
+        sqlQuery = `UPDATE dbo.tech_validation
           SET ${updateField} = '${updateValue}'
               ,date_updated = '${upDate}'
           WHERE lower(customer_name) like '${customer}'`;

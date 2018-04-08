@@ -177,7 +177,10 @@ module.exports = function(controller) {
           for (var i = 0; i < jsonStr.length; i++) {
           //  if (jsonStr[i].Actual_Start_Date == null) {var startDate = "None"} else {var startDate = jsonStr[i].Actual_Start_Date.value}
             //if (jsonStr[i].End_Date == null) {var endDate = ""} else {var endDate = jsonStr[i].End_Date.value}
-
+						if(jsonStr[i].compliance !== null) {var compliance = jsonStr[i].compliance.replace("|","\n")} else {var compliance = "None"};
+						if(jsonStr[i].use_case !== null) {var use_case = jsonStr[i].use_case.replace("|","\n")} else {var use_case = "None"};
+						if(jsonStr[i].region !== null) {var region = jsonStr[i].region.replace("|","\n")} else {var region = "None"};
+						if(jsonStr[i].services !== null) {var service = jsonStr[i].services.replace("|","\n")} else {var service = "None"};
           	bot.reply(message, {
               	text: "Here's what I found for " + jsonStr[i].Customer_Name,
                 attachments: [
@@ -204,8 +207,7 @@ module.exports = function(controller) {
                                               },
                                               {
                                                 "title": "Use Cases",
-																								//"value": jsonStr[i].use_case.replace("|","\n"),
-                                                "value": jsonStr[i].Primary_Use_Case + "\n" + jsonStr[i].Secondary_Use_Case,
+																								"value": use_case,
                                                 "short": true
                                               },
                                               {
@@ -219,20 +221,20 @@ module.exports = function(controller) {
                                                 "short": true
                                               },
                                               {
-                                                "title": "Deployed AWS Region",
-                                                "value": jsonStr[i].Primary_AWS_Region,
-                                                "short": true
-                                              },
-                                              {
-                                                "title": "Desired AWS Region",
-                                                "value": jsonStr[i].Secondary_AWS_Region,
+                                                "title": "AWS Regions",
+                                                "value": region,
                                                 "short": true
                                               },
                                               {
                                                 "title": "Compliance Requirements",
-                                                "value": jsonStr[i].Compliance,
+                                                "value": compliance,
                                                 "short": true
                                               },
+																							{
+																								"title": "Services",
+																								"value": service,
+																								"short": true
+																							},
                                               {
                                                 "title": "Org ID",
                                                 "value": jsonStr[i].ORG_ID,
@@ -280,14 +282,13 @@ module.exports = function(controller) {
 			if (searchType == 1) {
         // Search by customer name
 				sqlQuery = `SELECT *
-											,(SELECT CASE WHEN count(*) >= 1 THEN 'Yes' ELSE 'No' END from [dbo].[pre_flight_checklist] where customer_name like '%${customer}%') as pre_flight
-                      FROM dbo.pocs_and_pilots
+                      FROM dbo.tech_validation_tracker_view
                       WHERE lower(Customer_name) like '%${customer}%'`;
                   }
       else {
         //search by SE
         sqlQuery = `SELECT *
-                      FROM dbo.pocs_and_pilots
+                      FROM dbo.tech_validation_tracker_view
                       WHERE lower(SE_Specialist) like '%${customer}%'`;
       }
 			sql.connect(config, err => {

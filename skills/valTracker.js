@@ -35,12 +35,10 @@ module.exports = function(controller) {
       var sfOpp; //SalesForce ID
       var custType; //poc or paidpilot
       var seName; //set se
-      var priUC; //primary use case
-      var secUC; //secondary use case
-      var triUC;  //tertiary use case
-      var DepReg; //
-      var desiredReg; //desired region
-      var compType; //compliance requirements
+      var priUC = ""; //primary use case
+      var depReg = ""; //
+      var compType = ""; //compliance requirements
+      var servType = ""; //services and add-ons
       var statusType; //status
       var startDate; //start Date
       var endDate; //end Date
@@ -67,13 +65,13 @@ module.exports = function(controller) {
             convo.ask({
               attachments: [
                             {
-                                title: "What is " + customer + "'s primary use case?",
+                                title: "What are " + customer + "'s use case(s)?",
                                 callback_id: 'primary_use_case',
                                 attachment_type: 'default',
                                 color: color,
                                 actions: [
                                     {
-                                        "name":"primary_use_case",
+                                        "name":"use_case",
                                         "text": "Pick a use case...",
                                         "type": "select",
                                         "options": fields.useCases()
@@ -85,81 +83,74 @@ module.exports = function(controller) {
                     {
                       default: true,
                     callback: function(response, convo) {
-                      priUC = response.text;
-                      askSecUC(response, convo);
+                      priUC = priUC + response.text  + "|";
+                      askUCRepeat(response, convo);
                       convo.next();
                     }
                   }
                   ]);
               };
 
-  let askSecUC = (response, convo) => {
+    let askUCRepeat = (response, convo) => {
 
-            convo.ask({
-              attachments:[
+          convo.ask({
+                    attachments:[
+                                {
+                                    title: 'Are there more use cases?',
+                                    callback_id: 'moreUC',
+                                    attachment_type: 'default',
+                                    color: color,
+                                    actions: [
+                                        {
+                                            "name":"yes",
+                                            "text": "Yes",
+                                            "value": "Yes",
+                                            "type": "button",
+                                        },
+                                        {
+                                            "name":"no",
+                                            "text": "No",
+                                            "value": "No",
+                                            "type": "button",
+                                        }
+                                    ]
+                                }
+                            ]
+                        },[
                           {
-                              title: "What is " + customer + "'s secondary use case?",
-                              callback_id: 'secondary_use_case',
-                              attachment_type: 'default',
-                              color: color,
-                              actions: [
-                                  {
-                                      "name":"Secondary_Use_Case",
-                                      "text": "Pick a use case...",
-                                      "type": "select",
-                                      "options": fields.useCases()
-                                  }
-                              ]
-                          }
-                      ]
-                  },[
-                    {
-                      default: true,
-                    callback: function(response, convo) {
-                      secUC = response.text;
-                      askDepReg(response, convo);
-                      convo.next();
-                    }
-                  }
-                  ]);
-              };
-  let askTriUC = (response, convo) => {
-
-            convo.ask({
-              attachments:[
-                          {
-                              title: "What is " + customer + "'s tertiary use case?",
-                              callback_id: 'tertiary_use_case',
-                              attachment_type: 'default',
-                              color: color,
-                              actions: [
-                                  {
-                                      "name":"tertiary_use_case",
-                                      "text": "Pick a use case...",
-                                      "type": "select",
-                                      "options": fields.useCases()
-                                  }
-                              ]
-                          }
-                      ]
-                  },[
-                    {
-                      default: true,
-                    callback: function(response, convo) {
-                      triUC = response.text;
-                      askDepReg(response, convo);
-                      convo.next();
-                    }
-                  }
-                  ]);
-              };
+                            pattern: "yes",
+                            callback: function(reply, convo) {
+                                askPriUC(response, convo);
+                                convo.next();
+                                // do something awesome here.
+                            }
+                        },
+                        {
+                            pattern: "no",
+                            callback: function(reply, convo) {
+                                convo.say('Cool beans :coolbean:');
+                                //compType = "NA";
+                                askDepReg(response, convo);
+                                convo.next();
+                            }
+                        },
+                            {
+                                default: true,
+                                callback: function(response, convo) {
+                                  // = response.text;
+                                  askStatus(response, convo);
+                                  convo.next();
+                                }
+                            }
+                        ]);
+  };
 
   let askDepReg = (response, convo) => {
 
     convo.ask({
       attachments:[
                   {
-                      title: 'Region SDDC is deploying for ' + custType,
+                      title: 'Select the desired AWS region(s) for ' + customer,
                       callback_id: 'deployRegion',
                       attachment_type: 'default',
                       color: color,
@@ -177,44 +168,66 @@ module.exports = function(controller) {
             {
               default: true,
             callback: function(response, convo) {
-              depReg = response.text;
-              askDesReg(response, convo);
+              depReg = depReg + response.text  + "|";
+              askRegRepeat(response, convo);
               convo.next();
             }
           }
           ]);
       };
 
-      //ask where poc or pilot will be deployed
-      let askDesReg = (response, convo) => {
+  let askRegRepeat = (response, convo) => {
 
-        convo.ask({
-          attachments:[
-                      {
-                          title: 'Desired region?',
-                          callback_id: 'deployRegion',
-                          attachment_type: 'default',
-                          color: color,
-                          actions: [
-                              {
-                                  "name":"deployRegion",
-                                  "text": "Pick a region...",
-                                  "type": "select",
-                                  "options": fields.awsRegions()
-                              }
-                          ]
-                      }
-                  ]
-              },[
-                {
-                  default: true,
-                callback: function(response, convo) {
-                  desiredReg = response.text;
-                  askComp(response, convo);
-                  convo.next();
-                }
-              }
-              ]);
+          convo.ask({
+                    attachments:[
+                                {
+                                    title: 'Are there more regions?',
+                                    callback_id: 'moreReg',
+                                    attachment_type: 'default',
+                                    color: color,
+                                    actions: [
+                                        {
+                                            "name":"yes",
+                                            "text": "Yes",
+                                            "value": "Yes",
+                                            "type": "button",
+                                        },
+                                        {
+                                            "name":"no",
+                                            "text": "No",
+                                            "value": "No",
+                                            "type": "button",
+                                        }
+                                    ]
+                                }
+                            ]
+                        },[
+                          {
+                            pattern: "yes",
+                            callback: function(reply, convo) {
+                                askDepReg(response, convo);
+                                convo.next();
+                                // do something awesome here.
+                            }
+                        },
+                        {
+                            pattern: "no",
+                            callback: function(reply, convo) {
+                                convo.say('Cool beans :coolbean:');
+                                //compType = "NA";
+                                askComp(response, convo);
+                                convo.next();
+                            }
+                        },
+                            {
+                                default: true,
+                                callback: function(response, convo) {
+                                  // = response.text;
+                                  askStatus(response, convo);
+                                  convo.next();
+                                }
+                            }
+                        ]);
           };
 
           let askComp = (response, convo) => {
@@ -256,7 +269,7 @@ module.exports = function(controller) {
                                   callback: function(reply, convo) {
                                       convo.say('Ok good to know');
                                       compType = "NA";
-                                      askStatus(response, convo);
+                                      askServType(response, convo);
                                       convo.next();
                                   }
                               },
@@ -276,7 +289,7 @@ module.exports = function(controller) {
           convo.ask({
             attachments:[
                         {
-                            title: 'What is the primary compliance requirement for ' + customer,
+                            title: 'What are the compliance requirement(s) for ' + customer,
                             callback_id: 'compType',
                             attachment_type: 'default',
                             color: color,
@@ -293,17 +306,210 @@ module.exports = function(controller) {
                 },[
                   {
                     default: true,
-                  callback: function(response, convo) {
-                    compType = response.text;
-                    askStatus(response, convo);
-                    convo.next();
+                    callback: function(response, convo) {
+                      compType = compType + response.text  + "|";
+                      askCompRepeat(response, convo);
+                      convo.next();
                   }
                 }
                 ]);
             };
 
+            let askCompRepeat = (response, convo) => {
+
+                  convo.ask({
+                            attachments:[
+                                        {
+                                            title: 'Are there more compliance requirements?',
+                                            callback_id: 'custType',
+                                            attachment_type: 'default',
+                                            color: color,
+                                            actions: [
+                                                {
+                                                    "name":"yes",
+                                                    "text": "Yes",
+                                                    "value": "Yes",
+                                                    "type": "button",
+                                                },
+                                                {
+                                                    "name":"no",
+                                                    "text": "No",
+                                                    "value": "No",
+                                                    "type": "button",
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },[
+                                  {
+                                    pattern: "yes",
+                                    callback: function(reply, convo) {
+                                        askCompType(response, convo);
+                                        convo.next();
+                                        // do something awesome here.
+                                    }
+                                },
+                                {
+                                    pattern: "no",
+                                    callback: function(reply, convo) {
+                                        convo.say('Cool beans :coolbean:');
+                                        //compType = "NA";
+                                        askServType(response, convo);
+                                        convo.next();
+                                    }
+                                },
+                                    {
+                                        default: true,
+                                        callback: function(response, convo) {
+                                          // = response.text;
+                                          askStatus(response, convo);
+                                          convo.next();
+                                        }
+                                    }
+                                ]);
+          };
+
+          let askService = (response, convo) => {
+
+                convo.ask({
+                          attachments:[
+                                      {
+                                          title: 'Will there be services or add-ons included?',
+                                          callback_id: 'custType',
+                                          attachment_type: 'default',
+                                          color: color,
+                                          actions: [
+                                              {
+                                                  "name":"yes",
+                                                  "text": "Yes",
+                                                  "value": "Yes",
+                                                  "type": "button",
+                                              },
+                                              {
+                                                  "name":"no",
+                                                  "text": "No",
+                                                  "value": "No",
+                                                  "type": "button",
+                                              }
+                                          ]
+                                      }
+                                  ]
+                              },[
+                                {
+                                  pattern: "yes",
+                                  callback: function(reply, convo) {
+                                      askServType(response, convo);
+                                      convo.next();
+                                      // do something awesome here.
+                                  }
+                              },
+                              {
+                                  pattern: "no",
+                                  callback: function(reply, convo) {
+                                      convo.say('Ok good to know');
+                                      compType = "NA";
+                                      askStatus(response, convo);
+                                      convo.next();
+                                  }
+                              },
+                                  {
+                                      default: true,
+                                      callback: function(response, convo) {
+                                        // = response.text;
+                                        confTask(response, convo);
+                                        convo.next();
+                                      }
+                                  }
+                              ]);
+          };
+
+          let askServType = (response, convo) => {
+
+          convo.ask({
+            attachments:[
+                        {
+                            title: 'What service(s) or add-ons will be installed for ' + customer,
+                            callback_id: 'servType',
+                            attachment_type: 'default',
+                            color: color,
+                            actions: [
+                                {
+                                    "name":"servType",
+                                    "text": "Services...",
+                                    "type": "select",
+                                    "options": fields.services()
+                                }
+                            ]
+                        }
+                    ]
+                },[
+                  {
+                    default: true,
+                    callback: function(response, convo) {
+                      servType = servType + response.text  + "|";
+                      askServRepeat(response, convo);
+                      convo.next();
+                  }
+                }
+                ]);
+            };
+
+            let askServRepeat = (response, convo) => {
+
+                  convo.ask({
+                            attachments:[
+                                        {
+                                            title: 'Are there more services or add-ons?',
+                                            callback_id: 'custType',
+                                            attachment_type: 'default',
+                                            color: color,
+                                            actions: [
+                                                {
+                                                    "name":"yes",
+                                                    "text": "Yes",
+                                                    "value": "Yes",
+                                                    "type": "button",
+                                                },
+                                                {
+                                                    "name":"no",
+                                                    "text": "No",
+                                                    "value": "No",
+                                                    "type": "button",
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },[
+                                  {
+                                    pattern: "yes",
+                                    callback: function(reply, convo) {
+                                        askServType(response, convo);
+                                        convo.next();
+                                        // do something awesome here.
+                                    }
+                                },
+                                {
+                                    pattern: "no",
+                                    callback: function(reply, convo) {
+                                        convo.say('Keep going, you are almost there!');
+                                        //compType = "NA";
+                                        askStatus(response, convo);
+                                        convo.next();
+                                    }
+                                },
+                                    {
+                                        default: true,
+                                        callback: function(response, convo) {
+                                          // = response.text;
+                                          askStatus(response, convo);
+                                          convo.next();
+                                        }
+                                    }
+                                ]);
+          };
+
             let askStatus = (response, convo) => {
-//ACTIVE, ON TRACK, PLANNING, WAITING ON FUNCTIONALITY, WAITING ON AWS REGION, CUSTOMER HOLD, COMPLETE - WON, COMPLETE - LOST, ON HOLD, AT RISK
+
               convo.ask({
                 attachments:[
                             {
@@ -509,25 +715,24 @@ module.exports = function(controller) {
 
           var estDate = mm + '/' + dd + '/' + yyyy;
 
-          var rows = "('" + sfOpp + "','"
+          var rows = "'" + sfOpp + "','"
                       + customer + "','"
                       + custType + "','"
                       + real_name + "','"
                       + priUC + "','"
-                      + secUC + "','"
+                    //  + secUC + "','"
                       + depReg + "','"
-                      + desiredReg + "','"
+                  //    + desiredReg + "','"
                       + compType + "','"
+                      + servType + "','"
                       + statusType + "','"
                       + estDate + "','"
                       + estDate + "',"
                       + startDate + ","
                       + endDate + ",'"
                       + notes + "','"
-                      + orgId + "',0)";
-          //convo.say("Here's what I gathered: " + inputRes);
-          //convo.say("Thanks for the input :smile:  Your " + custType + " information for " + customer + " has been added to Mode Analytics (not really).");
-           //const rows = JSON.parse(inputRes);
+                      + orgId + "'";
+
            insertRowsAsStream(rows, function(res) {
              if (res == 0) {
                bot.reply(message, {
@@ -567,25 +772,9 @@ function insertRowsAsStream(rows, callback) {
   let sqlQuery;
 
   // insert val tracker
-    sqlQuery = `INSERT INTO [dbo].[pocs_and_pilots]
-           ([SFDC_OPPTY_ID]
-           ,[Customer_Name]
-           ,[Type]
-           ,[SE_Specialist]
-           ,[Primary_Use_Case]
-           ,[Secondary_Use_Case]
-           ,[Primary_AWS_Region]
-           ,[Secondary_AWS_Region]
-           ,[Compliance]
-           ,[Status]
-           ,[Date_Inserted]
-           ,[date_updated]
-           ,[Actual_Start_Date]
-           ,[End_Date]
-           ,[Notes]
-           ,[ORG_ID]
-           ,[id])
-     VALUES ${rows}`;
+    sqlQuery = `EXECUTE [dbo].[tech_validation_insert_sp]
+                ${rows}`;
+
  console.log(sqlQuery);
   sql.connect(config, err => {
       // Query
