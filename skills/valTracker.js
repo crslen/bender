@@ -14,21 +14,6 @@ let fields = require("../json/valFields");
 
 module.exports = function(controller) {
 
-    /* Collect some very simple runtime stats for use in the uptime/debug command */
-    var stats = {
-        triggers: 0,
-        convos: 0,
-    }
-
-    controller.on('heard_trigger', function() {
-        stats.triggers++;
-    });
-
-    controller.on('conversationStarted', function() {
-        stats.convos++;
-    });
-
-
     controller.hears(['new (.*) for (.*)', 'add (.*) for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
 
       var customer; //customer name
@@ -802,9 +787,10 @@ function insertRowsAsStream(rows, callback) {
   //get auth token
   request.post({
   headers: {"Content-Type" : "application/x-www-form-urlencoded", "Accept": "application/json"},
-  form: {"refresh_token": "6163a32c-b7e5-4fad-b675-e7492b7141eb"},
+  form: {"refresh_token": process.env.create_refresh_token},
   url:     "https://console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"
   }, function(error, response, body){
+  console.log("body-" + body);
   var jsonStr = JSON.parse(body);
   var rToken = jsonStr.access_token;
   //return callback(rToken);
@@ -816,12 +802,12 @@ function insertRowsAsStream(rows, callback) {
    json: {"preset_name":  "CUSTOMER",
            "number_of_invitations": "1",
            "invitation_properties":  {
-                   "defaultAwsRegions":  "US_EAST_1,US_WEST_2",
+                   "defaultAwsRegions":  "US_EAST_1,US_WEST_2,EU_WEST_2",
                    "enableZeroCloudCloudProvider":  "false",
                    "skipSubscriptionCheck":  "true",
                    "enableAWSCloudProvider":  "true",
                    "accountLinkingOptional":  "false",
-                   "enabledAvailabilityZones":  "{\"us-east-1\":[\"iad6\",\"iad7\",\"iad12\"],\"us-west-2\":[\"pdx1\",\"pdx2\",\"pdx4\"]}",
+                   "enabledAvailabilityZones":  "{\"us-east-1\":[\"iad6\",\"iad7\",\"iad12\"],\"us-west-2\":[\"pdx1\",\"pdx2\",\"pdx4\"],\"eu-west-2\":[\"lhr54\",\"lhr55\"]}",
                    "sddcLimit":  "1",
                    "sla":  "CUSTOMER",
                    "orgType": "CUSTOMER_POC",
@@ -834,7 +820,7 @@ function insertRowsAsStream(rows, callback) {
          },
    url:     "https://vmc.vmware.com/vmc/api/operator/invitations/service-invitations"
   }, function(error, response, body){
-   console.log("Invite - " + body);
+   //console.log("Invite - " + body);
    return callback(body);
    });
   });

@@ -27,7 +27,6 @@ module.exports = function(controller) {
         stats.convos++;
     });
 
-
     controller.hears(['create org', 'new org'], 'direct_message,direct_mention,mention', (bot, message) => {
 
     let customer;
@@ -105,29 +104,30 @@ module.exports = function(controller) {
    //get auth token
    request.post({
     headers: {"Content-Type" : "application/x-www-form-urlencoded", "Accept": "application/json"},
-    form: {"refresh_token": "6163a32c-b7e5-4fad-b675-e7492b7141eb"},
+    form: {"refresh_token": process.env.create_refresh_token},
     url:     "https://console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"
    }, function(error, response, body){
+   console.log("body-" + body);
    var jsonStr = JSON.parse(body);
    var rToken = jsonStr.access_token;
+   console.log("token-" + rToken);
    //return callback(rToken);
    //request org invitation url
    var request = require('request');
-   //console.log(rToken);
    request.post({
      headers: {'csp-auth-token': rToken, 'Content-Type': 'application/json'},
      json: {"preset_name":  "CUSTOMER",
              "number_of_invitations": "1",
              "invitation_properties":  {
-                     "defaultAwsRegions":  "US_EAST_1,US_WEST_2",
+                     "defaultAwsRegions":  "US_EAST_1,US_WEST_2,EU_WEST_2",
                      "enableZeroCloudCloudProvider":  "false",
                      "skipSubscriptionCheck":  "true",
                      "enableAWSCloudProvider":  "true",
                      "accountLinkingOptional":  "false",
-                     "enabledAvailabilityZones":  "{\"us-east-1\":[\"iad6\",\"iad7\",\"iad12\"],\"us-west-2\":[\"pdx1\",\"pdx2\",\"pdx4\"]}",
+                     "enabledAvailabilityZones":  "{\"us-east-1\":[\"iad6\",\"iad7\",\"iad12\"],\"us-west-2\":[\"pdx1\",\"pdx2\",\"pdx4\"],\"eu-west-2\":[\"lhr54\",\"lhr55\"]}",
                      "sddcLimit":  "1",
                      "sla":  "CUSTOMER",
-		     "orgType": "CUSTOMER_POC",
+                     "orgType": "CUSTOMER_POC",
                      "defaultHostsPerSddc":  "4",
                      "hostLimit":  "6",
                      "defaultIADDatacenter":  "iad6",
@@ -146,25 +146,3 @@ module.exports = function(controller) {
 
 }; /* the end */
 
-/* updated script for new api
- //request org invitation url
- var request = require('request');
- request.post({
-   headers: {'x-api-key': "ZskwjVSREl2rIp961VTyzavlzhZg5LrG8Dk78mlj", 'Content-Type': 'application/json'},
-   json: {"org_type":"CUSTOMER_POC",
-          "regions":["us-east-1", "us-west-2"],
-          "num_of_hosts":4,
-          "invitation_properties":{
-              "hostLimit":6,
-              "skipSubscriptionCheck": "true"
-          },
-          "skip_fund_check": "true"
-      },
-   url:     "https://cwf1lbhfc4.execute-api.us-west-2.amazonaws.com/dev/generate-invitations"
- }, function(error, response, body){
-   var invite = JSON.stringify(body);
-   invite = JSON.parse(invite);
-   console.log("Invite - " + invite.invitation_url);
-   });
-
-*/
