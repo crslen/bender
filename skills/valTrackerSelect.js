@@ -188,7 +188,7 @@ module.exports = function(controller) {
                                     "title": "Validation Tracker Info",
                                     "color": colorArray[i],
                                     "title": "Mode Analytics Report",
-                                    "title_link": "https://modeanalytics.com/vmware_inc/reports/1c69ccf26a01",
+                                    "title_link": "https://modeanalytics.com/vmware_inc/reports/e869ce5736c1",
                                     "fields": [
                                               {
                                                   "title": "Customer",
@@ -212,12 +212,12 @@ module.exports = function(controller) {
                                               },
                                               {
                                                 "title": "Start Date",
-                                                "value": jsonStr[i].Actual_Start_Date,
+                                                "value": jsonStr[i].Expected_Start_Date,
                                                 "short": true
                                               },
                                               {
                                                 "title": "End Date",
-                                                "value": jsonStr[i].End_Date,
+                                                "value": jsonStr[i].Expected_End_Date,
                                                 "short": true
                                               },
                                               {

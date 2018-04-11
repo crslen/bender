@@ -33,7 +33,7 @@ module.exports = function(controller) {
                                   "name":"uField",
                                   "text": "Pick a field...",
                                   "type": "select",
-                                  "options": fields.uFields()
+                                  "option_groups": fields.uFields()
                               }
                           ]
                       }
@@ -75,14 +75,14 @@ module.exports = function(controller) {
             });
             break;
           case "Actual_Start_Date":
-            convo.ask("Start Date? (yyyy-mm-dd)", (response, convo) => {
+            convo.ask("Start Date? (dd/mm/yyyy)", (response, convo) => {
                 updateValue = response.text;
                 confTask(response, convo);
                 convo.next();
             });
             break;
           case "End_date":
-            convo.ask("End Date? (yyyy-mm-dd)", (response, convo) => {
+            convo.ask("End Date? (dd/mm/yyyy)", (response, convo) => {
               updateValue = response.text;
               confTask(response, convo);
               convo.next();
@@ -90,13 +90,6 @@ module.exports = function(controller) {
             break;
           case "Cloud_Specialist":
               convo.ask("Who is the Cloud Specialist assigned to " + customer + "?", (response, convo) => {
-                updateValue = response.text;
-                confTask(response, convo);
-                convo.next();
-            });
-            break;
-          case "CS_Architect":
-              convo.ask("Who is the Customer Success assigned to " + customer + "?", (response, convo) => {
                 updateValue = response.text;
                 confTask(response, convo);
                 convo.next();
@@ -110,7 +103,7 @@ module.exports = function(controller) {
             });
             break;
           case "Notes":
-            convo.ask("Append additional notes", (response, convo) => {
+            convo.ask("Append additional notes (date will be added)", (response, convo) => {
               updateValue = response.text;
               confTask(response, convo);
               convo.next();
@@ -186,7 +179,7 @@ module.exports = function(controller) {
               convo.ask({
                 attachments:[
                             {
-                                title: 'What is the primary compliance requirement?',
+                                title: 'What are the compliance requirement(s)?',
                                 callback_id: 'compType',
                                 attachment_type: 'default',
                                 color: color,
@@ -240,64 +233,6 @@ module.exports = function(controller) {
                     }
                     ]);
               break;
-            case "Secondary_Use_Case":
-              convo.ask({
-                attachments:[
-                            {
-                                title: "What is " + customer + "'s secondary use case?",
-                                callback_id: 'secondary_use_case',
-                                attachment_type: 'default',
-                                color: color,
-                                actions: [
-                                    {
-                                        "name":"Secondary_Use_Case",
-                                        "text": "Pick a use case...",
-                                        "type": "select",
-                                        "options": fields.useCases()
-                                    }
-                                ]
-                            }
-                        ]
-                    },[
-                      {
-                        default: true,
-                      callback: function(response, convo) {
-                        updateValue = response.text;
-                        confTask(response, convo);
-                        convo.next();
-                      }
-                    }
-                    ]);
-            break;
-            case "Tertiary_Use_Case":
-              convo.ask({
-                attachments:[
-                            {
-                                title: "What is " + customer + "'s tertiary use case?",
-                                callback_id: 'tertiary_use_case',
-                                attachment_type: 'default',
-                                color: color,
-                                actions: [
-                                    {
-                                        "name":"tertiary_use_case",
-                                        "text": "Pick a use case...",
-                                        "type": "select",
-                                        "options": fields.useCases()
-                                    }
-                                ]
-                            }
-                        ]
-                    },[
-                      {
-                        default: true,
-                      callback: function(response, convo) {
-                        updateValue = response.text;
-                        confTask(response, convo);
-                        convo.next();
-                      }
-                    }
-                    ]);
-            break;
             case "Primary_AWS_Region":
               convo.ask({
                 attachments:[
@@ -327,35 +262,79 @@ module.exports = function(controller) {
                     }
                     ]);
             break;
-            case "Secondary_AWS_Region":
-              convo.ask({
-                attachments:[
-                            {
-                                title: 'Desired region?',
-                                callback_id: 'deployRegion',
-                                attachment_type: 'default',
-                                color: color,
-                                actions: [
-                                    {
-                                        "name":"deployRegion",
-                                        "text": "Pick a region...",
-                                        "type": "select",
-                                        "options": fields.awsRegions()
-                                    }
-                                ]
-                            }
-                        ]
-                    },[
-                      {
-                        default: true,
-                      callback: function(response, convo) {
-                        updateValue = response.text;
-                        confTask(response, convo);
-                        convo.next();
-                      }
-                    }
-                    ]);
+
+          //consumption plan fields
+          case "CS_Architect":
+              convo.ask("Who is the Customer Success assigned to " + customer + "?", (response, convo) => {
+                updateValue = response.text;
+                confTask(response, convo);
+                convo.next();
+            });
             break;
+          case "CS_Manager":
+              convo.ask("Who is the Customer Success Manager assigned to " + customer + "?", (response, convo) => {
+                updateValue = response.text;
+                confTask(response, convo);
+                convo.next();
+            });
+            break;
+          case "current_host_count":
+            convo.ask("Number of hosts (today)", (response, convo) => {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            });
+            break;
+          case "expected_num_hosts":
+            convo.ask("Expected number of hosts (12 months)", (response, convo) => {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            });
+            break;
+          case "vmc_reference":
+            convo.ask("VMC Reference (Yes/no/maybe)", (response, convo) => {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            });
+            break;
+          case "oppty_close_date":
+            convo.ask("Opportunity Close Date (dd/mm/yyyy)", (response, convo) => {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            });
+            break;
+          case "est_onboarding_date":
+            convo.ask("Estimated onboarding start (dd/mm/yyyy)", (response, convo) => {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            });
+            break;
+          case "est_go_live_date":
+            convo.ask("Launch/completion date (dd/mm/yyyy)", (response, convo) => {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            });
+            break;
+          case "customer_requirements":
+            convo.ask("Customer requirements", (response, convo) => {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            });
+            break;
+          case "use_case_scenario":
+            convo.ask("Use case scenario????", (response, convo) => {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            });
+            break;
+            //
         }
         //update the fields in bigquery
         console.log("done with case");
@@ -379,7 +358,7 @@ module.exports = function(controller) {
         //let us know if more fields need to be updated if marked complete won.
         if(updateValue == 'Complete Won') {
           bot.reply(message, {
-            text: "Don't forget to update Cloud Specialist, Customer Success member and projected number of hosts."
+            text: "Make sure to fill out the consumption plan fields for Customer Success Team."
           });
           bot.say({
               channel: "#tech-validation",

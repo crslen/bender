@@ -123,7 +123,38 @@ module.exports = function(controller) {
                                     "name":"compType",
                                     "text": "Compliance...",
                                     "type": "select",
-                                    "options": fields.compliance()
+                                    "option_groups": [
+        {
+            "text": "Doggone bot antics",
+            "options": [
+                    {
+                        "text": "Unexpected sentience",
+                        "value": "AI-2323"
+                    },
+                    {
+                        "text": "Bot biased toward other bots",
+                        "value": "SUPPORT-42"
+                    },
+                    {
+                        "text": "Bot broke my toaster",
+                        "value": "IOT-75"
+                    }
+            ]
+        },
+        {
+            "text": "Human error",
+            "options": [
+                {
+                    "text": "Not Penny's boat",
+                    "value": "LOST-7172"
+                },
+                {
+                    "text": "We built our own CMS",
+                    "value": "OOPS-1"
+                }
+            ]
+        }
+    ]
                                 }
                             ]
                         }
@@ -132,7 +163,7 @@ module.exports = function(controller) {
                   {
                     default: true,
                   callback: function(response, convo) {
-                    compType = compType + "|" + response.text;
+                    compType = compType + response.text  + "|";
                     askCompRepeat(response, convo);
                     convo.next();
                   }
