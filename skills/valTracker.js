@@ -374,7 +374,7 @@ module.exports = function(controller) {
 
       convo.ask({
         attachments: [{
-          title: 'What service(s) or add-ons will be installed for ' + customer,
+          title: 'What service(s) or add-on(s) will be installed for ' + customer,
           callback_id: 'servType',
           attachment_type: 'default',
           color: color,
@@ -382,7 +382,7 @@ module.exports = function(controller) {
             "name": "servType",
             "text": "Services...",
             "type": "select",
-            "options": fields.services()
+            "option_groups": fields.services()
           }]
         }]
       }, [{
@@ -522,7 +522,7 @@ module.exports = function(controller) {
 
     let askStartDate = (response, convo) => {
 
-      convo.ask("Expected start date? (dd/mm/yyyy)", (response, convo) => {
+      convo.ask("Expected start date? (mm/dd/yyyy)", (response, convo) => {
         startDate = "'" + response.text + "'";
         askEndDate(response, convo);
         convo.next();
@@ -531,7 +531,7 @@ module.exports = function(controller) {
 
     let askEndDate = (response, convo) => {
 
-      convo.ask("Expected end date? (dd/mm/yyyy)", (response, convo) => {
+      convo.ask("Expected end date? (mm/dd/yyyy)", (response, convo) => {
         endDate = "'" + response.text + "'";
         askNotes(response, convo);
         convo.next();
@@ -555,7 +555,7 @@ module.exports = function(controller) {
 
       convo.ask({
         attachments: [{
-          title: 'Do you need an invite to create a new Org?',
+          title: 'Do you have the org ID?',
           callback_id: 'reqOrg',
           attachment_type: 'default',
           color: color,
@@ -576,11 +576,11 @@ module.exports = function(controller) {
       }, [{
           pattern: "yes",
           callback: function(reply, convo) {
-            getInvite(function(url) {
+            /*getInvite(function(url) {
               bot.reply(message, {
                 text: "Here's the invite for " + customer + " - " + url + "\n Click on the invite link to create the new org.  Make sure to capture the Org ID to update tech validation tracker."
               });
-            });
+            });*/
             askOrg(response, convo);
             convo.next();
             // do something awesome here.
@@ -591,7 +591,7 @@ module.exports = function(controller) {
           callback: function(reply, convo) {
             convo.say('Ok when you are ready for an invite ask "@bender create new org" to generate a new invite');
             orgId = "";
-            askOrg(response, convo);
+            confTask(response, convo);
             convo.next();
           }
         },
@@ -608,7 +608,7 @@ module.exports = function(controller) {
 
     let askOrg = (response, convo) => {
 
-      convo.ask(custType + " OrgID?  If you don't have it you can update it later.", (response, convo) => {
+      convo.ask(custType + "Please enter the Org ID.", (response, convo) => {
         orgId = response.text;
         confTask(response, convo);
         convo.next();
