@@ -374,7 +374,7 @@ module.exports = function(controller) {
 
       convo.ask({
         attachments: [{
-          title: 'What service(s) or add-on(s) will be installed for ' + customer,
+          title: 'Which service(s) or add-on(s) will be installed for ' + customer,
           callback_id: 'servType',
           attachment_type: 'default',
           color: color,
@@ -670,8 +670,26 @@ module.exports = function(controller) {
             });
           } else {
             bot.reply(message, {
-              text: "Your info has been added!"
+              text: "Your info has been added!  I've also set a reminder for you to make updates for " + customer + " on Tuesdays and Fridays.\nTo delete the reminder just type `/remind list`"
             });
+            bot.api.users.info({
+              user: message.user
+            }, (error, response) => {
+              let {
+                id,
+                name,
+                real_name
+              } = response.user;
+              console.log(id, name, real_name);
+              bot.api.reminders.add({
+                token: process.env.OAUTH_ACCESS_TOKEN,
+                text: "Interact with Bender to update validation tracker for " + customer + ".",
+                time: "Tuesdays and Fridays",
+                user: id
+              }, (error, response) => {
+                console.log(error, response);
+              })
+            })
           }
           bot.say({
             channel: "#tech-validation",

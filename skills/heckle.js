@@ -127,14 +127,13 @@ module.exports = function(controller) {
       } = response.user;
       console.log(id, name, real_name);
       bot.api.reminders.add({
-        text: "update validation tracker for <customer>"
-      }, {
-        time: "Weekly"
-      }, {
+        token: process.env.OAUTH_ACCESS_TOKEN,
+        text: "update validation tracker for <customer>",
+        time: "Weekly",
         user: id
       }, (error, response) => {
         console.log(error, response);
-        convo.say(response);
+        bot.reply(response);
       })
     })
   });
@@ -161,10 +160,10 @@ module.exports = function(controller) {
       for (var i = 0; i < obj.channels.length; i++) {
 
         //if (obj[i].channels.name == chName) {
-          console.log("Found: " + obj[i].name + " id: " + obj[i].id);
-          chId = obj[i].id;
-          return callback(chId);
-          //orgId = obj[i].OrgId;
+        console.log("Found: " + obj[i].name + " id: " + obj[i].id);
+        chId = obj[i].id;
+        return callback(chId);
+        //orgId = obj[i].OrgId;
         //}
       }
     });
