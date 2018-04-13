@@ -277,7 +277,7 @@ module.exports = function(controller) {
     });
     //function to get customer tracker information
     function selectCustomer(customer, searchType, callback) {
-
+			customer = customer.replace("&","_");
 			let sqlQuery;
 			if (searchType == 1) {
         // Search by customer name

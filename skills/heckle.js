@@ -30,6 +30,7 @@ module.exports = function(controller) {
 
 
   controller.hears(['fuck', 'butthole', 'asshole', 'jerk', 'dick', 'moron', 'prick', 'idiot', 'fuck puddle', 'putz', 'fuckface'], 'direct_message, direct_mention, ambient', function(bot, message) {
+    //if (message.channel == "#dev-bender") {
     if (message.channel == "G99D12CCA") {
       bot.createConversation(message, function(err, convo) {
         var message_options = [
@@ -100,6 +101,10 @@ module.exports = function(controller) {
   });
 
   controller.hears(['grr'], 'direct_message, direct_mention, ambient', function(bot, message) {
+    getChannelId("tech-validation", function(res) {
+      console.log("chId:" + res);
+    });
+
     bot.createConversation(message, function(err, convo) {
       convo.say("Don't beat me!");
       convo.activate();
@@ -147,5 +152,21 @@ module.exports = function(controller) {
     }
   });
 
+  function getChannelId(chName, callback) {
+    bot.api.channels.list({}, (error, response) => {
+      //console.log(response);
+      jsonStr = JSON.stringify(response);
+      obj = JSON.parse(jsonStr);
+      console.log("parse: " + jsonStr)
+      for (var i = 0; i < obj.channels.length; i++) {
 
+        //if (obj[i].channels.name == chName) {
+          console.log("Found: " + obj[i].name + " id: " + obj[i].id);
+          chId = obj[i].id;
+          return callback(chId);
+          //orgId = obj[i].OrgId;
+        //}
+      }
+    });
+  }
 };

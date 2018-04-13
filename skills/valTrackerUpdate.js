@@ -631,6 +631,52 @@ module.exports = function(controller) {
             text: customer + " has been updated as a win!"
           });
         }
+        //ask if you want to update another field
+        convo.ask({
+          attachments: [{
+            title: 'Do you have more fields to update?',
+            callback_id: 'updateMore',
+            attachment_type: 'default',
+            color: color,
+            actions: [{
+                "name": "yes",
+                "text": "Yes",
+                "value": "Yes",
+                "type": "button",
+              },
+              {
+                "name": "no",
+                "text": "No",
+                "value": "No",
+                "type": "button",
+              }
+            ]
+          }]
+        }, [{
+            pattern: "yes",
+            callback: function(reply, convo) {
+              askField(response, convo);
+              convo.next();
+              // do something awesome here.
+            }
+          },
+          {
+            pattern: "no",
+            callback: function(reply, convo) {
+              convo.say('Buh bye');
+              //askStatus(response, convo);
+              convo.next();
+            }
+          },
+          {
+            default: true,
+            callback: function(response, convo) {
+              // = response.text;
+              confTask(response, convo);
+              convo.next();
+            }
+          }
+        ]);
       }); //end of function
 
     };
