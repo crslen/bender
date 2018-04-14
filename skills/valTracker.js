@@ -502,7 +502,7 @@ module.exports = function(controller) {
         {
           pattern: "no",
           callback: function(reply, convo) {
-            convo.say('Ok make sure you update start and end date once confirmed with your customer by typing "@bender update ' + customer + '"');
+            convo.say('Ok make sure you update start and end date once confirmed with your customer by typing `@bender update ' + customer + '`');
             startDate = null;
             endDate = null;
             askNotes(response, convo);
@@ -589,7 +589,7 @@ module.exports = function(controller) {
         {
           pattern: "no",
           callback: function(reply, convo) {
-            convo.say('Ok when you are ready for an invite ask "@bender create new org" to generate a new invite');
+            convo.say('Ok when you are ready for an invite ask `@bender create new org` to generate a new invite');
             orgId = "";
             confTask(response, convo);
             convo.next();
