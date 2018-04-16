@@ -11,6 +11,16 @@ respond immediately with a single line response.
 
 var wordfilter = require('wordfilter');
 let fields = require("../json/valFields");
+const sql = require('mssql')
+const config = {
+  user: process.env.sql_user,
+  password: process.env.sql_password,
+  server: process.env.sql_server, // You can use 'localhost\\instance' to connect to named instance
+  database: process.env.sql_database,
+  options: {
+    encrypt: false // Use this if you're on Windows Azure
+  }
+}
 
 module.exports = function(controller) {
 
@@ -699,23 +709,47 @@ module.exports = function(controller) {
       })
     };
 
-    bot.reply(message, "OK, I can help you with that! I will need to ask some questions to add to the validation tracker database.");
-    bot.startConversation(message, askOpp);
+    //check to see if customer is already in tech validation table
+    getCustomer(customer, function(res) {
+      if (res[0].result == "No") {
+        bot.reply(message, "OK, I can help you with that! I will need to ask some questions to add to the validation tracker database.");
+        bot.startConversation(message, askOpp);
+      } else {
+        bot.reply(message, "Looks like there's already an entry in the Tech Validation database for " + customer + ". Use `@bender get " + customer + "` to get more information.")
+      }
+    });
 
   });
-  /*  function to insert data into bigquery */
+
+  //check to see if customer exists in tech validation table
+  function getCustomer(customer, callback) {
+    customer = customer.replace("&", "_");
+    let sqlQuery;
+
+    sqlQuery = `select dbo.get_tech_validation_customer_fn('${customer}') AS result`;
+
+    sql.connect(config, err => {
+      console.log("connect error: " + err);
+
+      // Query
+
+      new sql.Request().query(sqlQuery, (err, result) => {
+        // ... error checks
+        sql.close();
+        console.log(result.recordset);
+        return callback(result.recordset);
+      })
+
+    })
+
+    sql.on('error', err => {
+      console.log("on error:" + err);
+    })
+  }
+
+  /*  function to insert data into sql server */
   function insertRowsAsStream(rows, callback) {
     // Imports the mssql query
-    const sql = require('mssql')
-    const config = {
-      user: process.env.sql_user,
-      password: process.env.sql_password,
-      server: process.env.sql_server, // You can use 'localhost\\instance' to connect to named instance
-      database: process.env.sql_database,
-      options: {
-        encrypt: false // Use this if you're on Windows Azure
-      }
-    }
     let sqlQuery;
 
     // insert val tracker
