@@ -11,6 +11,16 @@ respond immediately with a single line response.
 
 var wordfilter = require('wordfilter');
 let fields = require("../json/valFields");
+const sql = require('mssql')
+const config = {
+  user: process.env.sql_user,
+  password: process.env.sql_password,
+  server: process.env.sql_server, // You can use 'localhost\\instance' to connect to named instance
+  database: process.env.sql_database,
+  options: {
+    encrypt: false // Use this if you're on Windows Azure
+  }
+}
 let color = "#009cdb";
 
 module.exports = function(controller) {
@@ -624,11 +634,17 @@ module.exports = function(controller) {
         //let us know if more fields need to be updated if marked complete won.
         if (updateValue == 'Complete Won') {
           bot.reply(message, {
-            text: "Make sure to fill out the consumption plan fields for Customer Success Team."
+            text: "Make sure to fill out the consumption plan fields for Customer Success Team using `@bender update " + customer + "`."
           });
           bot.say({
             channel: "#tech-validation",
             text: customer + " has been updated as a win!"
+          });
+        }
+        //make sure SDDC is deleted when status marked complete*
+        if (updateValue.indexOf("Complete") > -1) {
+          bot.reply(message, {
+            text: "Please make sure to delete the SDDC as part of the POC wrap up."
           });
         }
         //ask if you want to update another field
@@ -687,16 +703,6 @@ module.exports = function(controller) {
   //function to get customer tracker information
   function updateCustomer(customer, updateField, updateValue, callback) {
     // Imports the mssql query
-    const sql = require('mssql')
-    const config = {
-      user: process.env.sql_user,
-      password: process.env.sql_password,
-      server: process.env.sql_server, // You can use 'localhost\\instance' to connect to named instance
-      database: process.env.sql_database,
-      options: {
-        encrypt: false // Use this if you're on Windows Azure
-      }
-    }
     let sqlQuery;
     customer = customer.toLowerCase();
     customer = customer.replace("*", "%");
