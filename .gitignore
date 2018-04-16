@@ -1,0 +1,33 @@
+# Bot related files #
+json
+*.env
+node_modules
+public
+components
+backup
+docs
+sass
+views
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Packages #
+############
+*.7z
+*.dmg
+*.gz
+*.iso
+*.rar
+*.tar
+*.zip
+
+# Hidden and gitignore folder #
+############
+.*
+!/.gitignore
