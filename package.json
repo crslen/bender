@@ -9,6 +9,7 @@
   "dependencies": {
     "@google-cloud/bigquery": "^1.0.0",
     "@google-cloud/bigquery-data-transfer": "^0.3.0",
+    "badwords": "^1.0.0",
     "body-parser": "^1.15.2",
     "botkit": "^0.6.12",
     "botkit-storage-mongo": "^1.0.6",
