@@ -81,16 +81,28 @@ module.exports = function(controller) {
           break;
         case "Actual_Start_Date":
           convo.ask("Start Date? (mm/dd/yyyy)", (response, convo) => {
-            updateValue = response.text;
-            confTask(response, convo);
-            convo.next();
+            console.log('start date: ' + isValidDate(response.text));
+            if (isValidDate(response.text)) {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            } else {
+              convo.say('Oops looks like you entered the date wrong.  Try again.');
+              convo.next();
+            }
           });
           break;
         case "End_date":
           convo.ask("End Date? (mm/dd/yyyy)", (response, convo) => {
-            updateValue = response.text;
-            confTask(response, convo);
-            convo.next();
+            console.log('end date: ' + isValidDate(response.text));
+            if (isValidDate(response.text)) {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            } else {
+              convo.say('Oops looks like you entered the date wrong.  Try again.');
+              convo.next();
+            }
           });
           break;
         case "Cloud_Specialist":
@@ -102,6 +114,13 @@ module.exports = function(controller) {
           break;
         case "ORG_ID":
           convo.ask("OrgID?", (response, convo) => {
+            updateValue = response.text;
+            confTask(response, convo);
+            convo.next();
+          });
+          break;
+        case "refresh_token":
+          convo.ask("Refresh Token?", (response, convo) => {
             updateValue = response.text;
             confTask(response, convo);
             convo.next();
@@ -578,23 +597,41 @@ module.exports = function(controller) {
           break;
         case "oppty_close_date":
           convo.ask("Opportunity Close Date (mm/dd/yyyy)", (response, convo) => {
-            updateValue = response.text;
-            confTask(response, convo);
-            convo.next();
+            console.log('opp close date: ' + isValidDate(response.text));
+            if (isValidDate(response.text)) {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            } else {
+              convo.say('Oops looks like you entered the date wrong.  Try again.');
+              convo.next();
+            }
           });
           break;
         case "est_onboarding_date":
           convo.ask("Estimated onboarding start (mm/dd/yyyy)", (response, convo) => {
-            updateValue = response.text;
-            confTask(response, convo);
-            convo.next();
+            console.log('est date: ' + isValidDate(response.text));
+            if (isValidDate(response.text)) {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            } else {
+              convo.say('Oops looks like you entered the date wrong.  Try again.');
+              convo.next();
+            }
           });
           break;
         case "est_go_live_date":
           convo.ask("Launch/completion date (mm/dd/yyyy)", (response, convo) => {
-            updateValue = response.text;
-            confTask(response, convo);
-            convo.next();
+            console.log('launch date: ' + isValidDate(response.text));
+            if (isValidDate(response.text)) {
+              updateValue = response.text;
+              confTask(response, convo);
+              convo.next();
+            } else {
+              convo.say('Oops looks like you entered the date wrong.  Try again.');
+              convo.next();
+            }
           });
           break;
         case "customer_requirements":
@@ -615,7 +652,6 @@ module.exports = function(controller) {
       }
       //update the fields in bigquery
       console.log("done with case");
-
     };
 
     let confTask = (response, convo) => {
@@ -642,7 +678,7 @@ module.exports = function(controller) {
           });
         }
         //make sure SDDC is deleted when status marked complete*
-        if (updateValue.indexOf("Complete") > -1) {
+        if (updateField.indexOf("Complete") > -1) {
           bot.reply(message, {
             text: "Please make sure to delete the SDDC as part of the POC wrap up."
           });
@@ -696,9 +732,36 @@ module.exports = function(controller) {
       }); //end of function
 
     };
-
-    bot.startConversation(message, askField);
+    //check to see if customer is already in tech validation table
+    getCustomer(customer, function(res) {
+      if (res[0].result == "Yes") {
+        bot.startConversation(message, askField);
+      } else {
+        bot.reply(message, "I can't find " + customer + ". Use `@bender get " + customer + "` to get more information.  Also try using the exact customer name entered into tech validation.")
+      }
+    });
   });
+
+  //check to see if customer exists in tech validation table
+  function getCustomer(customer, callback) {
+    customer = customer.replace("&", "_");
+    let sqlQuery;
+
+    sqlQuery = `select dbo.get_tech_validation_customer_fn('${customer}') AS result`;
+    sql.connect(config, err => {
+      console.log("connect error: " + err);
+      new sql.Request().query(sqlQuery, (err, result) => {
+        // ... error checks
+        sql.close();
+        console.log(result.recordset);
+        return callback(result.recordset);
+      })
+    })
+
+    sql.on('error', err => {
+      console.log("on error:" + err);
+    })
+  }
 
   //function to get customer tracker information
   function updateCustomer(customer, updateField, updateValue, callback) {
@@ -724,11 +787,12 @@ module.exports = function(controller) {
 
     // Update val tracker
     if (updateField == 'Notes') {
+      updateValue = updateValue.replace("'", "''");
       sqlQuery = `UPDATE dbo.tech_validation
           SET notes = CONCAT(notes, CHAR(13),CAST(CONVERT(date, getdate()) as nvarchar),'-', '${updateValue}')
               ,date_updated = '${upDate}'
           WHERE lower(customer_name) like '${customer}'`;
-    } else if (updateField == 'Use_Case' | updateField == 'Compliance' | updateField == 'AWS_Region' | updateField == 'Services') {
+    } else if (updateField == 'Use_Case' || updateField == 'Compliance' || updateField == 'AWS_Region' || updateField == 'Services') {
       sqlQuery = `EXECUTE [dbo].[tech_validation_upsert_sp]
                   '${customer}'
                   ,'${updateField}'
@@ -748,8 +812,12 @@ module.exports = function(controller) {
       new sql.Request().query(sqlQuery, (err, result) => {
         // ... error checks
         sql.close();
-        console.log(result.rowsAffected);
-        return callback(result.rowsAffected);
+        if (!err) {
+          console.log(result.rowsAffected);
+          return callback(result.rowsAffected);
+        } else {
+          return callback(0);
+        }
       })
 
     })
@@ -757,5 +825,22 @@ module.exports = function(controller) {
     sql.on('error', err => {
       console.log("on error:" + err);
     })
+  }
+  //check date format function
+  function isValidDate(s) {
+    var sp = s + '';
+    var bits = sp.split('/');
+    var y = bits[2],
+      m = bits[1],
+      d = bits[0];
+    // Assume not leap year by default (note zero index for Jan)
+    var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    // If evenly divisible by 4 and not evenly divisible by 100,
+    // or is evenly divisible by 400, then a leap year
+    if ((!(y % 4) && y % 100) || !(y % 400)) {
+      daysInMonth[1] = 29;
+    }
+    return !(/\D/.test(String(d))) && d > 0 && d <= daysInMonth[--m]
   }
 }; /* the end */

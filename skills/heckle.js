@@ -11,6 +11,7 @@ respond immediately with a single line response.
 
 var wordfilter = require('wordfilter');
 let fields = require("../json/valFields");
+var badwordsArray = require('badwords/array');
 
 module.exports = function(controller) {
 
@@ -29,9 +30,10 @@ module.exports = function(controller) {
   });
 
 
-  controller.hears(['fuck', 'butthole', 'asshole', 'jerk', 'dick', 'moron', 'prick', 'idiot', 'fuck puddle', 'putz', 'fuckface'], 'direct_message, direct_mention, ambient', function(bot, message) {
+  //controller.hears(['fuck', 'butthole', 'asshole', 'jerk', 'dick', 'moron', 'prick', 'idiot', 'fuck puddle', 'putz', 'fuckface'], 'direct_message, direct_mention, ambient', function(bot, message) {
+  controller.hears(badwordsArray, 'direct_message, direct_mention, ambient', function(bot, message) {
     //if (message.channel == "#dev-bender") {
-    if (message.channel == "G99D12CCA") {
+    //if (message.channel == "G99D12CCA") {
       bot.createConversation(message, function(err, convo) {
         var message_options = [
           "Are you calling me a " + message.text,
@@ -58,9 +60,9 @@ module.exports = function(controller) {
         convo.say(chosen_message);
         convo.activate();
       });
-    } else {
-      bot.reply(message, "I only heckle in #dev channel");
-    }
+    //} else {
+    //  bot.reply(message, "I only heckle in #dev channel");
+    //}
 
   });
 
@@ -101,9 +103,9 @@ module.exports = function(controller) {
   });
 
   controller.hears(['grr'], 'direct_message, direct_mention, ambient', function(bot, message) {
-    getChannelId("tech-validation", function(res) {
+    /*getChannelId("tech-validation", function(res) {
       console.log("chId:" + res);
-    });
+    });*/
 
     bot.createConversation(message, function(err, convo) {
       convo.say("Don't beat me!");

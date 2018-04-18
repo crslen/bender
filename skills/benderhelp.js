@@ -14,6 +14,7 @@ module.exports = function(controller) {
       '`' + botName + ' update <Customer Name>`: Update fields in validation tracker. Wild Cards can be used (*)\n' +
       '`' + botName + ' What is <SE Name> working on`: Lists all Technical Validations that an Solution Engineer is assigned to.\n' +
       '`' + botName + ' create new org`: Creates invite for new POC org.\n' +
+      '`' + botName + ' get <Customer Name> sddc`: Get basic information about the customers SDDC.\n' +
       '\n' +
       '_VMC:_\n' +
       '`' + botName + ' add <email> to <vmc-ws#>`: Add student to workshop org.\n' +
