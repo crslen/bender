@@ -26,12 +26,11 @@ let color = "#009cdb";
 module.exports = function(controller) {
 
   controller.hears(['update (.*)'], 'direct_message, direct_mention,mention', function(bot, message) {
-
-    var updateValue = "";
     let customer = message.match[1];
 
     let askField = (response, convo) => {
-
+      var updateValue = "";
+      var updateField = "";
       convo.ask({
         attachments: [{
           title: 'Which field do you want to update?',
@@ -831,8 +830,8 @@ module.exports = function(controller) {
     var sp = s + '';
     var bits = sp.split('/');
     var y = bits[2],
-      m = bits[1],
-      d = bits[0];
+      m = bits[0],
+      d = bits[1];
     // Assume not leap year by default (note zero index for Jan)
     var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 

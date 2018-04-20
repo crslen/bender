@@ -34,32 +34,32 @@ module.exports = function(controller) {
   controller.hears(badwordsArray, 'direct_message, direct_mention, ambient', function(bot, message) {
     //if (message.channel == "#dev-bender") {
     //if (message.channel == "G99D12CCA") {
-      bot.createConversation(message, function(err, convo) {
-        var message_options = [
-          "Are you calling me a " + message.text,
-          ":waving:",
-          "Shhh",
-          ":shushing_face:",
-          "I know what you are, but what am I?",
-          "Do you need some soap to put into your mouth?",
-          "Are you talking to me?",
-          "Have you seen my stapler?",
-          "Is that your real face or are you still celebrating Halloween?",
-          "Your bus leaves in 10 minutes... Be under it.",
-          "Why don't you go into that corner and finish evolving?",
-          "I'm sorry, I don't speak Orc.",
-          "Sorry, I can't understand what you're saying... I'm wearing a moron filter.",
-          "And yet your misses still prefers me to you.",
-          "I'm impressed; I've never met such a small mind inside such a big head before.",
-          "What's wrong, don't you get any attention back home?",
-          "Did your mother never tell you not to drink on an empty head?",
-          ":eggplant: :punch:"
-        ]
-        var random_index = Math.floor(Math.random() * message_options.length)
-        var chosen_message = message_options[random_index]
-        convo.say(chosen_message);
-        convo.activate();
-      });
+    bot.createConversation(message, function(err, convo) {
+      var message_options = [
+        "Are you calling me a " + message.text,
+        ":waving:",
+        "Shhh",
+        ":shushing_face:",
+        "I know what you are, but what am I?",
+        "Do you need some soap to put into your mouth?",
+        "Are you talking to me?",
+        "Have you seen my stapler?",
+        "Is that your real face or are you still celebrating Halloween?",
+        "Your bus leaves in 10 minutes... Be under it.",
+        "Why don't you go into that corner and finish evolving?",
+        "I'm sorry, I don't speak Orc.",
+        "Sorry, I can't understand what you're saying... I'm wearing a moron filter.",
+        "And yet your misses still prefers me to you.",
+        "I'm impressed; I've never met such a small mind inside such a big head before.",
+        "What's wrong, don't you get any attention back home?",
+        "Did your mother never tell you not to drink on an empty head?",
+        ":eggplant: :punch:"
+      ]
+      var random_index = Math.floor(Math.random() * message_options.length)
+      var chosen_message = message_options[random_index]
+      convo.say(chosen_message);
+      convo.activate();
+    });
     //} else {
     //  bot.reply(message, "I only heckle in #dev channel");
     //}
@@ -74,6 +74,17 @@ module.exports = function(controller) {
     });
 
   });
+
+  controller.hears(['╯°□°）╯︵ ┻━┻'], 'direct_message, direct_mention, ambient', function(bot, message) {
+
+    bot.createConversation(message, function(err, convo) {
+      convo.say("┬─┬ノ( º _ ºノ)");
+      convo.say("You're welcome.")
+      convo.activate();
+    });
+
+  });
+
   controller.hears(['Hmm'], 'direct_message, direct_mention, ambient', function(bot, message) {
     let yayMsg = fields.yayMessage();
     console.log(yayMsg);
