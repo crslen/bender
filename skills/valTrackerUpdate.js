@@ -27,10 +27,10 @@ module.exports = function(controller) {
 
   controller.hears(['update (.*)'], 'direct_message, direct_mention,mention', function(bot, message) {
     let customer = message.match[1];
-
+    var updateValue = "";
+    var updateField = "";
     let askField = (response, convo) => {
-      var updateValue = "";
-      var updateField = "";
+
       convo.ask({
         attachments: [{
           title: 'Which field do you want to update?',
