@@ -33,121 +33,60 @@ const config = {
 }
 module.exports = function(controller) {
 
-  /* Collect some very simple runtime stats for use in the uptime/debug command */
-  var stats = {
-    triggers: 0,
-    convos: 0,
-  }
+/* Collect some very simple runtime stats for use in the uptime/debug command */
+var stats = {
+  triggers: 0,
+  convos: 0,
+}
 
-  controller.on('heard_trigger', function() {
-    stats.triggers++;
-  });
+controller.on('heard_trigger', function() {
+  stats.triggers++;
+});
 
-  controller.on('conversationStarted', function() {
-    stats.convos++;
-  });
+controller.on('conversationStarted', function() {
+  stats.convos++;
+});
 
-  controller.hears(['what is (.*) working on'], 'direct_message, direct_mention,mention', function(bot, message) {
+controller.on('interactive_message_callback', function(bot, message) {
 
-    var seName = message.match[1];
-    var searchType = 0; //SE Search
-    bot.reply(message, "Please hold.....");
-    bot.createConversation(message, function(err, convo) {
-      selectCustomer(seName, searchType, function(res) {
-        if (res.length == 0) {
-          bot.reply(message, {
-            text: "I couldn't find any info on " + seName + "."
-          });
-        } else {
-          var jsonParse = JSON.stringify(res);
-          var jsonStr = JSON.parse(jsonParse);
+  var reply = "Ya I'm working on that button right now.  Try again later."
+  bot.replyInteractive(message, reply);
+});
 
-          for (var i = 0; i < jsonStr.length; i++) {
-            if (jsonStr[i].Actual_Start_Date == null) {
-              var startDate = "None"
-            } else {
-              var startDate = jsonStr[i].Actual_Start_Date.value
-            }
-            if (jsonStr[i].End_Date == null) {
-              var endDate = "None"
-            } else {
-              var endDate = jsonStr[i].End_Date.value
-            }
+controller.hears(['what is (.*) working on'], 'direct_message, direct_mention,mention', function(bot, message) {
 
-            bot.reply(message, {
-              text: "Here's what I found for " + jsonStr[i].Customer_Name,
-              attachments: [{
-                "title": "Validation Tracker Info",
-                "color": colorArray[i],
-                //"title": "Mode Analytics Report",
-                //"title_link": "https://modeanalytics.com/vmware_inc/reports/1c69ccf26a01",
-                "fields": [{
-                    "title": "Customer",
-                    "value": jsonStr[i].Customer_Name,
-                    "short": true
-                  },
-                  {
-                    "title": "Status",
-                    "value": jsonStr[i].Status + " - " + jsonStr[i].Type,
-                    "short": true
-                  }
-                ],
-              }]
-            });
-          }
-        }
-      });
-      //convo.say("Here's the invite: {{vars.createorg}}")
-    });
-  });
-
-
-  controller.hears(['get (.*)', 'show (.*)'], 'direct_message, direct_mention,mention', function(bot, message) {
-
-    var customer = message.match[1];
-    var searchType = 1; //customer search
-    bot.reply(message, "Please hold.....");
-    //bot.createConversation(message, function(err, convo) {
-    selectCustomer(customer, searchType, function(res) {
+  var seName = message.match[1];
+  var searchType = 0; //SE Search
+  bot.reply(message, "Please hold.....");
+  bot.createConversation(message, function(err, convo) {
+    selectCustomer(seName, searchType, function(res) {
       if (res.length == 0) {
         bot.reply(message, {
-          text: "I couldn't find any info on " + customer + "."
+          text: "I couldn't find any info on " + seName + "."
         });
       } else {
         var jsonParse = JSON.stringify(res);
-        console.log("return: " + jsonParse);
         var jsonStr = JSON.parse(jsonParse);
 
         for (var i = 0; i < jsonStr.length; i++) {
-          //  if (jsonStr[i].Actual_Start_Date == null) {var startDate = "None"} else {var startDate = jsonStr[i].Actual_Start_Date.value}
-          //if (jsonStr[i].End_Date == null) {var endDate = ""} else {var endDate = jsonStr[i].End_Date.value}
-          if (jsonStr[i].compliance !== null) {
-            var compliance = jsonStr[i].compliance.replace("|", "\n")
+          if (jsonStr[i].Actual_Start_Date == null) {
+            var startDate = "None"
           } else {
-            var compliance = "None"
-          };
-          if (jsonStr[i].use_case !== null) {
-            var use_case = jsonStr[i].use_case.replace("|", "\n")
+            var startDate = jsonStr[i].Actual_Start_Date.value
+          }
+          if (jsonStr[i].End_Date == null) {
+            var endDate = "None"
           } else {
-            var use_case = "None"
-          };
-          if (jsonStr[i].region !== null) {
-            var region = jsonStr[i].region.replace("|", "\n")
-          } else {
-            var region = "None"
-          };
-          if (jsonStr[i].services !== null) {
-            var service = jsonStr[i].services.replace("|", "\n")
-          } else {
-            var service = "None"
-          };
+            var endDate = jsonStr[i].End_Date.value
+          }
+
           bot.reply(message, {
             text: "Here's what I found for " + jsonStr[i].Customer_Name,
             attachments: [{
               "title": "Validation Tracker Info",
               "color": colorArray[i],
-              "title": "Mode Analytics Report",
-              "title_link": "https://modeanalytics.com/vmware_inc/reports/e869ce5736c1",
+              //"title": "Mode Analytics Report",
+              //"title_link": "https://modeanalytics.com/vmware_inc/reports/1c69ccf26a01",
               "fields": [{
                   "title": "Customer",
                   "value": jsonStr[i].Customer_Name,
@@ -157,124 +96,191 @@ module.exports = function(controller) {
                   "title": "Status",
                   "value": jsonStr[i].Status + " - " + jsonStr[i].Type,
                   "short": true
-                },
-                {
-                  "title": "SET Member",
-                  "value": jsonStr[i].SE_Specialist,
-                  "short": true
-                },
-                {
-                  "title": "Use Cases",
-                  "value": use_case,
-                  "short": true
-                },
-                {
-                  "title": "Start Date",
-                  "value": jsonStr[i].Expected_Start_Date,
-                  "short": true
-                },
-                {
-                  "title": "End Date",
-                  "value": jsonStr[i].Expected_End_Date,
-                  "short": true
-                },
-                {
-                  "title": "AWS Regions",
-                  "value": region,
-                  "short": true
-                },
-                {
-                  "title": "Compliance Requirements",
-                  "value": compliance,
-                  "short": true
-                },
-                {
-                  "title": "Services",
-                  "value": service,
-                  "short": true
-                },
-                {
-                  "title": "Org ID",
-                  "value": jsonStr[i].ORG_ID,
-                  "short": true
-                },
-                {
-                  "title": "CS Architect",
-                  "value": jsonStr[i].CS_Architect,
-                  "short": true
-                },
-                {
-                  "title": "Cloud Specialist",
-                  "value": jsonStr[i].Cloud_Specialist,
-                  "short": true
-                },
-                {
-                  "title": "Refresh Token?",
-                  "value": jsonStr[i].refresh_token,
-                  "short": true
-                },
-                {
-                  "title": "Pre-flight Complete?",
-                  "value": jsonStr[i].pre_flight,
-                  "short": true
-                },
-                {
-                  "title": "SF Opportunity ID",
-                  "value": jsonStr[i].SFDC_OPPTY_ID, //https://vmware.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&str=
-                  "short": true
-                },
-                {
-                  "title": "Notes",
-                  "value": jsonStr[i].Notes,
-                  "short": false
                 }
               ],
-							callback_id: 'showSDDC',
-              actions: [{
-                "name": "sddc",
-                "text": "Show SDDC",
-                "value": "showSDDC",
-                "type": "button",
-              }],
             }]
           });
         }
       }
     });
     //convo.say("Here's the invite: {{vars.createorg}}")
-    //});
   });
-  //function to get customer tracker information
-  function selectCustomer(customer, searchType, callback) {
-    customer = customer.replace("&", "_");
-    let sqlQuery;
-    if (searchType == 1) {
-      // Search by customer name
-      sqlQuery = `SELECT *
+});
+
+
+controller.hears(['get (.*)', 'show (.*)'], 'direct_message, direct_mention,mention', function(bot, message) {
+
+  var customer = message.match[1];
+  var searchType = 1; //customer search
+  bot.reply(message, "Please hold.....");
+  //bot.createConversation(message, function(err, convo) {
+  selectCustomer(customer, searchType, function(res) {
+    if (res.length == 0) {
+      bot.reply(message, {
+        text: "I couldn't find any info on " + customer + "."
+      });
+    } else {
+      var jsonParse = JSON.stringify(res);
+      console.log("return: " + jsonParse);
+      var jsonStr = JSON.parse(jsonParse);
+
+      for (var i = 0; i < jsonStr.length; i++) {
+        //  if (jsonStr[i].Actual_Start_Date == null) {var startDate = "None"} else {var startDate = jsonStr[i].Actual_Start_Date.value}
+        //if (jsonStr[i].End_Date == null) {var endDate = ""} else {var endDate = jsonStr[i].End_Date.value}
+        if (jsonStr[i].compliance !== null) {
+          var compliance = jsonStr[i].compliance.replace("|", "\n")
+        } else {
+          var compliance = "None"
+        };
+        if (jsonStr[i].use_case !== null) {
+          var use_case = jsonStr[i].use_case.replace("|", "\n")
+        } else {
+          var use_case = "None"
+        };
+        if (jsonStr[i].region !== null) {
+          var region = jsonStr[i].region.replace("|", "\n")
+        } else {
+          var region = "None"
+        };
+        if (jsonStr[i].services !== null) {
+          var service = jsonStr[i].services.replace("|", "\n")
+        } else {
+          var service = "None"
+        };
+        bot.reply(message, {
+          text: "Here's what I found for " + jsonStr[i].Customer_Name,
+          attachments: [{
+            "title": "Validation Tracker Info",
+            "color": colorArray[i],
+            "title": "Mode Analytics Report",
+            "title_link": "https://modeanalytics.com/vmware_inc/reports/e869ce5736c1",
+            "fields": [{
+                "title": "Customer",
+                "value": jsonStr[i].Customer_Name,
+                "short": true
+              },
+              {
+                "title": "Status",
+                "value": jsonStr[i].Status + " - " + jsonStr[i].Type,
+                "short": true
+              },
+              {
+                "title": "SET Member",
+                "value": jsonStr[i].SE_Specialist,
+                "short": true
+              },
+              {
+                "title": "Use Cases",
+                "value": use_case,
+                "short": true
+              },
+              {
+                "title": "Start Date",
+                "value": jsonStr[i].Expected_Start_Date,
+                "short": true
+              },
+              {
+                "title": "End Date",
+                "value": jsonStr[i].Expected_End_Date,
+                "short": true
+              },
+              {
+                "title": "AWS Regions",
+                "value": region,
+                "short": true
+              },
+              {
+                "title": "Compliance Requirements",
+                "value": compliance,
+                "short": true
+              },
+              {
+                "title": "Services",
+                "value": service,
+                "short": true
+              },
+              {
+                "title": "Org ID",
+                "value": jsonStr[i].ORG_ID,
+                "short": true
+              },
+              {
+                "title": "CS Architect",
+                "value": jsonStr[i].CS_Architect,
+                "short": true
+              },
+              {
+                "title": "Cloud Specialist",
+                "value": jsonStr[i].Cloud_Specialist,
+                "short": true
+              },
+              {
+                "title": "Refresh Token?",
+                "value": jsonStr[i].refresh_token,
+                "short": true
+              },
+              {
+                "title": "Pre-flight Complete?",
+                "value": jsonStr[i].pre_flight,
+                "short": true
+              },
+              {
+                "title": "SF Opportunity ID",
+                "value": jsonStr[i].SFDC_OPPTY_ID, //https://vmware.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&str=
+                "short": true
+              },
+              {
+                "title": "Notes",
+                "value": jsonStr[i].Notes,
+                "short": false
+              }
+            ],
+            callback_id: 'showSDDC',
+            actions: [{
+              "name": "sddc",
+              "text": "Show SDDC",
+              "value": "showSDDC",
+              "type": "button",
+            }],
+          }]
+        });
+      }
+    }
+  });
+  //convo.say("Here's the invite: {{vars.createorg}}")
+  //});
+});
+//function to get customer tracker information
+function selectCustomer(customer, searchType, callback) {
+  customer = customer.replace("&", "_");
+  let sqlQuery;
+  if (searchType == 1) {
+    // Search by customer name
+    sqlQuery = `SELECT *
                       FROM dbo.tech_validation_tracker_view
                       WHERE lower(Customer_name) like '%${customer}%'`;
-    } else {
-      //search by SE
-      sqlQuery = `SELECT *
+  } else {
+    //search by SE
+    sqlQuery = `SELECT *
                       FROM dbo.tech_validation_tracker_view
                       WHERE lower(SE_Specialist) like '%${customer}%'`;
-    }
-    sql.connect(config, err => {
-      console.log("connect error: " + err);
-
-      // Query
-
-      new sql.Request().query(sqlQuery, (err, result) => {
-        // ... error checks
-        sql.close();
-        console.log(result.recordset);
-        return callback(result.recordset);
-      })
-
-    })
-
-    sql.on('error', err => {
-      console.log("on error:" + err);
-    })
   }
+  sql.connect(config, err => {
+    console.log("connect error: " + err);
+
+    // Query
+
+    new sql.Request().query(sqlQuery, (err, result) => {
+      // ... error checks
+      sql.close();
+      console.log(result.recordset);
+      return callback(result.recordset);
+    })
+
+  })
+
+  sql.on('error', err => {
+    console.log("on error:" + err);
+  })
+}
 }; /* the end */

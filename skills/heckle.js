@@ -12,7 +12,12 @@ respond immediately with a single line response.
 var wordfilter = require('wordfilter');
 let fields = require("../json/valFields");
 var badwordsArray = require('badwords/array');
-
+/*
+var luis = require('botkit-middleware-luis');
+var luisOptions = {
+  serviceUri: process.env.serviceUri
+};
+*/
 module.exports = function(controller) {
 
   /* Collect some very simple runtime stats for use in the uptime/debug command */
@@ -28,6 +33,9 @@ module.exports = function(controller) {
   controller.on('conversationStarted', function() {
     stats.convos++;
   });
+
+  //enable luis AI
+  //controller.middleware.receive.use(luis.middleware.receive(luisOptions));
 
 
   //controller.hears(['fuck', 'butthole', 'asshole', 'jerk', 'dick', 'moron', 'prick', 'idiot', 'fuck puddle', 'putz', 'fuckface'], 'direct_message, direct_mention, ambient', function(bot, message) {
@@ -86,11 +94,10 @@ module.exports = function(controller) {
   });
 
   controller.hears(['Hmm'], 'direct_message, direct_mention, ambient', function(bot, message) {
-    let yayMsg = fields.yayMessage();
+    let yayMsg = fields.futQuotes();
     console.log(yayMsg);
     bot.createConversation(message, function(err, convo) {
       convo.say(":thinking_face:");
-      convo.say("¯\\_(ツ)_/¯");
       convo.say(yayMsg);
       convo.activate();
     });
@@ -124,6 +131,24 @@ module.exports = function(controller) {
     });
   });
 
+  controller.hears(['Shh'], 'direct_message, direct_mention, ambient', function(bot, message) {
+
+    bot.createConversation(message, function(err, convo) {
+      var message_options = [
+        "it",
+        "it-tastic",
+        "Shhh back at ya",
+        "art",
+        "nizzle",
+        ":shushing_face:"
+      ]
+      var random_index = Math.floor(Math.random() * message_options.length)
+      var chosen_message = message_options[random_index]
+      convo.say(chosen_message);
+      convo.activate();
+    });
+  });
+
   controller.hears(['set reminder'], 'direct_message, direct_mention', function(bot, message) {
 
     /*  bot.say({
@@ -141,9 +166,10 @@ module.exports = function(controller) {
       console.log(id, name, real_name);
       bot.api.reminders.add({
         token: process.env.OAUTH_ACCESS_TOKEN,
-        text: "update validation tracker for <customer>",
-        time: "Weekly",
-        user: id
+        text: "update @" + name + " validation tracker for <customer>",
+        time: "daily at 11:20am",
+        //user: id
+        channel: "C6HTFESG6"
       }, (error, response) => {
         console.log(error, response);
         bot.reply(response);

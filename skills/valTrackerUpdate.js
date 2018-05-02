@@ -58,7 +58,7 @@ module.exports = function(controller) {
     let getUpdate = (response, convo) => {
       switch (updateField) {
         case "SFDC_OPPTY_ID":
-          convo.ask("What's the SalesForce Opportunity ID?", (response, convo) => {
+          convo.ask("What's the SalesForce Cloud Sales Opportunity ID?", (response, convo) => {
             updateValue = response.text;
             confTask(response, convo);
             convo.next();
@@ -655,81 +655,85 @@ module.exports = function(controller) {
 
     let confTask = (response, convo) => {
       //update info
-      updateCustomer(customer, updateField, updateValue, function(res) {
-        console.log("response: " + res);
-        if (res == 0) {
-          bot.reply(message, {
-            text: "I couldn't find any info on " + customer + " or the the update failed."
-          });
-        } else {
-          bot.reply(message, {
-            text: "Your info has been updated!"
-          });
-        }
-        //let us know if more fields need to be updated if marked complete won.
-        if (updateValue == 'Complete Won') {
-          bot.reply(message, {
-            text: "Make sure to fill out the consumption plan fields for Customer Success Team using `@bender update " + customer + "`."
-          });
-          bot.say({
-            channel: "#tech-validation",
-            text: customer + " has been updated as a win!"
-          });
-        }
-        //make sure SDDC is deleted when status marked complete*
-        if (updateField.indexOf("Complete") > -1) {
-          bot.reply(message, {
-            text: "Please make sure to delete the SDDC as part of the POC wrap up."
-          });
-        }
-        //ask if you want to update another field
-        convo.ask({
-          attachments: [{
-            title: 'Do you have more fields to update?',
-            callback_id: 'updateMore',
-            attachment_type: 'default',
-            color: color,
-            actions: [{
-                "name": "yes",
-                "text": "Yes",
-                "value": "Yes",
-                "type": "button",
-              },
-              {
-                "name": "no",
-                "text": "No",
-                "value": "No",
-                "type": "button",
-              }
-            ]
-          }]
-        }, [{
-            pattern: "yes",
-            callback: function(reply, convo) {
-              askField(response, convo);
-              convo.next();
-              // do something awesome here.
-            }
-          },
-          {
-            pattern: "no",
-            callback: function(reply, convo) {
-              convo.say('Buh bye');
-              //askStatus(response, convo);
-              convo.next();
-            }
-          },
-          {
-            default: true,
-            callback: function(response, convo) {
-              // = response.text;
-              confTask(response, convo);
-              convo.next();
-            }
+      if (response.text === 'cancel') {
+        convo.say('Okay');
+        convo.next();
+      } else {
+        updateCustomer(customer, updateField, updateValue, function(res) {
+          console.log("response: " + res);
+          if (res == 0) {
+            bot.reply(message, {
+              text: "I couldn't find any info on " + customer + " or the the update failed."
+            });
+          } else {
+            bot.reply(message, {
+              text: "Your info has been updated!"
+            });
           }
-        ]);
-      }); //end of function
-
+          //let us know if more fields need to be updated if marked complete won.
+          if (updateValue == 'Complete Won') {
+            bot.reply(message, {
+              text: "Make sure to fill out the consumption plan fields for Customer Success Team using `@bender update " + customer + "`."
+            });
+            bot.say({
+              channel: "#vmc-tech-validation",
+              text: customer + " has been updated as a win!"
+            });
+          }
+          //make sure SDDC is deleted when status marked complete*
+          if (updateField.indexOf("Complete") > -1) {
+            bot.reply(message, {
+              text: "Please make sure to delete the SDDC as part of the POC wrap up."
+            });
+          }
+          //ask if you want to update another field
+          convo.ask({
+            attachments: [{
+              title: 'Do you have more fields to update?',
+              callback_id: 'updateMore',
+              attachment_type: 'default',
+              color: color,
+              actions: [{
+                  "name": "yes",
+                  "text": "Yes",
+                  "value": "Yes",
+                  "type": "button",
+                },
+                {
+                  "name": "no",
+                  "text": "No",
+                  "value": "No",
+                  "type": "button",
+                }
+              ]
+            }]
+          }, [{
+              pattern: "yes",
+              callback: function(reply, convo) {
+                askField(response, convo);
+                convo.next();
+                // do something awesome here.
+              }
+            },
+            {
+              pattern: "no",
+              callback: function(reply, convo) {
+                convo.say('Buh bye');
+                //askStatus(response, convo);
+                convo.next();
+              }
+            },
+            {
+              default: true,
+              callback: function(response, convo) {
+                // = response.text;
+                confTask(response, convo);
+                convo.next();
+              }
+            }
+          ]);
+        }); //end of function
+      }
     };
     //check to see if customer is already in tech validation table
     getCustomer(customer, function(res) {
