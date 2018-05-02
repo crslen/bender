@@ -10,7 +10,7 @@ respond immediately with a single line response.
 */
 
 var wordfilter = require('wordfilter');
-let fields = require("../json/valFields");
+let fields = require("../model/valFields");
 const sql = require('mssql')
 const config = {
   user: process.env.sql_user,
@@ -693,7 +693,7 @@ module.exports = function(controller) {
               console.log(id, name, real_name);
               bot.api.reminders.add({
                 token: process.env.OAUTH_ACCESS_TOKEN,
-                text: "Interact with Bender to update validation tracker for " + customer + ".",
+                text: "<@" + id + "> Interact with Bender to update validation tracker for " + customer + ".",
                 time: "Tuesdays and Fridays",
                 user: id
               }, (error, response) => {

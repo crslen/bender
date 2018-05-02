@@ -10,7 +10,7 @@ respond immediately with a single line response.
 */
 
 var wordfilter = require('wordfilter');
-let fields = require("../json/valFields");
+let fields = require("../model/valFields");
 var badwordsArray = require('badwords/array');
 /*
 var luis = require('botkit-middleware-luis');
@@ -166,8 +166,8 @@ module.exports = function(controller) {
       console.log(id, name, real_name);
       bot.api.reminders.add({
         token: process.env.OAUTH_ACCESS_TOKEN,
-        text: "update @" + name + " validation tracker for <customer>",
-        time: "daily at 11:20am",
+        text: "update <@" + id + "> validation tracker for <customer>",
+        time: "daily at 12:22pm",
         //user: id
         channel: "C6HTFESG6"
       }, (error, response) => {
