@@ -276,11 +276,11 @@ let uFields = fieldDD => {
   return [{
       "text": "Tech Validation Fields",
       "options": [{
-          "text": "Customer Name",
+          "text": "Account Name",
           "value": "Customer_Name"
         },
         {
-          "text": "SF Opp ID",
+          "text": "SFDC CSO ID",
           "value": "SFDC_OPPTY_ID"
         },
         {
@@ -388,6 +388,31 @@ let uFields = fieldDD => {
   ]
 };
 
+
+let type = typeDD => {
+  return [{
+      "text": "POC",
+      "value": "POC"
+    },
+    {
+      "text": "Paid Pilot",
+      "value": "Paid Pilot"
+    },
+    {
+      "text": "Partner POC",
+      "value": "Partner POC"
+    },
+    {
+      "text": "Partner Paid Pilot",
+      "value": "Partner Paid Pilot"
+    },
+    {
+      "text": " VMW/AWS funded Paid Pilot",
+      "value": " VMW/AWS funded Paid Pilot"
+    }
+  ]
+};
+
 //random thoughts
 
 //words of encouragement
@@ -434,6 +459,7 @@ exports.useCases = useCases;
 exports.awsRegions = awsRegions;
 exports.compliance = compliance;
 exports.status = status;
+exports.type = type;
 exports.uFields = uFields;
 exports.services = services;
 exports.yayMessage = yayMessage;

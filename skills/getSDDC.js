@@ -10,6 +10,7 @@ respond immediately with a single line response.
 */
 
 var wordfilter = require('wordfilter');
+var valFunc = require('../model/valFunctions')
 const sql = require('mssql')
 const config = {
   user: process.env.sql_user,
@@ -54,7 +55,7 @@ module.exports = function(controller) {
           console.log("refreshtoken: " + rToken);
           if (orgId != "" && rToken != "") {
             bot.reply(message, "OK, I can help you with that!");
-            getSDDC(orgId, rToken, function(sddc) {
+            valFunc.getSDDC(orgId, rToken, function(sddc) {
               if (sddc.length == 2) {
                 bot.reply(message, {
                   text: "I couldn't find any SDDC's deployed for " + customer + "."
@@ -187,8 +188,8 @@ module.exports = function(controller) {
     })
   }
 
-  /* Utility function to format uptime */
-  function getSDDC(orgId, rToken, callback) {
+  /* Utility function to get SDDC info*/
+  /*function getSDDC(orgId, rToken, callback) {
     var request = require('request');
     //get auth token
     request.post({
@@ -218,5 +219,5 @@ module.exports = function(controller) {
         return callback(body);
       });
     });
-  }
+  }*/
 }; /* the end */

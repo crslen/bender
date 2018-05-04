@@ -65,7 +65,7 @@ module.exports = function(controller) {
           });
           break;
         case "Customer_Name":
-          convo.ask("What's the customer's new name?", (response, convo) => {
+          convo.ask("What is the account's new name?", (response, convo) => {
             updateValue = response.text;
             confTask(response, convo);
             convo.next();
@@ -166,15 +166,7 @@ module.exports = function(controller) {
                 "name": "type",
                 "text": "Type...",
                 "type": "select",
-                "options": [{
-                    "text": "POC",
-                    "value": "POC"
-                  },
-                  {
-                    "text": "Paid Pilot",
-                    "value": "Paid Pilot"
-                  }
-                ]
+                "options": fields.type()
               }]
             }]
           }, [{
@@ -568,6 +560,13 @@ module.exports = function(controller) {
           break;
         case "CS_Manager":
           convo.ask("Who is the Customer Success Manager assigned to " + customer + "?", (response, convo) => {
+            updateValue = response.text;
+            confTask(response, convo);
+            convo.next();
+          });
+          break;
+        case "Customer_Email":
+          convo.ask("What is the main contact customer email?", (response, convo) => {
             updateValue = response.text;
             confTask(response, convo);
             convo.next();
