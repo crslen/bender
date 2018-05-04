@@ -10,7 +10,8 @@ respond immediately with a single line response.
 */
 
 var wordfilter = require('wordfilter');
-let fields = require("../model/valFields");
+//let fields = require("../model/valFields");
+let valFunc = require("../model/valFunctions");
 const sql = require('mssql')
 const config = {
   user: process.env.sql_user,
@@ -32,99 +33,46 @@ module.exports = function(controller) {
 
       convo.ask("What's the customer name?", (response, convo) => {
         customer = response.text;
-        selectCustomer(customer, function(res) {
-          console.log("response: " + res[0].response);
-          if (res[0].response == 'No') {
-            bot.reply(message, {
-              text: "I couldn't find any pre-flight info on " + customer + ".  Make sure the customer and account team fills out this survey - https://www.surveymonkey.com/r/vmc-tech-val-preflight"
+        valFunc.getCustomer(customer, function(res) {
+          if (res[0].result == "Yes") {
+            bot.reply(message, "Glad to see " + customer + " is in the tech validation database.");
+            selectCustomer(customer, function(res) {
+              console.log("response: " + res[0].response);
+              if (res[0].response == 'No') {
+                bot.reply(message, {
+                  text: "I couldn't find any pre-flight info on " + customer + ".  Make sure the customer and account team fills out this survey - https://www.surveymonkey.com/r/vmc-tech-val-preflight"
+                });
+              } else {
+                bot.reply(message, {
+                  text: fields.yayMessage() + "  I see that " + customer + " filled out the pre-flight survey.  You're one step closer to onboarding!"
+                });
+              }
+              confTask(response, convo);
+              convo.next();
             });
           } else {
-            bot.reply(message, {
-              text: fields.yayMessage() + "  I see that " + customer + " filled out the pre-flight survey.  You're one step closer to onboarding!"
-            });
+            bot.reply(message, "I don't see " + customer + " in the tech validation database . Make sure " + customer + " is added by asking me `@bender add POC for " + customer + "`")
+            convo.stop();
           }
-          confTask(response, convo);
-          convo.next();
         });
+
       });
     };
 
     let confTask = (response, convo) => {
-      //convo.setVar('createorg', getInvite(function(rToken){}));
-      //convo.say("Ok, just making sure you're doing your work properly :smile:.  Time to work my magic and create an invitation for " + customer);
-      getInvite(function(rToken) {
-        //console.log("response" + rToken);
-        //convo.say("Here's the invite: {{rToken}}");
+      valFunc.getInvite(function(vmcInvite) {
         bot.reply(message, {
-          text: "Here's the invite for " + customer + " - " + rToken
+          text: "Here's the invite for " + customer + " - " + vmcInvite
         });
         bot.reply(message, {
           text: "Once the org is created make sure to update the tech validation with the new org ID using 'Update " + customer + "'."
         });
       });
-      //convo.say("Here's the invite: {{vars.createorg}}")
     };
-
-
     bot.reply(message, "OK, I can help you with that!");
     bot.startConversation(message, askCustomer);
 
   });
-
-  /* Utility function to format uptime */
-  function getInvite(callback) {
-    var request = require('request');
-    //get auth token
-    request.post({
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Accept": "application/json"
-      },
-      form: {
-        "refresh_token": process.env.create_refresh_token
-      },
-      url: "https://console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"
-    }, function(error, response, body) {
-      console.log("body-" + body);
-      var jsonStr = JSON.parse(body);
-      var rToken = jsonStr.access_token;
-      console.log("token-" + rToken);
-      //return callback(rToken);
-      //request org invitation url
-      var request = require('request');
-      request.post({
-        headers: {
-          'csp-auth-token': rToken,
-          'Content-Type': 'application/json'
-        },
-        json: {
-          "preset_name": "CUSTOMER",
-          "number_of_invitations": "1",
-          "invitation_properties": {
-            "defaultAwsRegions": "US_EAST_1,US_WEST_2,EU_WEST_2",
-            "enableZeroCloudCloudProvider": "false",
-            "skipSubscriptionCheck": "true",
-            "enableAWSCloudProvider": "true",
-            "accountLinkingOptional": "false",
-            "enabledAvailabilityZones": "{\"us-east-1\":[\"iad6\",\"iad7\",\"iad12\"],\"us-west-2\":[\"pdx1\",\"pdx2\",\"pdx4\"],\"eu-west-2\":[\"lhr54\",\"lhr55\"]}",
-            "sddcLimit": "1",
-            "sla": "CUSTOMER",
-            "orgType": "CUSTOMER_POC",
-            "defaultHostsPerSddc": "4",
-            "hostLimit": "6",
-            "defaultIADDatacenter": "iad6",
-            "defaultPDXDatacenter": "pdx4"
-          },
-          "funds_required": "false"
-        },
-        url: "https://vmc.vmware.com/vmc/api/operator/invitations/service-invitations"
-      }, function(error, response, body) {
-        //var invite = JSON.parse(body);
-        console.log("Invite - " + body);
-        return callback(body);
-      });
-    });
-  }
 
   function selectCustomer(customer, callback) {
 

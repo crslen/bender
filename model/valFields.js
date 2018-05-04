@@ -388,6 +388,31 @@ let uFields = fieldDD => {
   ]
 };
 
+
+let type = typeDD => {
+  return [{
+      "text": "POC",
+      "value": "POC"
+    },
+    {
+      "text": "Paid Pilot",
+      "value": "Paid Pilot"
+    },
+    {
+      "text": "Partner POC",
+      "value": "Partner POC"
+    },
+    {
+      "text": "Partner Paid Pilot",
+      "value": "Partner Paid Pilot"
+    },
+    {
+      "text": " VMW/AWS funded Paid Pilot",
+      "value": " VMW/AWS funded Paid Pilot"
+    }
+  ]
+};
+
 //random thoughts
 
 //words of encouragement
@@ -434,6 +459,7 @@ exports.useCases = useCases;
 exports.awsRegions = awsRegions;
 exports.compliance = compliance;
 exports.status = status;
+exports.type = type;
 exports.uFields = uFields;
 exports.services = services;
 exports.yayMessage = yayMessage;

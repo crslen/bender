@@ -11,6 +11,7 @@ respond immediately with a single line response.
 
 var wordfilter = require('wordfilter');
 let fields = require("../model/valFields");
+var valFunc = require('../model/valFunctions')
 const sql = require('mssql')
 const config = {
   user: process.env.sql_user,
@@ -28,7 +29,6 @@ module.exports = function(controller) {
 
     var customer; //customer name
     var sfOpp; //SalesForce ID
-    var custType; //poc or paidpilot
     var seName; //set se
     var priUC = ""; //primary use case
     var depReg = ""; //
@@ -45,10 +45,20 @@ module.exports = function(controller) {
 
     var custType = message.match[1];
     var customer = message.match[2];
+    var partType = custType.toLowerCase();
+
+    let askPartner = (response, convo) => {
+
+      convo.ask("What is the partner name involved with " + customer + "?", (response, convo) => {
+        partnerName = response.text;
+        askOpp(response, convo);
+        convo.next();
+      });
+    };
 
     let askOpp = (response, convo) => {
 
-      convo.ask("What's the SalesForce Opportunity ID?", (response, convo) => {
+      convo.ask("What's the SalesForce Cloud Sales Opportunity ID? Example 0063400001BcitG", (response, convo) => {
         sfOpp = response.text;
         askPriUC(response, convo);
         convo.next();
@@ -210,7 +220,7 @@ module.exports = function(controller) {
       convo.ask({
         attachments: [{
           title: 'Are there compliance requirements?',
-          callback_id: 'custType',
+          callback_id: 'compliance',
           attachment_type: 'default',
           color: color,
           actions: [{
@@ -285,7 +295,7 @@ module.exports = function(controller) {
       convo.ask({
         attachments: [{
           title: 'Are there more compliance requirements?',
-          callback_id: 'custType',
+          callback_id: 'moreCompliance',
           attachment_type: 'default',
           color: color,
           actions: [{
@@ -335,7 +345,7 @@ module.exports = function(controller) {
       convo.ask({
         attachments: [{
           title: 'Will there be services or add-ons included?',
-          callback_id: 'custType',
+          callback_id: 'services',
           attachment_type: 'default',
           color: color,
           actions: [{
@@ -399,7 +409,11 @@ module.exports = function(controller) {
         default: true,
         callback: function(response, convo) {
           servType = servType + response.text + "|";
-          askServRepeat(response, convo);
+          if (servType.indexOf("None") >= 0) {
+            askStatus(response, convo);
+          } else {
+            askServRepeat(response, convo);
+          }
           convo.next();
         }
       }]);
@@ -410,7 +424,7 @@ module.exports = function(controller) {
       convo.ask({
         attachments: [{
           title: 'Are there more services or add-ons?',
-          callback_id: 'custType',
+          callback_id: 'moreServices',
           attachment_type: 'default',
           color: color,
           actions: [{
@@ -552,7 +566,7 @@ module.exports = function(controller) {
 
       convo.ask("Please provide the details of " + custType + " and next steps", (response, convo) => {
         notes = response.text;
-        if (custType = "POC") {
+        if (partType.indexOf("poc") >= 0) {
           askOrgInvite(response, convo);
         } else {
           askOrg(response, convo);
@@ -618,7 +632,7 @@ module.exports = function(controller) {
 
     let askOrg = (response, convo) => {
 
-      convo.ask(custType + "Please enter the Org ID.", (response, convo) => {
+      convo.ask("Please enter the Org ID.", (response, convo) => {
         orgId = response.text;
         confTask(response, convo);
         convo.next();
@@ -655,14 +669,11 @@ module.exports = function(controller) {
 
         var rows = "'" + sfOpp + "','" +
           customer + "','" +
+          partnerName + "','" +
           custType + "','" +
           real_name + "','" +
-          priUC + "','"
-          //  + secUC + "','"
-          +
-          depReg + "','"
-          //    + desiredReg + "','"
-          +
+          priUC + "','" +
+          depReg + "','" +
           compType + "','" +
           servType + "','" +
           statusType + "','" +
@@ -703,44 +714,27 @@ module.exports = function(controller) {
           }
           bot.say({
             channel: "#tech-validation",
-            text: "A new entry for " + customer + " has been added to the tech validation tracker."
+            text: "A new " + custType + " entry for " + customer + " has been added to the tech validation tracker."
           });
         });
       })
     };
 
     //check to see if customer is already in tech validation table
-    getCustomer(customer, function(res) {
+    valFunc.getCustomer(customer, function(res) {
       if (res[0].result == "No") {
         bot.reply(message, "OK, I can help you with that! I will need to ask some questions to add to the validation tracker database.");
-        bot.startConversation(message, askOpp);
+        if (partType.indexOf("partner") >= 0) {
+          bot.startConversation(message, askPartner);
+        } else {
+          bot.startConversation(message, askOpp);
+        }
       } else {
         bot.reply(message, "Looks like there's already an entry in the Tech Validation database for " + customer + ". Use `@bender get " + customer + "` to get more information.")
       }
     });
 
   });
-
-  //check to see if customer exists in tech validation table
-  function getCustomer(customer, callback) {
-    customer = customer.replace("&", "_");
-    let sqlQuery;
-
-    sqlQuery = `select dbo.get_tech_validation_customer_fn('${customer}') AS result`;
-    sql.connect(config, err => {
-      console.log("connect error: " + err);
-      new sql.Request().query(sqlQuery, (err, result) => {
-        // ... error checks
-        sql.close();
-        console.log(result.recordset);
-        return callback(result.recordset);
-      })
-    })
-
-    sql.on('error', err => {
-      console.log("on error:" + err);
-    })
-  }
 
   /*  function to insert data into sql server */
   function insertRowsAsStream(rows, callback) {
@@ -772,60 +766,7 @@ module.exports = function(controller) {
     })
   }
 
-  /* Utility function to get invite to create org */
-  function getInvite(callback) {
-    var request = require('request');
-    //get auth token
-    request.post({
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Accept": "application/json"
-      },
-      form: {
-        "refresh_token": process.env.create_refresh_token
-      },
-      url: "https://console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"
-    }, function(error, response, body) {
-      console.log("body-" + body);
-      var jsonStr = JSON.parse(body);
-      var rToken = jsonStr.access_token;
-      //return callback(rToken);
-      //request org invitation url
-      var request = require('request');
-      //console.log(rToken);
-      request.post({
-        headers: {
-          'csp-auth-token': rToken,
-          'Content-Type': 'application/json'
-        },
-        json: {
-          //"preset_name": "CUSTOMER",
-          "number_of_invitations": "1",
-          "invitation_properties": {
-            "defaultAwsRegions": "US_EAST_1,US_WEST_2,EU_WEST_2",
-            "enableZeroCloudCloudProvider": "false",
-            "skipSubscriptionCheck": "true",
-            "enableAWSCloudProvider": "true",
-            "accountLinkingOptional": "false",
-            "enabledAvailabilityZones": "{\"us-east-1\":[\"iad6\",\"iad7\",\"iad12\"],\"us-west-2\":[\"pdx1\",\"pdx2\",\"pdx4\"],\"eu-west-2\":[\"lhr54\",\"lhr55\"]}",
-            "sddcLimit": "1",
-            "sla": "CUSTOMER",
-            "orgType": "CUSTOMER_POC",
-            "defaultHostsPerSddc": "4",
-            "hostLimit": "6",
-            "defaultIADDatacenter": "iad6",
-            "defaultPDXDatacenter": "pdx4"
-          },
-          "funds_required": "false"
-        },
-        url: "https://vmc.vmware.com/vmc/api/operator/invitations/service-invitations"
-      }, function(error, response, body) {
-        //console.log("Invite - " + body);
-        return callback(body);
-      });
-    });
-  }
-
+  //check date format
   function isValidDate(s) {
     var bits = s.split('/');
     var y = bits[2],
