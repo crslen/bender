@@ -10,6 +10,7 @@ respond immediately with a single line response.
 */
 
 var wordfilter = require('wordfilter');
+var valFunc = require('../model/valFunctions')
 var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
   '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
   '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
@@ -39,12 +40,109 @@ module.exports = function(controller) {
     convos: 0,
   }
 
-  controller.on('heard_trigger', function() {
-    stats.triggers++;
-  });
+  controller.on('interactive_message_callback', function(bot, message) {
+    var ids = message.callback_id.split('|');
+    var user_id = ids[0];
+    var customer = ids[1];
+    console.log("action: " + message.actions[0].value);
+    if (message.actions[0].value == 'showSDDC') {
+      bot.reply(message, "Checking to see if I have a refresh token for " + customer);
+      //check to see if org and refresh token are in tech validation table
+      valFunc.getToken(customer, function(res) {
+        var jsonParse = JSON.stringify(res);
+        console.log("parse:" + jsonParse);
+        var jsonStr = JSON.parse(jsonParse);
+        var orgId = jsonStr[0].org_id;
+        var rToken = jsonStr[0].refresh_token;
+        console.log("orgid: " + orgId);
+        console.log("refreshtoken: " + rToken);
+        if (orgId != "" && rToken != "") {
+          //bot.reply(message, "OK, I can help you with that!");
+          valFunc.getSDDC(orgId, rToken, function(sddc) {
+            if (sddc.length == 2) {
+              bot.reply(message, {
+                text: "I couldn't find any SDDC's deployed for " + customer + "."
+              });
+            } else {
+              var jsonStr = JSON.parse(sddc);
+              console.log("results:" + jsonStr.length);
 
-  controller.on('conversationStarted', function() {
-    stats.convos++;
+              for (var i = 0; i < jsonStr.length; i++) {
+                //if (jsonStr[i].Actual_Start_Date == null) {var startDate = "None"} else {var startDate = jsonStr[i].Actual_Start_Date.value}
+                //if (jsonStr[i].End_Date == null) {var endDate = "None"} else {var endDate = jsonStr[i].End_Date.value}
+                bot.reply(message, {
+                  text: "Here's what I found for " + customer,
+                  attachments: [{
+                    "title": "SDDC Info",
+                    "color": colorArray[i],
+                    //"title": "Mode Analytics Report",
+                    //"title_link": "https://modeanalytics.com/vmware_inc/reports/1c69ccf26a01",
+                    "fields": [{
+                        "title": "SDDC Name",
+                        "value": jsonStr[i].name,
+                        "short": true
+                      },
+                      {
+                        "title": "Status",
+                        "value": jsonStr[i].sddc_state,
+                        "short": true
+                      },
+                      {
+                        "title": "Created",
+                        "value": jsonStr[i].created,
+                        "short": true
+                      },
+                      {
+                        "title": "vCenter URL",
+                        "value": jsonStr[i].resource_config.vc_url,
+                        "short": true
+                      },
+                      {
+                        "title": "AWS Region",
+                        "value": jsonStr[i].resource_config.region,
+                        "short": true
+                      },
+                      {
+                        "title": "AWS Availability Zone",
+                        "value": jsonStr[i].resource_config.esx_hosts[0].availability_zone,
+                        "short": true
+                      },
+                      {
+                        "title": "VMC Version",
+                        "value": jsonStr[i].resource_config.sddc_manifest.vmc_version,
+                        "short": true
+                      },
+                      {
+                        "title": "VMC Internal Version",
+                        "value": jsonStr[i].resource_config.sddc_manifest.vmc_internal_version,
+                        "short": true
+                      },
+                      {
+                        "title": "Org ID",
+                        "value": jsonStr[i].org_id,
+                        "short": true
+                      },
+                      {
+                        "title": "SDDC ID",
+                        "value": jsonStr[i].resource_config.sddc_id,
+                        "short": true
+                      }
+                    ],
+                  }]
+                });
+              }
+            }
+          });
+        } else {
+          bot.reply(message, "I cannot find Org ID or refresh token in the Tech Validation database for " + customer + ". Use `@bender update " + customer + "` to update Org ID and refresh token.")
+        }
+      });
+    }
+    if (message.actions[0].value == 'extendPOC') {
+      bot.reply(message, "For now go to #poc_extension_request channel to request an extension.")
+    }
+    //var reply = "Ya I'm working on that button right now.  Try again later."
+    //bot.replyInteractive(message, reply);
   });
 
   controller.hears(['what is (.*) working on'], 'direct_message, direct_mention,mention', function(bot, message) {
@@ -229,13 +327,20 @@ module.exports = function(controller) {
                   "short": false
                 }
               ],
-							callback_id: 'showSDDC',
+              callback_id: 'actions|' + customer,
               actions: [{
-                "name": "sddc",
-                "text": "Show SDDC",
-                "value": "showSDDC",
-                "type": "button",
-              }],
+                  "name": "sddc",
+                  "text": "Show SDDC",
+                  "value": "showSDDC",
+                  "type": "button",
+                },
+                {
+                  "name": "extend",
+                  "text": "Extend POC",
+                  "value": "extendPOC",
+                  "type": "button",
+                }
+              ],
             }]
           });
         }

@@ -9,12 +9,12 @@ module.exports = function(controller) {
       'For more information about the POC process visit the confluence page - https://confluence.eng.vmware.com/display/CloudSE/Technical+Validation \n\n' +
 
       '_Tech Validation Tracker:_\n' +
-      '`' + botName + ' add <POC or Paid Pilot> for <Customer Name>`: Adds new entry for the tech validation tracker into Mode Analytics.\n' +
-      '`' + botName + ' get <Customer Name> or show <Customer Name>`: Gets customer information from the validation tracker.\n' +
-      '`' + botName + ' update <Customer Name>`: Update fields in validation tracker. Wild Cards can be used (*)\n' +
+      '`' + botName + ' add <POC or Paid Pilot> for <Account Name>`: Adds new entry for the tech validation tracker into Mode Analytics.\n' +
+      '`' + botName + ' get <Account Name> or show <Account Name>`: Gets customer information from the validation tracker.\n' +
+      '`' + botName + ' update <Account Name>`: Update fields in validation tracker. Wild Cards can be used (*)\n' +
       '`' + botName + ' What is <SE Name> working on`: Lists all Technical Validations that an Solution Engineer is assigned to.\n' +
       '`' + botName + ' create new org`: Creates invite for new POC org.\n' +
-      '`' + botName + ' get <Customer Name> sddc`: Get basic information about the customers SDDC.\n' +
+      '`' + botName + ' get <Account Name> sddc`: Get basic information about the customers SDDC.\n' +
       '\n' +
       '_VMC:_\n' +
       '`' + botName + ' add <email> to <vmc-ws#>`: Add student to workshop org.\n' +

@@ -10,7 +10,7 @@ respond immediately with a single line response.
 */
 
 var wordfilter = require('wordfilter');
-let fields = require("../json/valFields");
+let fields = require("../model/valFields");
 const sql = require('mssql')
 const config = {
   user: process.env.sql_user,
@@ -550,7 +550,7 @@ module.exports = function(controller) {
 
     let askNotes = (response, convo) => {
 
-      convo.ask("Details of " + custType + " and next steps", (response, convo) => {
+      convo.ask("Please provide the details of " + custType + " and next steps", (response, convo) => {
         notes = response.text;
         if (custType = "POC") {
           askOrgInvite(response, convo);
@@ -693,7 +693,7 @@ module.exports = function(controller) {
               console.log(id, name, real_name);
               bot.api.reminders.add({
                 token: process.env.OAUTH_ACCESS_TOKEN,
-                text: "Interact with Bender to update validation tracker for " + customer + ".",
+                text: "<@" + id + "> Interact with Bender to update validation tracker for " + customer + ".",
                 time: "Tuesdays and Fridays",
                 user: id
               }, (error, response) => {
@@ -727,19 +727,14 @@ module.exports = function(controller) {
     let sqlQuery;
 
     sqlQuery = `select dbo.get_tech_validation_customer_fn('${customer}') AS result`;
-
     sql.connect(config, err => {
       console.log("connect error: " + err);
-
-      // Query
-
       new sql.Request().query(sqlQuery, (err, result) => {
         // ... error checks
         sql.close();
         console.log(result.recordset);
         return callback(result.recordset);
       })
-
     })
 
     sql.on('error', err => {
@@ -804,7 +799,7 @@ module.exports = function(controller) {
           'Content-Type': 'application/json'
         },
         json: {
-          "preset_name": "CUSTOMER",
+          //"preset_name": "CUSTOMER",
           "number_of_invitations": "1",
           "invitation_properties": {
             "defaultAwsRegions": "US_EAST_1,US_WEST_2,EU_WEST_2",
@@ -829,6 +824,22 @@ module.exports = function(controller) {
         return callback(body);
       });
     });
+  }
+
+  function isValidDate(s) {
+    var bits = s.split('/');
+    var y = bits[2],
+      m = bits[1],
+      d = bits[0];
+    // Assume not leap year by default (note zero index for Jan)
+    var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    // If evenly divisible by 4 and not evenly divisible by 100,
+    // or is evenly divisible by 400, then a leap year
+    if ((!(y % 4) && y % 100) || !(y % 400)) {
+      daysInMonth[1] = 29;
+    }
+    return !(/\D/.test(String(d))) && d > 0 && d <= daysInMonth[--m]
   }
 
 }; /* the end */

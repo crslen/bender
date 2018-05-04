@@ -10,7 +10,7 @@ respond immediately with a single line response.
 */
 
 var wordfilter = require('wordfilter');
-let fields = require("../json/valFields");
+let fields = require("../model/valFields");
 const sql = require('mssql')
 const config = {
   user: process.env.sql_user,
