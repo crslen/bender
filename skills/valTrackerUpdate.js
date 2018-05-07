@@ -11,6 +11,7 @@ respond immediately with a single line response.
 
 var wordfilter = require('wordfilter');
 let fields = require("../model/valFields");
+var valFunc = require('../model/valFunctions')
 const sql = require('mssql')
 const config = {
   user: process.env.sql_user,
@@ -58,7 +59,7 @@ module.exports = function(controller) {
     let getUpdate = (response, convo) => {
       switch (updateField) {
         case "SFDC_OPPTY_ID":
-          convo.ask("What's the SalesForce Cloud Sales Opportunity ID?", (response, convo) => {
+          convo.ask("What's the SalesForce Cloud Sales Opportunity ID? Example 0063400001BcitG", (response, convo) => {
             updateValue = response.text;
             confTask(response, convo);
             convo.next();
@@ -735,35 +736,14 @@ module.exports = function(controller) {
       }
     };
     //check to see if customer is already in tech validation table
-    getCustomer(customer, function(res) {
-      if (res[0].result == "Yes") {
+    valFunc.getCustomer(customer, function(res) {
+      if (res[0].result.indexOf("Yes") >= 0) {
         bot.startConversation(message, askField);
       } else {
         bot.reply(message, "I can't find " + customer + ". Use `@bender get " + customer + "` to get more information.  Also try using the exact customer name entered into tech validation.")
       }
     });
   });
-
-  //check to see if customer exists in tech validation table
-  function getCustomer(customer, callback) {
-    customer = customer.replace("&", "_");
-    let sqlQuery;
-
-    sqlQuery = `select dbo.get_tech_validation_customer_fn('${customer}') AS result`;
-    sql.connect(config, err => {
-      console.log("connect error: " + err);
-      new sql.Request().query(sqlQuery, (err, result) => {
-        // ... error checks
-        sql.close();
-        console.log(result.recordset);
-        return callback(result.recordset);
-      })
-    })
-
-    sql.on('error', err => {
-      console.log("on error:" + err);
-    })
-  }
 
   //function to get customer tracker information
   function updateCustomer(customer, updateField, updateValue, callback) {

@@ -30,6 +30,7 @@ module.exports = function(controller) {
     var customer; //customer name
     var sfOpp; //SalesForce ID
     var seName; //set se
+    var partnerName = ""; //partner name for POC's
     var priUC = ""; //primary use case
     var depReg = ""; //
     var compType = ""; //compliance requirements
@@ -722,7 +723,7 @@ module.exports = function(controller) {
 
     //check to see if customer is already in tech validation table
     valFunc.getCustomer(customer, function(res) {
-      if (res[0].result == "No") {
+      if (res[0].result == null) {
         bot.reply(message, "OK, I can help you with that! I will need to ask some questions to add to the validation tracker database.");
         if (partType.indexOf("partner") >= 0) {
           bot.startConversation(message, askPartner);
