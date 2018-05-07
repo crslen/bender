@@ -139,10 +139,27 @@ module.exports = function(controller) {
       });
     }
     if (message.actions[0].value == 'extendPOC') {
-      bot.reply(message, "For now go to #poc_extension_request channel to request an extension.")
+      let askExtReq = (response, convo) => {
+        convo.ask("Please give me a description of the extension request and how long.", (response, convo) => {
+          extReq = response.text;
+          //sweemer hardcastle reedy
+          var approvers = "<@U40TBNTTQ> <@U3U3D17MK> <@U3U3K6HM2>";
+          var message_options = [
+            "Hear ye hear ye, a request to extend " + customer + "'s POC has been requested. \n *" + extReq + "*  \n" + approvers + " do you approve? ",
+            "Attention K-Mart shoppers " + customer + " has requested an extension.  \n *" + extReq + "*  \n" + approvers + " do you approve?"
+          ]
+          var random_index = Math.floor(Math.random() * message_options.length);
+          var chosen_message = message_options[random_index];
+          bot.reply(message, "I will notify the approvers in the #poc_extension_request channel.");
+          bot.say({
+            channel: "#poc_extension_request",
+            text: chosen_message
+          });
+          convo.next();
+        });
+      };
+      bot.startConversation(message, askExtReq);
     }
-    //var reply = "Ya I'm working on that button right now.  Try again later."
-    //bot.replyInteractive(message, reply);
   });
 
   controller.hears(['what is (.*) working on'], 'direct_message, direct_mention,mention', function(bot, message) {

@@ -34,7 +34,8 @@ module.exports = function(controller) {
       convo.ask("What's the customer name?", (response, convo) => {
         customer = response.text;
         valFunc.getCustomer(customer, function(res) {
-          if (res[0].result == "Yes") {
+          var results = res[0].result.split('|');
+          if (results[0] == "Yes" && results[1].indexOf("POC") >= 0) {
             bot.reply(message, "Glad to see " + customer + " is in the tech validation database.");
             selectCustomer(customer, function(res) {
               console.log("response: " + res[0].response);
@@ -51,7 +52,7 @@ module.exports = function(controller) {
               convo.next();
             });
           } else {
-            bot.reply(message, "I don't see " + customer + " in the tech validation database . Make sure " + customer + " is added by asking me `@bender add POC for " + customer + "`")
+            bot.reply(message, "I don't see *" + customer + "* in the tech validation database or this has been selected as a *paid pilot*. If it's not a paid pilot make sure " + customer + " is added by asking me `@bender add POC for " + customer + "`")
             convo.stop();
           }
         });
@@ -65,7 +66,7 @@ module.exports = function(controller) {
           text: "Here's the invite for " + customer + " - " + vmcInvite
         });
         bot.reply(message, {
-          text: "Once the org is created make sure to update the tech validation with the new org ID using 'Update " + customer + "'."
+          text: "Once the org is created make sure to update the tech validation with the new org ID using `@bender Update " + customer + "`."
         });
       });
     };
