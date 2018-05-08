@@ -61,7 +61,10 @@ module.exports = function(controller) {
         "I'm impressed; I've never met such a small mind inside such a big head before.",
         "What's wrong, don't you get any attention back home?",
         "Did your mother never tell you not to drink on an empty head?",
-        ":eggplant: :punch:"
+        ":eggplant: :punch:",
+        "Stick it in your :poop: :oven:",
+        "Keep rolling your eyes maybe you'll find a brain back there.",
+        "I hope one day you choke on the :poo: you talk."
       ]
       var random_index = Math.floor(Math.random() * message_options.length)
       var chosen_message = message_options[random_index]
