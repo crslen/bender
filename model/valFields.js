@@ -292,6 +292,10 @@ let uFields = fieldDD => {
           "value": "SE_Specialist"
         },
         {
+          "text": "AWS Member",
+          "value": "aws_resource"
+        },
+        {
           "text": "Type",
           "value": "Type"
         },
@@ -448,7 +452,8 @@ let futQuotes = futQuotes => {
     "O’ cruel fate, to be thusly boned! Ask not for whom the bone bones—it bones for thee.",
     "Hey, whose been messing with my radio? This isn’t alternative rock, it’s college rock.",
     "My story is a lot like yours, only more interesting ‘cause it involves robots.",
-    "We’ll soon stage an attack on technology worthy of being chronicled in an anthem by Rush!"
+    "We’ll soon stage an attack on technology worthy of being chronicled in an anthem by Rush!",
+    "Can't decide if I need a hug, an XL coffee, 6 shots of vodka, or 2 weeks of sleep."
   ]
   var random_index = Math.floor(Math.random() * message_options.length)
   var chosen_message = message_options[random_index]

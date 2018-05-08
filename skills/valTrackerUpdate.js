@@ -26,6 +26,19 @@ let color = "#009cdb";
 
 module.exports = function(controller) {
 
+/*  this.setTimeout(60000 * 5);
+  this.onTimeout(function(convo) {
+    var message_options = [
+      ":musical_note: All by myself....don't want to be....:musical_note:",
+      "Hello? Did you forget about me????",
+      "Apparently I'm not important enough for you, so I'm back to my hole."
+    ]
+    var random_index = Math.floor(Math.random() * message_options.length);
+    var chosen_message = message_options[random_index];
+    convo.say(chosen_message)
+  })
+*/
+
   controller.hears(['update (.*)'], 'direct_message, direct_mention,mention', function(bot, message) {
     let customer = message.match[1];
     var updateValue = "";
@@ -74,6 +87,13 @@ module.exports = function(controller) {
           break;
         case "SE_Specialist":
           convo.ask("Name of the SET Member?", (response, convo) => {
+            updateValue = response.text;
+            confTask(response, convo);
+            convo.next();
+          });
+          break;
+        case "aws_resource":
+          convo.ask("Name of the AWS resource assigned to " + customer + "?", (response, convo) => {
             updateValue = response.text;
             confTask(response, convo);
             convo.next();
