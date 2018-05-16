@@ -567,11 +567,11 @@ module.exports = function(controller) {
 
       convo.ask("Please provide the details of " + custType + " and next steps", (response, convo) => {
         notes = response.text;
-        if (partType.indexOf("poc") >= 0) {
+        //if (partType.indexOf("poc") >= 0) {
           askOrgInvite(response, convo);
-        } else {
-          askOrg(response, convo);
-        }
+        //} else {
+          //askOrg(response, convo);
+        //}
         convo.next();
       });
     };

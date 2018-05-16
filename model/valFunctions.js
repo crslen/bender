@@ -61,7 +61,6 @@ function getToken(customer, callback) {
       console.log(result);
       return callback(result.recordset);
     })
-
   })
 
   sql.on('error', err => {
@@ -96,8 +95,8 @@ function getInvite(callback) {
         'Content-Type': 'application/json'
       },
       json: {
-        //"preset_name": "CUSTOMER",
-        "number_of_invitations": "1",
+        "preset_name": "CUSTOMER",
+        //"number_of_invitations": "1",
         "invitation_properties": {
           "defaultAwsRegions": "US_EAST_1,US_WEST_2,EU_WEST_2",
           "enableZeroCloudCloudProvider": "false",
@@ -144,7 +143,55 @@ function getCustomer(customer, callback) {
   })
 }
 
+//query SFDC data
+function getSFDC(sfdc_id, callback) {
+  //customer = customer.replace("&", "_");
+  let sqlQuery;
+
+  sqlQuery = `SELECT * FROM dbo.sfdc_opp_data_view WHERE Opportunity_ID = '${sfdc_id}' or Account_Name like '%${sfdc_id}%'`;
+  sql.connect(config, err => {
+    console.log("connect error: " + err);
+    new sql.Request().query(sqlQuery, (err, result) => {
+      // ... error checks
+      sql.close();
+      console.log(result.recordset);
+      return callback(result.recordset);
+    })
+  })
+
+  sql.on('error', err => {
+    console.log("on error:" + err);
+  })
+}
+
+//check to see if customer filled out pre-flight survey
+function getPreFlight(customer, callback) {
+
+  let sqlQuery;
+  sqlQuery = `SELECT dbo.get_pre_flight_fn('${customer}') as response`;
+
+  sql.connect(config, err => {
+    console.log("connect error: " + err);
+
+    // Query
+
+    new sql.Request().query(sqlQuery, (err, result) => {
+      // ... error checks
+      sql.close();
+      console.log(result);
+      return callback(result.recordset);
+    })
+
+  })
+
+  sql.on('error', err => {
+    console.log("on error:" + err);
+  })
+}
+
 exports.getSDDC = getSDDC;
 exports.getToken = getToken;
 exports.getInvite = getInvite;
 exports.getCustomer = getCustomer;
+exports.getSFDC = getSFDC;
+exports.getPreFlight = getPreFlight;
