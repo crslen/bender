@@ -1,16 +1,6 @@
 var wordfilter = require('wordfilter');
-//let fields = require("../model/valFields");
+let fields = require("../model/valFields");
 let valFunc = require("../model/valFunctions");
-const sql = require('mssql')
-const config = {
-  user: process.env.sql_user,
-  password: process.env.sql_password,
-  server: process.env.sql_server, // You can use 'localhost\\instance' to connect to named instance
-  database: process.env.sql_database,
-  options: {
-    encrypt: false // Use this if you're on Windows Azure
-  }
-}
 
 module.exports = function(controller) {
 
@@ -30,7 +20,7 @@ module.exports = function(controller) {
             var results = res[0].result.split('|');
             if (results[0] == "Yes" && results[1].indexOf("POC") >= 0) {
               bot.reply(message, "Glad to see " + customer + " is in the tech validation database.");
-              selectCustomer(customer, function(res) {
+              valFunc.getPreFlight(customer, function(res) {
                 console.log("response: " + res[0].response);
                 if (res[0].response == 'No') {
                   bot.reply(message, {
@@ -65,29 +55,5 @@ module.exports = function(controller) {
     bot.startConversation(message, askCustomer);
 
   });
-
-  function selectCustomer(customer, callback) {
-
-    let sqlQuery;
-    sqlQuery = `SELECT dbo.get_pre_flight_fn('${customer}') as response`;
-
-    sql.connect(config, err => {
-      console.log("connect error: " + err);
-
-      // Query
-
-      new sql.Request().query(sqlQuery, (err, result) => {
-        // ... error checks
-        sql.close();
-        console.log(result);
-        return callback(result.recordset);
-      })
-
-    })
-
-    sql.on('error', err => {
-      console.log("on error:" + err);
-    })
-  }
 
 }; /* the end */

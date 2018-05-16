@@ -20,26 +20,22 @@ var luisOptions = {
 */
 module.exports = function(controller) {
 
-  /* Collect some very simple runtime stats for use in the uptime/debug command */
-  var stats = {
-    triggers: 0,
-    convos: 0,
-  }
-
-  controller.on('heard_trigger', function() {
-    stats.triggers++;
-  });
-
-  controller.on('conversationStarted', function() {
-    stats.convos++;
-  });
-
   //enable luis AI
   //controller.middleware.receive.use(luis.middleware.receive(luisOptions));
 
+  //enable wit ai
+//  var wit = require('botkit-middleware-witai')({
+//    token: "M2PPWSTPSY5HFNTBPACQTNFMVEAEOTRJ",
+//    minConfidence: 0.6,
+//    logLevel: "debug"
+//  });
+
+//  controller.middleware.receive.use(wit.receive);
+
 
   //controller.hears(['fuck', 'butthole', 'asshole', 'jerk', 'dick', 'moron', 'prick', 'idiot', 'fuck puddle', 'putz', 'fuckface'], 'direct_message, direct_mention, ambient', function(bot, message) {
-  controller.hears(badwordsArray, 'direct_message, direct_mention, ambient', function(bot, message) {
+  controller.hears(badwordsArray, 'direct_message, direct_mention', function(bot, message) {
+  
     //if (message.channel == "#dev-bender") {
     //if (message.channel == "G99D12CCA") {
     bot.createConversation(message, function(err, convo) {
@@ -78,7 +74,6 @@ module.exports = function(controller) {
   });
 
   controller.hears(['paul Hi', 'Hi paul'], 'direct_message, direct_mention, ambient', function(bot, message) {
-
     bot.createConversation(message, function(err, convo) {
       convo.say("Shhh :shushing_face:");
       convo.activate();
@@ -124,9 +119,6 @@ module.exports = function(controller) {
   });
 
   controller.hears(['grr'], 'direct_message, direct_mention, ambient', function(bot, message) {
-    /*getChannelId("tech-validation", function(res) {
-      console.log("chId:" + res);
-    });*/
 
     bot.createConversation(message, function(err, convo) {
       convo.say("Don't beat me!");
@@ -134,6 +126,13 @@ module.exports = function(controller) {
     });
   });
 
+  /*controller.hears(['extension_reason'], 'message_received', wit.hears, function(bot, message) {
+  
+    console.log("Wit.ai detected entities", message.entities);
+    bot.reply("Sounds like you need to extend a poc");
+
+  });
+*/
   controller.hears(['Shh'], 'direct_message, direct_mention, ambient', function(bot, message) {
 
     bot.createConversation(message, function(err, convo) {

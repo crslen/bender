@@ -44,6 +44,7 @@ module.exports = function(controller) {
     var ids = message.callback_id.split('|');
     var user_id = ids[0];
     var customer = ids[1];
+    var sfdc_id = ids[2];
     console.log("action: " + message.actions[0].value);
     if (message.actions[0].value == 'showSDDC') {
       bot.reply(message, "Checking to see if I have a refresh token for " + customer);
@@ -56,7 +57,7 @@ module.exports = function(controller) {
         var rToken = jsonStr[0].refresh_token;
         console.log("orgid: " + orgId);
         console.log("refreshtoken: " + rToken);
-        if (orgId != "" && rToken != "") {
+        if (rToken !== null) {
           //bot.reply(message, "OK, I can help you with that!");
           valFunc.getSDDC(orgId, rToken, function(sddc) {
             if (sddc.length == 2) {
@@ -140,7 +141,7 @@ module.exports = function(controller) {
     }
     if (message.actions[0].value == 'extendPOC') {
       let askExtReq = (response, convo) => {
-        convo.ask("Please give me a description of the extension request and how long.", (response, convo) => {
+        convo.ask("Please give me a description of why the POC needs to be extended and how long. (i.e. technical issues, unfinished testing, customer sat issue, etc.)", (response, convo) => {
           extReq = response.text;
           //sweemer hardcastle reedy
           var approvers = "<@U40TBNTTQ> <@U3U3D17MK> <@U3U3K6HM2>";
@@ -159,6 +160,78 @@ module.exports = function(controller) {
         });
       };
       bot.startConversation(message, askExtReq);
+    }
+    if (message.actions[0].value == 'showSFDC') {
+      //get opp id
+      valFunc.getSFDC(sfdc_id, function(sfdc) {
+        //don't ask me why
+        var jsonParse = JSON.stringify(sfdc);
+        var jsonStr = JSON.parse(jsonParse);
+        if (jsonStr[0].SF_Opportunity_ID !== null) {
+          bot.reply(message, {
+            text: "Here's what I found for " + customer,
+            attachments: [{
+              "title": "SFDC Opportunity Info",
+              "color": "#1AB399",
+              "title": "VMware SalesForce",
+              "title_link": "https://vmware.my.salesforce.com/" + sfdc_id,
+              "fields": [{
+                  "title": "Opportunity Name",
+                  "value": jsonStr[0].Name,
+                  "short": true
+                },
+                {
+                  "title": "SF Opportunity ID",
+                  "value": jsonStr[0].SF_Opportunity_ID,
+                  "short": true
+                },
+                {
+                  "title": "Opportunity Type",
+                  "value": jsonStr[0].Opportunity_Record_Type,
+                  "short": true
+                },
+                {
+                  "title": "Account Name",
+                  "value": jsonStr[0].Account_Name,
+                  "short": true
+                },
+                {
+                  "title": "Geo",
+                  "value": jsonStr[0].Geo,
+                  "short": true
+                },
+                {
+                  "title": "Industry",
+                  "value": jsonStr[0].Industry,
+                  "short": true
+                },
+                {
+                  "title": "Country",
+                  "value": jsonStr[0].Country,
+                  "short": true
+                },
+                {
+                  "title": "Vertical",
+                  "value": jsonStr[0].Sales_Classification,
+                  "short": true
+                },
+                {
+                  "title": "Stage",
+                  "value": jsonStr[0].Stage,
+                  "short": true
+                },
+                {
+                  "title": "Opportunity Owner",
+                  "value": jsonStr[0].Opportunity_Owner,
+                  "short": true
+                }
+              ],
+            }]
+          });
+        } else {
+          bot.reply(message, "Hmm there might be an issue with the SF ID I have.  Make sure it's the valid alpha-numeric ID.");
+        }
+      });
     }
   });
 
@@ -335,7 +408,7 @@ module.exports = function(controller) {
                 },
                 {
                   "title": "SF Opportunity ID",
-                  "value": jsonStr[i].SFDC_OPPTY_ID, //https://vmware.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&str=
+                  "value": jsonStr[i].SFDC_OPPTY_ID_RAW, //https://vmware.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&str=
                   "short": true
                 },
                 {
@@ -344,11 +417,17 @@ module.exports = function(controller) {
                   "short": false
                 }
               ],
-              callback_id: 'actions|' + customer,
+              callback_id: 'actions|' + customer + "|" + jsonStr[i].SFDC_OPPTY_ID_RAW,
               actions: [{
                   "name": "sddc",
                   "text": "Show SDDC",
                   "value": "showSDDC",
+                  "type": "button",
+                },
+                {
+                  "name": "sfdc",
+                  "text": "Show SF Opp",
+                  "value": "showSFDC",
                   "type": "button",
                 },
                 {
@@ -363,9 +442,8 @@ module.exports = function(controller) {
         }
       }
     });
-    //convo.say("Here's the invite: {{vars.createorg}}")
-    //});
   });
+
   //function to get customer tracker information
   function selectCustomer(customer, searchType, callback) {
     customer = customer.replace("&", "_");
