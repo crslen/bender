@@ -11,31 +11,42 @@ respond immediately with a single line response.
 
 var wordfilter = require('wordfilter');
 let fields = require("../model/valFields");
-var badwordsArray = require('badwords/array');
-/*
-var luis = require('botkit-middleware-luis');
-var luisOptions = {
-  serviceUri: process.env.serviceUri
-};
-*/
+let valFunc = require("../model/valFunctions");
+let benderQuestions = require("../model/BenderQuestions");
+let badwordsArray = require('badwords/array');
+
 module.exports = function(controller) {
 
-  //enable luis AI
-  //controller.middleware.receive.use(luis.middleware.receive(luisOptions));
+  controller.hears(['Provide Storage Information'], 'direct_message, direct_mention, ambient', function(bot, message) {
+    //bot.createConversation(message, function(err, convo) {
+    var jsonWKS = benderQuestions.storageQuestions();
+    var jsonStr = JSON.stringify(jsonWKS);
+    var obj = JSON.parse(jsonStr);
+    for (var i = 0; i < obj.length; i++) {
+      console.log(obj[i].Questions.Question);
+    }
+    //convo.say(jsonWKS.Questions[0]);
+    //convo.activate();
+    //});
 
-  //enable wit ai
-//  var wit = require('botkit-middleware-witai')({
-//    token: "M2PPWSTPSY5HFNTBPACQTNFMVEAEOTRJ",
-//    minConfidence: 0.6,
-//    logLevel: "debug"
-//  });
+  });
 
-//  controller.middleware.receive.use(wit.receive);
+  /*  controller.hears(['Provide Storage Information'], 'direct_message,direct_mention,mention', function(bot, message) {
+      bot.createConversation(message, function(err, convo) {
+        //console.log(json.stringify(benderQuestions.Questions()));
+        //var jsonWKS = benderQuestions.Questions();
 
-
+        convo.ask("Hi?", (response, convo) => {
+          partnerName = response.text;
+          //askOpp(response, convo);
+          convo.next();
+        });
+      });
+    });
+  */
   //controller.hears(['fuck', 'butthole', 'asshole', 'jerk', 'dick', 'moron', 'prick', 'idiot', 'fuck puddle', 'putz', 'fuckface'], 'direct_message, direct_mention, ambient', function(bot, message) {
   controller.hears(badwordsArray, 'direct_message, direct_mention', function(bot, message) {
-  
+
     //if (message.channel == "#dev-bender") {
     //if (message.channel == "G99D12CCA") {
     bot.createConversation(message, function(err, convo) {
@@ -121,13 +132,15 @@ module.exports = function(controller) {
   controller.hears(['grr'], 'direct_message, direct_mention, ambient', function(bot, message) {
 
     bot.createConversation(message, function(err, convo) {
+      var resp = valFunc.testSegment();
+      console.log("resp: " + resp);
       convo.say("Don't beat me!");
       convo.activate();
     });
   });
 
   /*controller.hears(['extension_reason'], 'message_received', wit.hears, function(bot, message) {
-  
+
     console.log("Wit.ai detected entities", message.entities);
     bot.reply("Sounds like you need to extend a poc");
 

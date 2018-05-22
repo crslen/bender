@@ -18,7 +18,7 @@ module.exports = function(controller) {
             convo.stop();
           } else {
             var results = res[0].result.split('|');
-            if (results[0] == "Yes" && results[1].indexOf("POC") >= 0) {
+            if (results[0] == "Yes" && results[1].toLowerCase().indexOf("poc") >= 0) {
               bot.reply(message, "Glad to see " + customer + " is in the tech validation database.");
               valFunc.getPreFlight(customer, function(res) {
                 console.log("response: " + res[0].response);

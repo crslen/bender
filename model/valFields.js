@@ -80,6 +80,10 @@ let awsRegions = awsReg => {
           "value": "US West (Oregon)"
         },
         {
+          "text": "EU (Frankfurt)",
+          "value": "EU (Frankfurt)"
+        },
+        {
           "text": "EU (London)",
           "value": "EU (London)"
         }
@@ -132,10 +136,6 @@ let awsRegions = awsReg => {
         {
           "text": "China (Ningxia)",
           "value": "China (Ningxia)"
-        },
-        {
-          "text": "EU (Frankfurt)",
-          "value": "EU (Frankfurt)"
         },
         {
           "text": "EU (Ireland)",

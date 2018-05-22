@@ -10,6 +10,13 @@ const config = {
   }
 }
 
+var Analytics = require('analytics-node');
+var analytics = new Analytics(process.env.segment_key);
+
+function insertSegment(json) {
+  analytics.track(json);
+}
+
 /* Utility function to get SDDC info*/
 function getSDDC(orgId, rToken, callback) {
   var request = require('request');
@@ -195,3 +202,4 @@ exports.getInvite = getInvite;
 exports.getCustomer = getCustomer;
 exports.getSFDC = getSFDC;
 exports.getPreFlight = getPreFlight;
+exports.insertSegment = insertSegment;
