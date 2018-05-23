@@ -1,4 +1,5 @@
 "use strict";
+//mssql server
 const sql = require('mssql')
 const config = {
   user: process.env.sql_user,
@@ -9,6 +10,17 @@ const config = {
     encrypt: false // Use this if you're on Windows Azure
   }
 }
+
+//redshift.js
+var Redshift = require('node-redshift');
+
+var client = {
+  user: process.env.RSuser,
+  database: process.env.RSdatabase,
+  password: process.env.RSpassword,
+  port: process.env.RSport,
+  host: process.env.RShost
+};
 
 var Analytics = require('analytics-node');
 var analytics = new Analytics(process.env.segment_key);
@@ -105,12 +117,12 @@ function getInvite(callback) {
         "preset_name": "CUSTOMER",
         //"number_of_invitations": "1",
         "invitation_properties": {
-          "defaultAwsRegions": "US_EAST_1,US_WEST_2,EU_WEST_2",
+          "defaultAwsRegions": "US_EAST_1,US_WEST_2,EU_CENTRAL_1,EU_WEST_2",
           "enableZeroCloudCloudProvider": "false",
           "skipSubscriptionCheck": "true",
           "enableAWSCloudProvider": "true",
           "accountLinkingOptional": "false",
-          "enabledAvailabilityZones": "{\"us-east-1\":[\"iad6\",\"iad7\",\"iad12\"],\"us-west-2\":[\"pdx1\",\"pdx2\",\"pdx4\"],\"eu-west-2\":[\"lhr54\",\"lhr55\"]}",
+          "enabledAvailabilityZones": "{\"us-east-1\":[\"iad6\",\"iad7\",\"iad12\"],\"us-west-2\":[\"pdx1\",\"pdx2\",\"pdx4\"],\"eu-west-2\":[\"lhr54\",\"lhr55\"],\"eu-central-1\":[\"fra52\",\"fra53\",\"fra54\"]}",
           "sddcLimit": "1",
           "sla": "CUSTOMER",
           "orgType": "CUSTOMER_POC",
@@ -152,8 +164,29 @@ function getCustomer(customer, callback) {
 
 //query SFDC data
 function getSFDC(sfdc_id, callback) {
-  //customer = customer.replace("&", "_");
-  let sqlQuery;
+  //redshift Query
+  //connection pool
+  var redshiftClient = new Redshift(client, {
+    rawConnection: true
+  })
+
+  redshiftClient.connect(function(err) {
+    if (err) throw err;
+    else {
+      redshiftClient.query(`select * from vmstar.opportunity where (id like '${sfdc_id}%' or accountname like '%${sfdc_id}%') and snapshot_date = (select max(snapshot_date) from vmstar.opportunity)`, {
+        rawConnection: true
+      }, function(err, data) {
+        if (err) throw err;
+        else {
+          console.log(data.rows);
+          redshiftClient.close();
+          return callback(data.rows);
+        }
+      });
+    }
+  });
+  //ms sql query
+  /*let sqlQuery;
 
   sqlQuery = `SELECT * FROM dbo.sfdc_opp_data_view WHERE Opportunity_ID = '${sfdc_id}' or Account_Name like '%${sfdc_id}%'`;
   sql.connect(config, err => {
@@ -168,7 +201,7 @@ function getSFDC(sfdc_id, callback) {
 
   sql.on('error', err => {
     console.log("on error:" + err);
-  })
+  })*/
 }
 
 //check to see if customer filled out pre-flight survey

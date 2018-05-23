@@ -199,7 +199,7 @@ module.exports = function(controller) {
         {
           pattern: "no",
           callback: function(reply, convo) {
-            convo.say('Cool beans :coolbean:');
+            convo.say(fields.yayMessage());
             //compType = "NA";
             askComp(response, convo);
             convo.next();
@@ -324,7 +324,7 @@ module.exports = function(controller) {
         {
           pattern: "no",
           callback: function(reply, convo) {
-            convo.say('Cool beans :coolbean:');
+            convo.say(fields.yayMessage());
             //compType = "NA";
             askServType(response, convo);
             convo.next();

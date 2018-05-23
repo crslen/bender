@@ -141,22 +141,32 @@ module.exports = function(controller) {
     }
     if (message.actions[0].value == 'extendPOC') {
       let askExtReq = (response, convo) => {
-        convo.ask("Please give me a description of why the POC needs to be extended and how long. (i.e. technical issues, unfinished testing, customer sat issue, etc.)", (response, convo) => {
-          extReq = response.text;
-          //sweemer hardcastle reedy
-          var approvers = "<@U40TBNTTQ> <@U3U3D17MK> <@U3U3K6HM2>";
-          var message_options = [
-            "Hear ye hear ye, a request to extend " + customer + "'s POC has been requested. \n *" + extReq + "*  \n" + approvers + " do you approve? ",
-            "Attention K-Mart shoppers " + customer + " has requested an extension.  \n *" + extReq + "*  \n" + approvers + " do you approve?"
-          ]
-          var random_index = Math.floor(Math.random() * message_options.length);
-          var chosen_message = message_options[random_index];
-          bot.reply(message, "I will notify the approvers in the #poc_extension_request channel.");
-          bot.say({
-            channel: "#poc_extension_request",
-            text: chosen_message
+        bot.api.users.info({
+          user: message.user
+        }, (error, response) => {
+          let {
+            id,
+            name,
+            real_name
+          } = response.user;
+          console.log(id, name, real_name);
+          convo.ask("Please give me a description of why the POC needs to be extended and how long. (i.e. technical issues, unfinished testing, customer sat issue, etc.)", (response, convo) => {
+            extReq = response.text;
+            //sweemer hardcastle reedy
+            var approvers = "<@U40TBNTTQ> <@U3U3D17MK> <@U3U3K6HM2>";
+            var message_options = [
+              "Hear ye hear ye, a request from " + real_name + " to extend " + customer + "'s POC has been requested. \n *" + extReq + "*  \n" + approvers + " do you approve? ",
+              "Attention K-Mart shoppers, " + real_name + " has requested an extention for " + customer + ".  \n *" + extReq + "*  \n" + approvers + " do you approve?"
+            ]
+            var random_index = Math.floor(Math.random() * message_options.length);
+            var chosen_message = message_options[random_index];
+            bot.reply(message, "I will notify the approvers in the #poc_extension_request channel.");
+            bot.say({
+              channel: "#poc_extension_request",
+              text: chosen_message
+            });
+            convo.next();
           });
-          convo.next();
         });
       };
       bot.startConversation(message, askExtReq);
