@@ -101,6 +101,21 @@ module.exports = function(controller) {
                   "title": "Opportunity Owner",
                   "value": jsonStr[i].opportunity_owner_name__c,
                   "short": true
+                },
+                {
+                  "title": "Amount",
+                  "value": jsonStr[i].amount,
+                  "short": true
+                },
+                {
+                  "title": "Sales Territory",
+                  "value": jsonStr[i].primary_field_sales_territory__c,
+                  "short": true
+                },
+                {
+                  "title": "Next Steps",
+                  "value": jsonStr[i].next_steps__c,
+                  "short": false
                 }
               ],
             }]
