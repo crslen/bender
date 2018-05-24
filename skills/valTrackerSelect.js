@@ -45,12 +45,13 @@ module.exports = function(controller) {
     console.log("action: " + action_id);
     if (action_id == 'showSDDC') {
       valFunc.getSDDC(orgId, function(sddc) {
-        if (sddc.length > 0) {
+        if (sddc.length == 0) {
           bot.reply(message, {
             text: "I couldn't find any SDDC's deployed for " + customer + "."
           });
         } else {
-          var jsonStr = JSON.parse(sddc);
+          var sddcStr = JSON.stringify(sddc);
+          var jsonStr = JSON.parse(sddcStr);
           console.log("results:" + jsonStr.length);
 
           for (var i = 0; i < jsonStr.length; i++) {

@@ -1,14 +1,3 @@
-/*
-
-WHAT IS THIS?
-
-This module demonstrates simple uses of Botkit's `hears` handler functions.
-
-In these examples, Botkit is configured to listen for certain phrases, and then
-respond immediately with a single line response.
-
-*/
-
 var wordfilter = require('wordfilter');
 let fields = require("../model/valFields");
 let valFunc = require("../model/valFunctions");
@@ -23,7 +12,7 @@ module.exports = function(controller) {
     var jsonStr = JSON.stringify(jsonWKS);
     var obj = JSON.parse(jsonStr);
     for (var i = 0; i < obj.length; i++) {
-      console.log(obj[i].Questions.Question);
+      console.log(obj.questions[i]);
     }
     //convo.say(jsonWKS.Questions[0]);
     //convo.activate();
@@ -190,6 +179,20 @@ module.exports = function(controller) {
         bot.reply(response);
       })
     })
+  });
+
+  controller.hears(['([0-9]{1,2}) miles', '([0-9]{1,2}) km', '([0-9]{1,2}) kilometers'], 'direct_message,direct_mention,ambient', function(bot, message) {
+    console.log(message);
+    if (message.match[1]) {
+      if (message.text.indexOf("miles") > -1) {
+        var conv = (message.match[1] * 1.609344).toFixed(2);
+        bot.reply(message, "Thats " + conv + " km for you non-metric bit heads.")
+      }
+      if (message.text.indexOf("km") > -1 || message.text.indexOf("kilometers") > -1) {
+        var conv = (message.match[1] / 1.609344).toFixed(2);
+        bot.reply(message, "Thats " + conv + " miles for you metric bit heads.")
+      }
+    }
   });
 
   controller.hears(['^say (.*)', '^say'], 'direct_message,direct_mention', function(bot, message) {
