@@ -20,6 +20,22 @@ module.exports = function(controller) {
       '`' + botName + ' add <email> to <vmc-ws#>`: Add student to workshop org.\n' +
       '`' + botName + ' remove <email> from <vmc-ws#>`: remove student from workshop org\n' +
       '`' + botName + ' create new org`: Creates invite for new POC org.\n' +
+      '\n' +
+      '_Misc:_\n' +
+      '`' + botName + ' new one thing report`: Adds your one thing you want to share with upper management.\n' +
+      '';
+
+    bot.reply(message, helpMessage);
+  });
+
+  controller.hears('one thing help', 'direct_message,direct_mention,mention', function(bot, message) {
+    var botName = '@' + bot.identity.name,
+      helpMessage;
+
+    helpMessage = '' +
+      '1 - Please answer the following question: "If you had 30 seconds with Pat Gelsinger or Andy Jassy\’s, what is the one thing you would want them to know about VMC this week?". ' +
+      '2 - If you don’t have a good answer to #1, don’t send me an update.' +
+      '3 - 3.	If your answer is more than one to two sentences (max), you’re doing it wrong.' +
       '';
 
     bot.reply(message, helpMessage);

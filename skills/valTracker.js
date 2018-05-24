@@ -199,7 +199,7 @@ module.exports = function(controller) {
         {
           pattern: "no",
           callback: function(reply, convo) {
-            convo.say('Cool beans :coolbean:');
+            convo.say(fields.yayMessage());
             //compType = "NA";
             askComp(response, convo);
             convo.next();
@@ -324,7 +324,7 @@ module.exports = function(controller) {
         {
           pattern: "no",
           callback: function(reply, convo) {
-            convo.say('Cool beans :coolbean:');
+            convo.say(fields.yayMessage());
             //compType = "NA";
             askServType(response, convo);
             convo.next();
@@ -568,9 +568,9 @@ module.exports = function(controller) {
       convo.ask("Please provide the details of " + custType + " and next steps", (response, convo) => {
         notes = response.text;
         //if (partType.indexOf("poc") >= 0) {
-          askOrgInvite(response, convo);
+        askOrgInvite(response, convo);
         //} else {
-          //askOrg(response, convo);
+        //askOrg(response, convo);
         //}
         convo.next();
       });
@@ -684,6 +684,33 @@ module.exports = function(controller) {
           endDate + ",'" +
           notes + "','" +
           orgId + "'";
+
+        var jsonInput = {
+          "event": "Tech Validation",
+          "userId": "clennon@vmware.com",
+          "properties": {
+            "sfdc_oppty_id": sfOpp,
+            "customer_name": customer,
+            "partner_name": partnerName,
+            "type": custType,
+            "se_specialist": real_name,
+            "use_case": priUC,
+            "region": depReg,
+            "compliance": compType,
+            "service": servType,
+            "status": statusType,
+            "datetime_inserted": estDate,
+            "datetime_updated": estDate,
+            "est_start_date": startDate,
+            "est_end_date": endDate,
+            "notes": notes,
+            "org_id": orgId
+          }
+        }
+
+        valFunc.insertSegment(jsonInput, function(res) {
+          console.log("segment response: " + res);
+        });
 
         insertRowsAsStream(rows, function(res) {
           if (res == 0) {

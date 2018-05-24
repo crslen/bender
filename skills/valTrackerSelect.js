@@ -34,134 +34,125 @@ const config = {
 }
 module.exports = function(controller) {
 
-  /* Collect some very simple runtime stats for use in the uptime/debug command */
-  var stats = {
-    triggers: 0,
-    convos: 0,
-  }
 
   controller.on('interactive_message_callback', function(bot, message) {
     var ids = message.callback_id.split('|');
-    var user_id = ids[0];
+    var action_id = message.actions[0].value;
     var customer = ids[1];
     var sfdc_id = ids[2];
-    console.log("action: " + message.actions[0].value);
-    if (message.actions[0].value == 'showSDDC') {
-      bot.reply(message, "Checking to see if I have a refresh token for " + customer);
-      //check to see if org and refresh token are in tech validation table
-      valFunc.getToken(customer, function(res) {
-        var jsonParse = JSON.stringify(res);
-        console.log("parse:" + jsonParse);
-        var jsonStr = JSON.parse(jsonParse);
-        var orgId = jsonStr[0].org_id;
-        var rToken = jsonStr[0].refresh_token;
-        console.log("orgid: " + orgId);
-        console.log("refreshtoken: " + rToken);
-        if (rToken !== null) {
-          //bot.reply(message, "OK, I can help you with that!");
-          valFunc.getSDDC(orgId, rToken, function(sddc) {
-            if (sddc.length == 2) {
-              bot.reply(message, {
-                text: "I couldn't find any SDDC's deployed for " + customer + "."
-              });
-            } else {
-              var jsonStr = JSON.parse(sddc);
-              console.log("results:" + jsonStr.length);
-
-              for (var i = 0; i < jsonStr.length; i++) {
-                //if (jsonStr[i].Actual_Start_Date == null) {var startDate = "None"} else {var startDate = jsonStr[i].Actual_Start_Date.value}
-                //if (jsonStr[i].End_Date == null) {var endDate = "None"} else {var endDate = jsonStr[i].End_Date.value}
-                bot.reply(message, {
-                  text: "Here's what I found for " + customer,
-                  attachments: [{
-                    "title": "SDDC Info",
-                    "color": colorArray[i],
-                    //"title": "Mode Analytics Report",
-                    //"title_link": "https://modeanalytics.com/vmware_inc/reports/1c69ccf26a01",
-                    "fields": [{
-                        "title": "SDDC Name",
-                        "value": jsonStr[i].name,
-                        "short": true
-                      },
-                      {
-                        "title": "Status",
-                        "value": jsonStr[i].sddc_state,
-                        "short": true
-                      },
-                      {
-                        "title": "Created",
-                        "value": jsonStr[i].created,
-                        "short": true
-                      },
-                      {
-                        "title": "vCenter URL",
-                        "value": jsonStr[i].resource_config.vc_url,
-                        "short": true
-                      },
-                      {
-                        "title": "AWS Region",
-                        "value": jsonStr[i].resource_config.region,
-                        "short": true
-                      },
-                      {
-                        "title": "AWS Availability Zone",
-                        "value": jsonStr[i].resource_config.esx_hosts[0].availability_zone,
-                        "short": true
-                      },
-                      {
-                        "title": "VMC Version",
-                        "value": jsonStr[i].resource_config.sddc_manifest.vmc_version,
-                        "short": true
-                      },
-                      {
-                        "title": "VMC Internal Version",
-                        "value": jsonStr[i].resource_config.sddc_manifest.vmc_internal_version,
-                        "short": true
-                      },
-                      {
-                        "title": "Org ID",
-                        "value": jsonStr[i].org_id,
-                        "short": true
-                      },
-                      {
-                        "title": "SDDC ID",
-                        "value": jsonStr[i].resource_config.sddc_id,
-                        "short": true
-                      }
-                    ],
-                  }]
-                });
-              }
-            }
+    var orgId = ids[3];
+    console.log("callback: " + message.callback_id);
+    console.log("action: " + action_id);
+    if (action_id == 'showSDDC') {
+      valFunc.getSDDC(orgId, function(sddc) {
+        if (sddc.length > 0) {
+          bot.reply(message, {
+            text: "I couldn't find any SDDC's deployed for " + customer + "."
           });
         } else {
-          bot.reply(message, "I cannot find Org ID or refresh token in the Tech Validation database for " + customer + ". Use `@bender update " + customer + "` to update Org ID and refresh token.")
+          var jsonStr = JSON.parse(sddc);
+          console.log("results:" + jsonStr.length);
+
+          for (var i = 0; i < jsonStr.length; i++) {
+            //if (jsonStr[i].Actual_Start_Date == null) {var startDate = "None"} else {var startDate = jsonStr[i].Actual_Start_Date.value}
+            //if (jsonStr[i].End_Date == null) {var endDate = "None"} else {var endDate = jsonStr[i].End_Date.value}
+            bot.reply(message, {
+              text: "Here's what I found for " + customer,
+              attachments: [{
+                "title": "SDDC Info",
+                "color": colorArray[i],
+                //"title": "Mode Analytics Report",
+                //"title_link": "https://modeanalytics.com/vmware_inc/reports/1c69ccf26a01",
+                "fields": [{
+                    "title": "SDDC Name",
+                    "value": jsonStr[i].name,
+                    "short": true
+                  },
+                  {
+                    "title": "Status",
+                    "value": jsonStr[i].sddc_state,
+                    "short": true
+                  },
+                  {
+                    "title": "Created",
+                    "value": jsonStr[i].created,
+                    "short": true
+                  },
+                  {
+                    "title": "Age in Days",
+                    "value": jsonStr[i].age_days,
+                    "short": true
+                  },
+                  {
+                    "title": "AWS Region",
+                    "value": jsonStr[i].region,
+                    "short": true
+                  },
+                  {
+                    "title": "Powered on VMs",
+                    "value": jsonStr[i].powered_on_vms,
+                    "short": true
+                  },
+                  {
+                    "title": "VMC Version",
+                    "value": jsonStr[i].vmc_version,
+                    "short": true
+                  },
+                  {
+                    "title": "VMC Internal Version",
+                    "value": jsonStr[i].vmc_internal_version,
+                    "short": true
+                  },
+                  {
+                    "title": "Org ID",
+                    "value": jsonStr[i].org_id,
+                    "short": true
+                  },
+                  {
+                    "title": "SDDC ID",
+                    "value": jsonStr[i].sddc_id,
+                    "short": true
+                  }
+                ],
+              }]
+            });
+          }
         }
       });
     }
-    if (message.actions[0].value == 'extendPOC') {
+    if (action_id == 'extendPOC') {
       let askExtReq = (response, convo) => {
-        convo.ask("Please give me a description of why the POC needs to be extended and how long. (i.e. technical issues, unfinished testing, customer sat issue, etc.)", (response, convo) => {
-          extReq = response.text;
-          //sweemer hardcastle reedy
-          var approvers = "<@U40TBNTTQ> <@U3U3D17MK> <@U3U3K6HM2>";
-          var message_options = [
-            "Hear ye hear ye, a request to extend " + customer + "'s POC has been requested. \n *" + extReq + "*  \n" + approvers + " do you approve? ",
-            "Attention K-Mart shoppers " + customer + " has requested an extension.  \n *" + extReq + "*  \n" + approvers + " do you approve?"
-          ]
-          var random_index = Math.floor(Math.random() * message_options.length);
-          var chosen_message = message_options[random_index];
-          bot.reply(message, "I will notify the approvers in the #poc_extension_request channel.");
-          bot.say({
-            channel: "#poc_extension_request",
-            text: chosen_message
+        bot.api.users.info({
+          user: message.user
+        }, (error, response) => {
+          let {
+            id,
+            name,
+            real_name
+          } = response.user;
+          console.log(id, name, real_name);
+          convo.ask("Please give me a description of why the POC needs to be extended and how long. (i.e. technical issues, unfinished testing, customer sat issue, etc.)", (response, convo) => {
+            extReq = response.text;
+            //sweemer hardcastle reedy
+            var approvers = "<@U40TBNTTQ> <@U3U3D17MK> <@U3U3K6HM2>";
+            var message_options = [
+              "Hear ye hear ye, a request from " + real_name + " to extend " + customer + "'s POC has been requested. \n *" + extReq + "*  \n" + approvers + " do you approve? ",
+              "Attention K-Mart shoppers, " + real_name + " has requested an extention for " + customer + ".  \n *" + extReq + "*  \n" + approvers + " do you approve?"
+            ]
+            var random_index = Math.floor(Math.random() * message_options.length);
+            var chosen_message = message_options[random_index];
+            bot.reply(message, "I will notify the approvers in the #poc_extension_request channel.");
+            bot.say({
+              channel: "#poc_extension_request",
+              text: chosen_message
+            });
+            convo.next();
           });
-          convo.next();
         });
       };
       bot.startConversation(message, askExtReq);
     }
-    if (message.actions[0].value == 'showSFDC') {
+    if (action_id == 'showSFDC') {
       //get opp id
       valFunc.getSFDC(sfdc_id, function(sfdc) {
         //don't ask me why
@@ -177,53 +168,68 @@ module.exports = function(controller) {
               "title_link": "https://vmware.my.salesforce.com/" + sfdc_id,
               "fields": [{
                   "title": "Opportunity Name",
-                  "value": jsonStr[0].Name,
+                  "value": jsonStr[0].name,
                   "short": true
                 },
                 {
                   "title": "SF Opportunity ID",
-                  "value": jsonStr[0].SF_Opportunity_ID,
+                  "value": jsonStr[0].id + "\n" + jsonStr[0].opportunity_id__c,
                   "short": true
                 },
                 {
                   "title": "Opportunity Type",
-                  "value": jsonStr[0].Opportunity_Record_Type,
+                  "value": jsonStr[0].recordtype,
                   "short": true
                 },
                 {
                   "title": "Account Name",
-                  "value": jsonStr[0].Account_Name,
+                  "value": jsonStr[0].accountname,
                   "short": true
                 },
-                {
-                  "title": "Geo",
-                  "value": jsonStr[0].Geo,
-                  "short": true
-                },
-                {
-                  "title": "Industry",
-                  "value": jsonStr[0].Industry,
-                  "short": true
-                },
-                {
-                  "title": "Country",
-                  "value": jsonStr[0].Country,
-                  "short": true
-                },
-                {
-                  "title": "Vertical",
-                  "value": jsonStr[0].Sales_Classification,
-                  "short": true
-                },
+                /*  {
+                    "title": "Geo",
+                    "value": jsonStr[i].Geo,
+                    "short": true
+                  },
+                  {
+                    "title": "Industry",
+                    "value": jsonStr[i].Industry,
+                    "short": true
+                  },
+                  {
+                    "title": "Country",
+                    "value": jsonStr[i].Country,
+                    "short": true
+                  },
+                  {
+                    "title": "Vertical",
+                    "value": jsonStr[i].Sales_Classification,
+                    "short": true
+                  },*/
                 {
                   "title": "Stage",
-                  "value": jsonStr[0].Stage,
+                  "value": jsonStr[0].stagename,
                   "short": true
                 },
                 {
                   "title": "Opportunity Owner",
-                  "value": jsonStr[0].Opportunity_Owner,
+                  "value": jsonStr[0].opportunity_owner_name__c,
                   "short": true
+                },
+                {
+                  "title": "Amount",
+                  "value": jsonStr[0].amount,
+                  "short": true
+                },
+                {
+                  "title": "Sales Territory",
+                  "value": jsonStr[0].primary_field_sales_territory__c,
+                  "short": true
+                },
+                {
+                  "title": "Next Steps",
+                  "value": jsonStr[0].next_steps__c,
+                  "short": false
                 }
               ],
             }]
@@ -417,7 +423,7 @@ module.exports = function(controller) {
                   "short": false
                 }
               ],
-              callback_id: 'actions|' + customer + "|" + jsonStr[i].SFDC_OPPTY_ID_RAW,
+              callback_id: 'actions|' + customer + "|" + jsonStr[i].SFDC_OPPTY_ID_RAW + "|" + jsonStr[i].ORG_ID,
               actions: [{
                   "name": "sddc",
                   "text": "Show SDDC",
