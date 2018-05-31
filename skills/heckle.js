@@ -136,21 +136,22 @@ module.exports = function(controller) {
   });
 */
   controller.hears(['Shh'], 'direct_message, direct_mention, ambient', function(bot, message) {
-
-    bot.createConversation(message, function(err, convo) {
-      var message_options = [
-        "it",
-        "it-tastic",
-        "Shhh back at ya",
-        "art",
-        "nizzle",
-        ":shushing_face:"
-      ]
-      var random_index = Math.floor(Math.random() * message_options.length)
-      var chosen_message = message_options[random_index]
-      convo.say(chosen_message);
-      convo.activate();
-    });
+    if (valFunc.validateUser(message) == "true") {
+      bot.createConversation(message, function(err, convo) {
+        var message_options = [
+          "it",
+          "it-tastic",
+          "Shhh back at ya",
+          "art",
+          "nizzle",
+          ":shushing_face:"
+        ]
+        var random_index = Math.floor(Math.random() * message_options.length)
+        var chosen_message = message_options[random_index]
+        convo.say(chosen_message);
+        convo.activate();
+      });
+    }
   });
 
   controller.hears(['set reminder'], 'direct_message, direct_mention', function(bot, message) {
@@ -186,11 +187,11 @@ module.exports = function(controller) {
     if (message.match[1]) {
       if (message.text.indexOf("miles") > -1) {
         var conv = (message.match[1] * 1.609344).toFixed(2);
-        bot.reply(message, "Thats " + conv + " km for you non-metric bit heads.")
+        bot.reply(message, "Thats " + conv + " km for you metric bit heads.")
       }
       if (message.text.indexOf("km") > -1 || message.text.indexOf("kilometers") > -1) {
         var conv = (message.match[1] / 1.609344).toFixed(2);
-        bot.reply(message, "Thats " + conv + " miles for you metric bit heads.")
+        bot.reply(message, "Thats " + conv + " miles for you non-metric bit heads.")
       }
     }
   });

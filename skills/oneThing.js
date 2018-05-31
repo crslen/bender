@@ -14,7 +14,7 @@ const config = {
 
 module.exports = function(controller) {
 
-  controller.hears(['add one thing report for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.hears(['new one thing report', 'add one thing report for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
 
     var oneThing; //customer name
     var category = "";
@@ -87,6 +87,31 @@ module.exports = function(controller) {
     bot.startConversation(message, askOneThing);
   });
 
+  controller.hears(['export one thing report'], 'direct_message,direct_mention,mention', (bot, message) => {
+
+    bot.reply(message, "Please hold.....");
+    getRows(function(res) {
+      if (res.length == 0) {
+        bot.reply(message, {
+          text: "Hmm something bad happend, I can't query this information."
+        });
+      } else {
+        var jsonParse = JSON.stringify(res);
+        console.log("return: " + jsonParse);
+        var jsonStr = JSON.parse(jsonParse);
+
+        for (var i = 0; i < jsonStr.length; i++) {
+          var date = new Date(jsonStr[i].datetime_created)
+          var otDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+          bot.reply(message, {
+            text: "`" + otDate + "` - " + jsonStr[i].The_One_Thing + " *" + jsonStr[i].Specialist + "*"
+          });
+        }
+      }
+    });
+  });
+
+
   /*  function to insert data into sql server */
   function insertRows(rows, callback) {
     // Imports the mssql query
@@ -113,6 +138,33 @@ module.exports = function(controller) {
         } else {
           return callback(result.rowsAffected);
         }
+      })
+
+    })
+
+    sql.on('error', err => {
+      console.log(err)
+    })
+  }
+
+  /*  function to insert data into sql server */
+  function getRows(callback) {
+    // Imports the mssql query
+    let sqlQuery;
+
+    // insert val tracker
+    sqlQuery = `SELECT * FROM [dbo].[one_thing_report]
+                WHERE [datetime_created] >= DATEADD(DAY, -14, GETDATE())
+                order by [datetime_created]`;
+
+    console.log(sqlQuery);
+    sql.connect(config, err => {
+      // Query
+      new sql.Request().query(sqlQuery, (err, result) => {
+        // ... error checks
+        sql.close();
+        console.log(result);
+        return callback(result.recordset);
       })
 
     })
