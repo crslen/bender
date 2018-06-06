@@ -12,32 +12,10 @@ respond immediately with a single line response.
 var wordfilter = require('wordfilter');
 let fields = require("../model/valFields");
 var valFunc = require('../model/valFunctions')
-const sql = require('mssql')
-const config = {
-  user: process.env.sql_user,
-  password: process.env.sql_password,
-  server: process.env.sql_server, // You can use 'localhost\\instance' to connect to named instance
-  database: process.env.sql_database,
-  options: {
-    encrypt: false // Use this if you're on Windows Azure
-  }
-}
+
 let color = "#009cdb";
 
 module.exports = function(controller) {
-
-/*  this.setTimeout(60000 * 5);
-  this.onTimeout(function(convo) {
-    var message_options = [
-      ":musical_note: All by myself....don't want to be....:musical_note:",
-      "Hello? Did you forget about me????",
-      "Apparently I'm not important enough for you, so I'm back to my hole."
-    ]
-    var random_index = Math.floor(Math.random() * message_options.length);
-    var chosen_message = message_options[random_index];
-    convo.say(chosen_message)
-  })
-*/
 
   controller.hears(['update (.*)'], 'direct_message, direct_mention,mention', function(bot, message) {
     let customer = message.match[1];
@@ -679,7 +657,7 @@ module.exports = function(controller) {
         convo.say('Okay');
         convo.next();
       } else {
-        updateCustomer(customer, updateField, updateValue, function(res) {
+        valFunc.updateCustomer(customer, updateField, updateValue, function(res) {
           console.log("response: " + res);
           if (res == 0) {
             bot.reply(message, {
@@ -765,69 +743,6 @@ module.exports = function(controller) {
     });
   });
 
-  //function to get customer tracker information
-  function updateCustomer(customer, updateField, updateValue, callback) {
-    // Imports the mssql query
-    let sqlQuery;
-    customer = customer.toLowerCase();
-    customer = customer.replace("*", "%");
-    //get date in mm/dd/yyyy format
-    var today = new Date();
-    var dd = today.getDate();
-    var mm = today.getMonth() + 1; //January is 0!
-    var yyyy = today.getFullYear();
-
-    if (dd < 10) {
-      dd = '0' + dd
-    }
-
-    if (mm < 10) {
-      mm = '0' + mm
-    }
-
-    var upDate = mm + '/' + dd + '/' + yyyy;
-
-    // Update val tracker
-    if (updateField == 'Notes') {
-      updateValue = updateValue.replace("'", "''");
-      sqlQuery = `UPDATE dbo.tech_validation
-          SET notes = CONCAT(notes, CHAR(13),CAST(CONVERT(date, getdate()) as nvarchar),'-', '${updateValue}')
-              ,date_updated = '${upDate}'
-          WHERE lower(customer_name) like '${customer}'`;
-    } else if (updateField == 'Use_Case' || updateField == 'Compliance' || updateField == 'AWS_Region' || updateField == 'Services') {
-      sqlQuery = `EXECUTE [dbo].[tech_validation_upsert_sp]
-                  '${customer}'
-                  ,'${updateField}'
-                  ,'${updateValue}'`;
-    } else {
-      sqlQuery = `UPDATE dbo.tech_validation
-          SET ${updateField} = '${updateValue}'
-              ,date_updated = '${upDate}'
-          WHERE lower(customer_name) like '${customer}'`;
-    }
-    console.log("query-" + sqlQuery);
-    sql.connect(config, err => {
-      console.log("connect error: " + err);
-
-      // Query
-
-      new sql.Request().query(sqlQuery, (err, result) => {
-        // ... error checks
-        sql.close();
-        if (!err) {
-          console.log(result.rowsAffected);
-          return callback(result.rowsAffected);
-        } else {
-          return callback(0);
-        }
-      })
-
-    })
-
-    sql.on('error', err => {
-      console.log("on error:" + err);
-    })
-  }
   //check date format function
   function isValidDate(s) {
     var sp = s + '';

@@ -136,7 +136,6 @@ module.exports = function(controller) {
   });
 */
   controller.hears(['Shh'], 'direct_message, direct_mention, ambient', function(bot, message) {
-    if (valFunc.validateUser(message) == "true") {
       bot.createConversation(message, function(err, convo) {
         var message_options = [
           "it",
@@ -151,7 +150,6 @@ module.exports = function(controller) {
         convo.say(chosen_message);
         convo.activate();
       });
-    }
   });
 
   controller.hears(['set reminder'], 'direct_message, direct_mention', function(bot, message) {

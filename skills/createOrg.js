@@ -31,7 +31,12 @@ module.exports = function(controller) {
                     text: fields.yayMessage() + "  I see that " + customer + " filled out the pre-flight survey.  You're one step closer to onboarding!"
                   });
                 }
-                confTask(response, convo);
+                if (results[1].toLowerCase().indexOf("partner") >= 0) {
+                  var tvType = "PARTNER_POC";
+                } else {
+                  var tvType = "CUSTOMER_POC";
+                }
+                confTask(tvType, response, convo);
                 convo.next();
               });
             }
@@ -40,8 +45,8 @@ module.exports = function(controller) {
       });
     };
 
-    let confTask = (response, convo) => {
-      valFunc.getInvite(function(vmcInvite) {
+    let confTask = (tvType, response, convo) => {
+      valFunc.getInvite(tvType, function(vmcInvite) {
         vmcInvite = JSON.stringify(vmcInvite);
         bot.reply(message, {
           text: "Here's the invite for " + customer + " - " + vmcInvite
