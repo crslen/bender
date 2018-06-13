@@ -24,7 +24,41 @@ var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
   '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'
 ];
 
+var orgName;
+var orgId;
+var oToken;
+var sddcName;
+var provider;
+var cidr;
+var subnetId;
+
 module.exports = function(controller) {
+
+
+  controller.hears(['deploy workshops'], 'direct_message,direct_mention,mention', (bot, message) => {
+    var jsonWKS = require("../json/workshop.json");
+    //console.log(jsonWKS);
+    jsonStr = JSON.stringify(jsonWKS);
+    obj = JSON.parse(jsonStr);
+    for (var i = 0; i < obj.length; i++) {
+      if (obj[i].OrgName.toUpperCase().indexOf("VMC-WS") >= 0) {
+        provider = obj[i].Provider;
+        console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName);
+        valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, "ZEROCLOUD", obj[i].RefreshToken, function(res) {
+          var jsonParse = JSON.stringify(res);
+          var jsonStr = JSON.parse(jsonParse);
+          console.log("response: " + jsonStr.status);
+          if (jsonStr.status == "STARTED") {
+            bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.  Waiting 45 seconds to deploy the next.");
+          } else {
+            bot.reply(message, "Error message *" + jsonStr.status + "*.  Waiting 45 seconds to deploy the next.");
+          }
+          sleep(4500000);
+        });
+      }
+    }
+
+  });
 
   controller.hears(['get workshop status'], 'direct_message,direct_mention,mention', (bot, message) => {
 
@@ -41,8 +75,6 @@ module.exports = function(controller) {
         bot.reply(message, "A total of *" + jsonStr.length + "* SDDC's have been deployed.");
         console.log("results:" + jsonStr.length);
         for (var i = 0; i < jsonStr.length; i++) {
-          //if (jsonStr[i].Actual_Start_Date == null) {var startDate = "None"} else {var startDate = jsonStr[i].Actual_Start_Date.value}
-          //if (jsonStr[i].End_Date == null) {var endDate = "None"} else {var endDate = jsonStr[i].End_Date.value}
           bot.reply(message, {
             //text: "Here's what I found",
             attachments: [{
@@ -104,4 +136,12 @@ module.exports = function(controller) {
     });
   });
 
+  function sleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+      if ((new Date().getTime() - start) > milliseconds) {
+        break;
+      }
+    }
+  }
 }; /* the end */

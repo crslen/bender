@@ -14,13 +14,13 @@ const config = {
 
 module.exports = function(controller) {
 
-  controller.hears(['new one thing report', 'add one thing report for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.hears(['new one thing report for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
 
     var oneThing; //customer name
     var category = "";
     var seName = "";
     seName = message.match[1];
-    console.log("name:" + seName);
+    console.log("name:" + JSON.stringify(message));
 
     let askOneThing = (response, convo) => {
       convo.ask("What is your one thing you want to report this week?", (response, convo) => {
@@ -50,7 +50,7 @@ module.exports = function(controller) {
           }
           var todayDate = mm + '/' + dd + '/' + yyyy;
 
-          if (seName == "") {
+          if (seName == "me") {
             seName = real_name;
           }
 
