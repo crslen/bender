@@ -6,13 +6,15 @@ let badwordsArray = require('badwords/array');
 
 module.exports = function(controller) {
 
-  controller.hears(['Provide Storage Information'], 'direct_message, direct_mention, ambient', function(bot, message) {
+  controller.hears(['Provide Storage Information'], 'direct_message, direct_mention', function(bot, message) {
     //bot.createConversation(message, function(err, convo) {
     var jsonWKS = benderQuestions.storageQuestions();
     var jsonStr = JSON.stringify(jsonWKS);
     var obj = JSON.parse(jsonStr);
-    for (var i = 0; i < obj.length; i++) {
-      console.log(obj.questions[i]);
+    console.log("json: " + jsonStr);
+    console.log("length: " + obj.questions.length);
+    for (var i = 0; i < obj.questions.length; i++) {
+      console.log(obj.questions.question[i]);
     }
     //convo.say(jsonWKS.Questions[0]);
     //convo.activate();
@@ -136,20 +138,20 @@ module.exports = function(controller) {
   });
 */
   controller.hears(['Shh'], 'direct_message, direct_mention, ambient', function(bot, message) {
-      bot.createConversation(message, function(err, convo) {
-        var message_options = [
-          "it",
-          "it-tastic",
-          "Shhh back at ya",
-          "art",
-          "nizzle",
-          ":shushing_face:"
-        ]
-        var random_index = Math.floor(Math.random() * message_options.length)
-        var chosen_message = message_options[random_index]
-        convo.say(chosen_message);
-        convo.activate();
-      });
+    bot.createConversation(message, function(err, convo) {
+      var message_options = [
+        "it",
+        "it-tastic",
+        "Shhh back at ya",
+        "art",
+        "nizzle",
+        ":shushing_face:"
+      ]
+      var random_index = Math.floor(Math.random() * message_options.length)
+      var chosen_message = message_options[random_index]
+      convo.say(chosen_message);
+      convo.activate();
+    });
   });
 
   controller.hears(['set reminder'], 'direct_message, direct_mention', function(bot, message) {

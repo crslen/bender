@@ -11,8 +11,8 @@ respond immediately with a single line response.
 
 var wordfilter = require('wordfilter');
 let fields = require("../model/valFields");
-var valFunc = require('../model/valFunctions')
-const sql = require('mssql')
+var valFunc = require('../model/valFunctions');
+const sql = require('mssql');
 const config = {
   user: process.env.sql_user,
   password: process.env.sql_password,
@@ -567,11 +567,7 @@ module.exports = function(controller) {
 
       convo.ask("Please provide the details of " + custType + " and next steps", (response, convo) => {
         notes = response.text;
-        //if (partType.indexOf("poc") >= 0) {
         askOrgInvite(response, convo);
-        //} else {
-        //askOrg(response, convo);
-        //}
         convo.next();
       });
     };
@@ -741,7 +737,7 @@ module.exports = function(controller) {
             })
           }
           bot.say({
-            channel: "#tech-validation",
+            channel: "#vmc-tech-validation",
             text: "A new " + custType + " entry for " + customer + " has been added to the tech validation tracker."
           });
         });

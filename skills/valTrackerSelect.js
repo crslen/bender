@@ -144,7 +144,7 @@ module.exports = function(controller) {
             var chosen_message = message_options[random_index];
             bot.reply(message, "I will notify the approvers in the #poc_extension_request channel.");
             bot.say({
-              channel: "#poc_extension_request",
+              channel: "#vmc-poc-extensions",
               text: chosen_message
             });
             convo.next();
