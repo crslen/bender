@@ -142,7 +142,7 @@ module.exports = function(controller) {
     valFunc.getSFDC(customer, function(res) {
       if (res.length == 0) {
         bot.reply(message, {
-          text: "I couldn't find any opportunities on " + customer + " :shocked:"
+          text: "I couldn't find any opportunities for " + customer + " :shocked:"
         });
         bot.reply(message, {
           attachments: [{
@@ -168,13 +168,22 @@ module.exports = function(controller) {
         var jsonParse = JSON.stringify(res);
         console.log("return: " + jsonParse);
         var jsonStr = JSON.parse(jsonParse);
+        bot.reply(message, "If possible select a Cloud Opportunity");
 
         for (var i = 0; i < jsonStr.length; i++) {
+
+          var sfMessage = '' +
+            '*Account Name:* ' + jsonStr[i].accountname + '\n' +
+            '*Opportunity ID:* ' + jsonStr[i].id + ' or ' + jsonStr[i].opportunity_id__c + '\n' +
+            '*Opportunity Type:* ' + jsonStr[i].recordtype + '\n' +
+            '*Stage:* ' + jsonStr[i].stagename + '\n' +
+            '*Opportunity Owner:* ' + jsonStr[i].opportunity_owner_name__c + '\n';
 
           bot.reply(message, {
             //text: "Here's what I found for " + customer,
             attachments: [{
-              "color": colorArray[i],
+              "text": sfMessage,
+              /*"color": colorArray[i],
               "fields": [{
                   "title": "Account Name",
                   "value": jsonStr[i].accountname,
@@ -201,7 +210,7 @@ module.exports = function(controller) {
                   "value": jsonStr[i].opportunity_owner_name__c,
                   "short": true
                 }
-              ],
+              ],*/
               callback_id: 'actions|' + jsonStr[i].accountname + "|" + jsonStr[i].id,
               actions: [{
                 "name": "select",
@@ -215,7 +224,5 @@ module.exports = function(controller) {
       }
     });
   });
-
-
 
 }; /*the end*/
