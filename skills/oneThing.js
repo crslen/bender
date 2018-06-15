@@ -55,7 +55,7 @@ module.exports = function(controller) {
           }
 
           //db data
-          var rows = "('" + todayDate + "','" + category + "','" + seName + "','" + oneThing + "')"
+          var rows = "('" + todayDate + "','" + category + "','" + seName + "','" + oneThing.replace("'","\'") + "')"
           insertRows(rows, function(res) {
             if (res == 0) {
               bot.reply(message, {

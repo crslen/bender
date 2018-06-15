@@ -17,6 +17,7 @@ module.exports = function(controller) {
       '`' + botName + ' get <Account Name> sddc`: Get basic information about the customers SDDC.\n' +
       '`' + botName + ' get <Account Name> or <SF OPP ID> sf opp`: Get basic information about a cloud or managed sales opportunity.\n' +
       '`' + botName + ' new activity for <Account Name>`: Add an entry for tracking activities i.e. demo, presentation, workshop etc.\n' +
+      '`' + botName + ' get activities for <Account Name>`: Return all SET activities for an account.\n' +
       
       '\n' +
       '_VMC Workshops:_\n' +

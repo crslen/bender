@@ -1,29 +1,20 @@
 var wordfilter = require('wordfilter');
 let fields = require("../model/valFields");
 var valFunc = require('../model/valFunctions');
-var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
-  '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
-  '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
-  '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC',
-  '#66994D', '#B366CC', '#4D8000', '#B33300', '#CC80CC',
-  '#66664D', '#991AFF', '#E666FF', '#4DB3FF', '#1AB399',
-  '#E666B3', '#33991A', '#CC9999', '#B3B31A', '#00E680',
-  '#4D8066', '#809980', '#E6FF80', '#1AFF33', '#999933',
-  '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3',
-  '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'
-];
+var colorArray = ['#629aca', '#9ecbde', '#6392ac', '#e6f1f7', '#64818f'];
 
 module.exports = function(controller) {
 
   controller.on('interactive_message_callback', function(bot, message) {
-    var ids = message.callback_id.split('|');
     var action_id = message.actions[0].value;
-    var customer = ids[1];
-    var sfdc_id = ids[2];
-    console.log("callback: " + message.callback_id);
-    console.log("action: " + action_id);
 
-    if (action_id == 'select' || action_id == 'Yes') {
+    if (action_id == 'select-act' || action_id == 'Yes-act') {
+      var ids = message.callback_id.split('|');
+      var customer = ids[1];
+      var sfdc_id = ids[2];
+      console.log("callback: " + message.callback_id);
+      console.log("action: " + action_id);
+      console.log("name:" + JSON.stringify(message));
       let askActivity = (response, convo) => {
 
         convo.ask({
@@ -31,7 +22,7 @@ module.exports = function(controller) {
             title: "Select an activity?",
             callback_id: 'activity',
             attachment_type: 'default',
-            color: "#999966",
+            color: colorArray,
             actions: [{
               "name": "activity",
               "text": "Pick an activity...",
@@ -147,18 +138,18 @@ module.exports = function(controller) {
         bot.reply(message, {
           attachments: [{
             title: 'You still want to enter an activity?',
-            callback_id: 'actions|' + customer + "|null",
+            callback_id: 'actions-act|' + customer + "|null",
             attachment_type: 'default',
             actions: [{
                 "name": "yes",
                 "text": "Yes",
-                "value": "Yes",
+                "value": "Yes-act",
                 "type": "button",
               },
               {
                 "name": "no",
                 "text": "No",
-                "value": "No",
+                "value": "No-act",
                 "type": "button",
               }
             ]
@@ -183,39 +174,11 @@ module.exports = function(controller) {
             //text: "Here's what I found for " + customer,
             attachments: [{
               "text": sfMessage,
-              /*"color": colorArray[i],
-              "fields": [{
-                  "title": "Account Name",
-                  "value": jsonStr[i].accountname,
-                  "short": true
-                },
-                {
-                  "title": "SF Opportunity ID",
-                  "value": jsonStr[i].id + "\n" + jsonStr[i].opportunity_id__c,
-                  "short": true
-                },
-                {
-                  "title": "Opportunity Type",
-                  "value": jsonStr[i].recordtype,
-                  "short": true
-                },
-
-                {
-                  "title": "Stage",
-                  "value": jsonStr[i].stagename,
-                  "short": true
-                },
-                {
-                  "title": "Opportunity Owner",
-                  "value": jsonStr[i].opportunity_owner_name__c,
-                  "short": true
-                }
-              ],*/
-              callback_id: 'actions|' + jsonStr[i].accountname + "|" + jsonStr[i].id,
+              callback_id: 'actions-act|' + jsonStr[i].accountname + "|" + jsonStr[i].id,
               actions: [{
                 "name": "select",
                 "text": "Select",
-                "value": "select",
+                "value": "select-act",
                 "type": "button",
               }],
             }]
@@ -224,5 +187,27 @@ module.exports = function(controller) {
       }
     });
   });
+  controller.hears(['get activities for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    bot.reply(message, "Please hold.....");
+    var customer = message.match[1];
+    valFunc.getActivities(customer, function(res) {
+      if (res.length == 0) {
+        bot.reply(message, {
+          text: "Hmm something bad happend, I can't query this information."
+        });
+      } else {
+        var jsonParse = JSON.stringify(res);
+        console.log("return: " + jsonParse);
+        var jsonStr = JSON.parse(jsonParse);
 
+        for (var i = 0; i < jsonStr.length; i++) {
+          var date = new Date(jsonStr[i].date_inserted)
+          var otDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+          bot.reply(message, {
+            text: "`" + otDate + "` - *" + jsonStr[i].activity + "* " + jsonStr[i].notes + "\n *" + jsonStr[i].se_specialist + "*"
+          });
+        }
+      }
+    });
+  });
 }; /*the end*/

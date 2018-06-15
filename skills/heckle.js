@@ -7,34 +7,55 @@ let badwordsArray = require('badwords/array');
 module.exports = function(controller) {
 
   controller.hears(['Provide Storage Information'], 'direct_message, direct_mention', function(bot, message) {
-    //bot.createConversation(message, function(err, convo) {
+    var jsonProperties = "";
+    var strQuestion = "";
+    var strVariable = "";
     var jsonWKS = benderQuestions.storageQuestions();
     var jsonStr = JSON.stringify(jsonWKS);
     var obj = JSON.parse(jsonStr);
     console.log("json: " + jsonStr);
-    console.log("length: " + obj.questions.length);
-    for (var i = 0; i < obj.questions.length; i++) {
-      console.log(obj.questions.question[i]);
+    console.log("length: " + obj.Questions.length);
+
+
+    let startLoop = (response, convo) => {
+      var promises = [];
+      for (var i = 0; i < obj.Questions.length; i++) {
+        strQuestion = obj.Questions[i].Question;
+        strVariable = obj.Questions[i].variable;
+        askQuestion(strQuestion, strVariable, response, convo);
+      }
+      convo.activate();
+
+
+    };
+
+    let askQuestion = (strQuestion, strVariable, response, convo) => {
+      //for (var i = 0; i < obj.Questions.length; i++) {
+      convo.addQuestion(strQuestion, (response, convo) => {
+        jsonProperties = jsonProperties + '"' + strVariable + '": "' + response.text + '",';
+      });
+      convo.next();
+      //}
+    };
+
+    let confTask = (response, convo) => {
+      jsonProperties = jsonProperties.substring(0, jsonProperties.length - 1);
+      var jsonInput = {
+        "event": obj.event,
+        "userId": "clennon@vmware.com",
+        "properties": {
+          jsonProperties
+        }
+      };
+      console.log("jsonInput: " + jsonInput);
+      valFunc.insertSegment(jsonInput, function(res) {
+        console.log("segment response: " + res);
+      });
     }
-    //convo.say(jsonWKS.Questions[0]);
-    //convo.activate();
-    //});
+    bot.createConversation(message, startLoop);
 
   });
 
-  /*  controller.hears(['Provide Storage Information'], 'direct_message,direct_mention,mention', function(bot, message) {
-      bot.createConversation(message, function(err, convo) {
-        //console.log(json.stringify(benderQuestions.Questions()));
-        //var jsonWKS = benderQuestions.Questions();
-
-        convo.ask("Hi?", (response, convo) => {
-          partnerName = response.text;
-          //askOpp(response, convo);
-          convo.next();
-        });
-      });
-    });
-  */
   //controller.hears(['fuck', 'butthole', 'asshole', 'jerk', 'dick', 'moron', 'prick', 'idiot', 'fuck puddle', 'putz', 'fuckface'], 'direct_message, direct_mention, ambient', function(bot, message) {
   controller.hears(badwordsArray, 'direct_message, direct_mention', function(bot, message) {
 
@@ -132,11 +153,11 @@ module.exports = function(controller) {
 
   /*controller.hears(['extension_reason'], 'message_received', wit.hears, function(bot, message) {
 
-    console.log("Wit.ai detected entities", message.entities);
-    bot.reply("Sounds like you need to extend a poc");
+      console.log("Wit.ai detected entities", message.entities);
+      bot.reply("Sounds like you need to extend a poc");
 
-  });
-*/
+    });
+  */
   controller.hears(['Shh'], 'direct_message, direct_mention, ambient', function(bot, message) {
     bot.createConversation(message, function(err, convo) {
       var message_options = [
