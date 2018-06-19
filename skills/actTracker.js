@@ -132,7 +132,7 @@ module.exports = function(controller) {
       text: "Searching opportunities for " + customer + "....."
     });
 
-    valFunc.getSFDC(customer, function(res) {
+    valFunc.getSFDC(customer, null, function(res) {
       if (res.length == 0) {
         bot.reply(message, {
           text: "I couldn't find any opportunities for " + customer + " :shocked:"

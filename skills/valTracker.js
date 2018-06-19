@@ -46,10 +46,10 @@ module.exports = function(controller) {
       var compType = ""; //compliance requirements
       var servType = ""; //services and add-ons
       var statusType; //status
-      var startDate; //start Date
-      var endDate; //end Date
+      var startDate = ""; //start Date
+      var endDate = ""; //end Date
       var notes; //notes and next Steps
-      var orgId; //orgID
+      var orgId = ""; //orgID
       let css; //Cloud Sales Specialist
       let custEmail; //customer email
       let color = "#009cdb";
@@ -701,6 +701,18 @@ module.exports = function(controller) {
               "est_start_date": startDate,
               "est_end_date": endDate,
               "notes": notes,
+              "cs_architect": null,
+              "cloud_specialist": null,
+              "customer_email": null,
+              "expected_num_hosts": null,
+              "current_host_count": null,
+              "vmc_reference": null,
+              "oppty_close_date": null,
+              "est_onboarding_date": null,
+              "est_go_list_date": null,
+              "customer_requirements": null,
+              "CS_Manager": null,
+              "aws_resource": null,
               "org_id": orgId
             }
           }
@@ -767,66 +779,75 @@ module.exports = function(controller) {
     var custType = message.match[1];
     var customer = message.match[2];
 
-    bot.reply(message, {
-      text: "Searching opportunities for " + customer + "....."
-    });
+    //make sure we are entering a valid entry
+    if (custType.toLowerCase() == 'paid pilot' || custType.toLowerCase() == 'poc' || custType.toLowerCase() == 'partner poc' || custType.toLowerCase() == 'pilot') {
 
-    valFunc.getSFDC(customer, function(res) {
-      if (res.length == 0) {
-        bot.reply(message, {
-          text: "I couldn't find any opportunities for " + customer + " :shocked:"
-        });
-        bot.reply(message, {
-          attachments: [{
-            title: 'You still want to enter a new entry?',
-            callback_id: 'actions-poc|' + customer + "|null|" + partType,
-            attachment_type: 'default',
-            actions: [{
-                "name": "yes",
-                "text": "Yes",
-                "value": "Yes-poc",
-                "type": "button",
-              },
-              {
-                "name": "no",
-                "text": "No",
-                "value": "No-poc",
-                "type": "button",
-              }
-            ]
-          }]
-        });
-      } else {
-        var jsonParse = JSON.stringify(res);
-        console.log("return: " + jsonParse);
-        var jsonStr = JSON.parse(jsonParse);
-        bot.reply(message, "If possible select a Cloud Opportunity");
+      bot.reply(message, {
+        text: "Searching opportunities for " + customer + "....."
+      });
 
-        for (var i = 0; i < jsonStr.length; i++) {
-
-          var sfMessage = '' +
-            '*Account Name:* ' + jsonStr[i].accountname + '\n' +
-            '*Opportunity ID:* ' + jsonStr[i].id + ' or ' + jsonStr[i].opportunity_id__c + '\n' +
-            '*Opportunity Type:* ' + jsonStr[i].recordtype + '\n' +
-            '*Stage:* ' + jsonStr[i].stagename + '\n' +
-            '*Opportunity Owner:* ' + jsonStr[i].opportunity_owner_name__c + '\n';
-
+      valFunc.getSFDC(customer, null, function(res) {
+        if (res.length == 0) {
           bot.reply(message, {
-            //text: "Here's what I found for " + customer,
+            text: "I couldn't find any opportunities for " + customer + " :shocked:"
+          });
+          bot.reply(message, {
             attachments: [{
-              "text": sfMessage,
-              callback_id: 'actions-poc|' + jsonStr[i].accountname + "|" + jsonStr[i].id + "|" + custType,
+              title: 'You still want to enter a new entry?',
+              callback_id: 'actions-poc|' + customer + "|null|" + custType,
+              attachment_type: 'default',
               actions: [{
-                "name": "select",
-                "text": "Select",
-                "value": "select-poc",
-                "type": "button",
-              }],
+                  "name": "yes",
+                  "text": "Yes",
+                  "value": "Yes-poc",
+                  "type": "button",
+                },
+                {
+                  "name": "no",
+                  "text": "No",
+                  "value": "No-poc",
+                  "type": "button",
+                }
+              ]
             }]
           });
+        } else {
+          var jsonParse = JSON.stringify(res);
+          console.log("return: " + jsonParse);
+          var jsonStr = JSON.parse(jsonParse);
+          bot.reply(message, "If possible select a Cloud Opportunity");
+
+          for (var i = 0; i < jsonStr.length; i++) {
+
+            var sfMessage = '' +
+              '*Account Name:* ' + jsonStr[i].accountname + '\n' +
+              '*Opportunity ID:* ' + jsonStr[i].id + ' or ' + jsonStr[i].opportunity_id__c + '\n' +
+              '*Opportunity Type:* ' + jsonStr[i].recordtype + '\n' +
+              '*Stage:* ' + jsonStr[i].stagename + '\n' +
+              '*Opportunity Owner:* ' + jsonStr[i].opportunity_owner_name__c + '\n';
+
+            bot.reply(message, {
+              //text: "Here's what I found for " + customer,
+              attachments: [{
+                "text": sfMessage,
+                callback_id: 'actions-poc|' + jsonStr[i].accountname + "|" + jsonStr[i].id + "|" + custType,
+                actions: [{
+                  "name": "select",
+                  "text": "Select",
+                  "value": "select-poc",
+                  "type": "button",
+                }],
+              }]
+            });
+          }
         }
-      }
-    });
+      });
+    } else {
+      bot.reply(message, {
+        text: "Looks like you didn't enter a valid tech validation type.  Try again."
+      });
+    }
+
   });
 
   /*  function to insert data into sql server */

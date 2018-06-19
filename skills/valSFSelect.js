@@ -19,7 +19,7 @@ module.exports = function(controller) {
       if (cb == 1) {
         var sfCustomer = message.match[1];
         bot.reply(message, "Please hold.....");
-        valFunc.getSFDC(sfCustomer, function(res) {
+        valFunc.getSFDC(sfCustomer, 'All', function(res) {
           if (res.length == 0) {
             bot.reply(message, {
               text: "I couldn't find any SF info on " + sfCustomer + "."
