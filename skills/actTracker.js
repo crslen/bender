@@ -114,7 +114,9 @@ module.exports = function(controller) {
       };
       bot.startConversation(message, askActivity);
     } else {
-      bot.reply(message, "Ok going back to my hole.");
+      if (action_id == 'no-act') {
+        bot.reply(message, "Ok going back to my hole.");
+      }
     }
 
   });
@@ -168,6 +170,7 @@ module.exports = function(controller) {
             '*Opportunity ID:* ' + jsonStr[i].id + ' or ' + jsonStr[i].opportunity_id__c + '\n' +
             '*Opportunity Type:* ' + jsonStr[i].recordtype + '\n' +
             '*Stage:* ' + jsonStr[i].stagename + '\n' +
+            '*Date Created:* ' + jsonStr[i].createddate + '\n' +
             '*Opportunity Owner:* ' + jsonStr[i].opportunity_owner_name__c + '\n';
 
           bot.reply(message, {

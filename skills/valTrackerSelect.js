@@ -132,7 +132,7 @@ module.exports = function(controller) {
             ]
             var random_index = Math.floor(Math.random() * message_options.length);
             var chosen_message = message_options[random_index];
-            bot.reply(message, "I will notify the approvers in the #poc_extension_request channel.");
+            bot.reply(message, "I will notify the approvers in the #vmc-poc-extensions channel.");
             bot.say({
               channel: "#vmc-poc-extensions",
               text: chosen_message
@@ -414,7 +414,7 @@ module.exports = function(controller) {
                   "short": false
                 }
               ],
-              callback_id: 'actions|' + customer + "|" + jsonStr[i].SFDC_OPPTY_ID_RAW + "|" + jsonStr[i].ORG_ID,
+              callback_id: 'actions-select|' + customer + "|" + jsonStr[i].SFDC_OPPTY_ID_RAW + "|" + jsonStr[i].ORG_ID,
               actions: [{
                   "name": "sddc",
                   "text": "Show SDDC",
