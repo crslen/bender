@@ -15,7 +15,7 @@ module.exports = function(controller) {
 
   //controller.hears(['salesforce'], 'direct_message,direct_mention,mention', wit.hears, function(bot, message) {
   controller.hears(['get (.*) sf opp', 'get (.*) salesforce opp'], 'direct_message,direct_mention,mention', function(bot, message) {
-    valFunc.validateUser(message, function(cb) {
+    valFunc.validateUser(bot, message, function(cb) {
       if (cb == 1) {
         var sfCustomer = message.match[1];
         bot.reply(message, "Please hold.....");

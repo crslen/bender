@@ -743,7 +743,7 @@ module.exports = function(controller) {
                   token: process.env.OAUTH_ACCESS_TOKEN,
                   text: "<@" + id + "> Interact with Bender to update validation tracker for " + customer + ".",
                   time: "Tuesdays and Fridays",
-                  user: id
+                  channel: process.env.poc_channel
                 }, (error, response) => {
                   console.log(error, response);
                 })

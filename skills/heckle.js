@@ -18,7 +18,7 @@ module.exports = function(controller) {
 
 
     let startLoop = (response, convo) => {
-      var promises = [];
+      
       for (var i = 0; i < obj.Questions.length; i++) {
         strQuestion = obj.Questions[i].Question;
         strVariable = obj.Questions[i].variable;
@@ -59,6 +59,8 @@ module.exports = function(controller) {
   //controller.hears(['fuck', 'butthole', 'asshole', 'jerk', 'dick', 'moron', 'prick', 'idiot', 'fuck puddle', 'putz', 'fuckface'], 'direct_message, direct_mention, ambient', function(bot, message) {
   controller.hears(badwordsArray, 'direct_message, direct_mention', function(bot, message) {
 
+    validateUser(bot);
+    
     //if (message.channel == "#dev-bender") {
     //if (message.channel == "G99D12CCA") {
     bot.createConversation(message, function(err, convo) {
@@ -247,4 +249,27 @@ module.exports = function(controller) {
       }
     });
   }
+
+  function validateUser(bot, callback) {
+    bot.api.usergroups.list({
+      token: process.env.OAUTH_ACCESS_TOKEN,
+      include_users: true
+    }, (error, response) => {
+      //console.log(response);
+      jsonStr = JSON.stringify(response);
+      obj = JSON.parse(jsonStr);
+      console.log("parse: " + obj.usergroups[0].users)
+      for (var i = 0; i < obj.users.length; i++) {
+
+        //if (obj[i].channels.name == chName) {
+        console.log("Found: " + obj[i].name + " id: " + obj[i].id);
+        chId = obj[i].id;
+        //return callback(chId);
+        //orgId = obj[i].OrgId;
+        //}
+      }
+    });
+  }
+
+  
 };
