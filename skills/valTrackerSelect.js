@@ -145,7 +145,7 @@ module.exports = function(controller) {
     }
     if (action_id == 'showSFDC') {
       //get opp id
-      valFunc.getSFDC(sfdc_id, function(sfdc) {
+      valFunc.getSFDC(sfdc_id, "All", function(sfdc) {
         //don't ask me why
         var jsonParse = JSON.stringify(sfdc);
         var jsonStr = JSON.parse(jsonParse);

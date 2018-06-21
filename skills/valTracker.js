@@ -776,78 +776,83 @@ module.exports = function(controller) {
 
   controller.hears(['new (.*) for (.*)', 'add (.*) for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
 
-    var custType = message.match[1];
-    var customer = message.match[2];
+    valFunc.validateUser(bot, message, function(cb) {
+      if (cb == 1) {
+        var custType = message.match[1];
+        var customer = message.match[2];
 
-    //make sure we are entering a valid entry
-    if (custType.toLowerCase() == 'paid pilot' || custType.toLowerCase() == 'poc' || custType.toLowerCase() == 'partner poc' || custType.toLowerCase() == 'pilot') {
+        //make sure we are entering a valid entry
+        if (custType.toLowerCase() == 'paid pilot' || custType.toLowerCase() == 'poc' || custType.toLowerCase() == 'partner poc' || custType.toLowerCase() == 'pilot') {
 
-      bot.reply(message, {
-        text: "Searching opportunities for " + customer + "....."
-      });
-
-      valFunc.getSFDC(customer, null, function(res) {
-        if (res.length == 0) {
           bot.reply(message, {
-            text: "I couldn't find any opportunities for " + customer + " :shocked:"
+            text: "Searching opportunities for " + customer + "....."
           });
-          bot.reply(message, {
-            attachments: [{
-              title: 'You still want to enter a new entry?',
-              callback_id: 'actions-poc|' + customer + "|null|" + custType,
-              attachment_type: 'default',
-              actions: [{
-                  "name": "yes",
-                  "text": "Yes",
-                  "value": "Yes-poc",
-                  "type": "button",
-                },
-                {
-                  "name": "no",
-                  "text": "No",
-                  "value": "No-poc",
-                  "type": "button",
-                }
-              ]
-            }]
+
+          valFunc.getSFDC(customer, null, function(res) {
+            if (res.length == 0) {
+              bot.reply(message, {
+                text: "I couldn't find any opportunities for " + customer + " :shocked:"
+              });
+              bot.reply(message, {
+                attachments: [{
+                  title: 'You still want to enter a new entry?',
+                  callback_id: 'actions-poc|' + customer + "|null|" + custType,
+                  attachment_type: 'default',
+                  actions: [{
+                      "name": "yes",
+                      "text": "Yes",
+                      "value": "Yes-poc",
+                      "type": "button",
+                    },
+                    {
+                      "name": "no",
+                      "text": "No",
+                      "value": "No-poc",
+                      "type": "button",
+                    }
+                  ]
+                }]
+              });
+            } else {
+              var jsonParse = JSON.stringify(res);
+              console.log("return: " + jsonParse);
+              var jsonStr = JSON.parse(jsonParse);
+              bot.reply(message, "If possible select a Cloud Opportunity");
+
+              for (var i = 0; i < jsonStr.length; i++) {
+
+                var sfMessage = '' +
+                  '*Account Name:* ' + jsonStr[i].accountname + '\n' +
+                  '*Opportunity ID:* ' + jsonStr[i].id + ' or ' + jsonStr[i].opportunity_id__c + '\n' +
+                  '*Opportunity Type:* ' + jsonStr[i].recordtype + '\n' +
+                  '*Stage:* ' + jsonStr[i].stagename + '\n' +
+                  '*Opportunity Owner:* ' + jsonStr[i].opportunity_owner_name__c + '\n';
+
+                bot.reply(message, {
+                  //text: "Here's what I found for " + customer,
+                  attachments: [{
+                    "text": sfMessage,
+                    callback_id: 'actions-poc|' + jsonStr[i].accountname + "|" + jsonStr[i].id + "|" + custType,
+                    actions: [{
+                      "name": "select",
+                      "text": "Select",
+                      "value": "select-poc",
+                      "type": "button",
+                    }],
+                  }]
+                });
+              }
+            }
           });
         } else {
-          var jsonParse = JSON.stringify(res);
-          console.log("return: " + jsonParse);
-          var jsonStr = JSON.parse(jsonParse);
-          bot.reply(message, "If possible select a Cloud Opportunity");
-
-          for (var i = 0; i < jsonStr.length; i++) {
-
-            var sfMessage = '' +
-              '*Account Name:* ' + jsonStr[i].accountname + '\n' +
-              '*Opportunity ID:* ' + jsonStr[i].id + ' or ' + jsonStr[i].opportunity_id__c + '\n' +
-              '*Opportunity Type:* ' + jsonStr[i].recordtype + '\n' +
-              '*Stage:* ' + jsonStr[i].stagename + '\n' +
-              '*Opportunity Owner:* ' + jsonStr[i].opportunity_owner_name__c + '\n';
-
-            bot.reply(message, {
-              //text: "Here's what I found for " + customer,
-              attachments: [{
-                "text": sfMessage,
-                callback_id: 'actions-poc|' + jsonStr[i].accountname + "|" + jsonStr[i].id + "|" + custType,
-                actions: [{
-                  "name": "select",
-                  "text": "Select",
-                  "value": "select-poc",
-                  "type": "button",
-                }],
-              }]
-            });
-          }
+          bot.reply(message, {
+            text: "Looks like you didn't enter a valid tech validation type.  Try again."
+          });
         }
-      });
-    } else {
-      bot.reply(message, {
-        text: "Looks like you didn't enter a valid tech validation type.  Try again."
-      });
-    }
-
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
   });
 
   /*  function to insert data into sql server */
