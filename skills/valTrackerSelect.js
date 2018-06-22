@@ -125,7 +125,11 @@ module.exports = function(controller) {
           convo.ask("Please give me a description of why the POC needs to be extended and how long. (i.e. technical issues, unfinished testing, customer sat issue, etc.)", (response, convo) => {
             extReq = response.text;
             //sweemer hardcastle reedy
-            var approvers = "<@U40TBNTTQ> <@U3U3D17MK> <@U3U3K6HM2>";
+            if (process.env.env_type = "dev"){
+              var approvers = "<@U40TBNTTQ> <@U3U3D17MK> <@U3U3K6HM2>";
+            } else {
+              var approvers = "<@WAATAPVQD> <@U3U3D17MK> <@U3U3K6HM2>";
+            }
             var message_options = [
               "Hear ye hear ye, a request from " + real_name + " to extend " + customer + "'s POC has been requested. \n *" + extReq + "*  \n" + approvers + " do you approve? ",
               "Attention K-Mart shoppers, " + real_name + " has requested an extention for " + customer + ".  \n *" + extReq + "*  \n" + approvers + " do you approve?"
@@ -136,6 +140,19 @@ module.exports = function(controller) {
             bot.say({
               channel: "#vmc-poc-extensions",
               text: chosen_message
+            });
+            var jsonInput = {
+              "event": "POC Extension Request",
+              "userId": "clennon@vmware.com",
+              "properties": {
+                "submitted_by": real_name,
+                "account_name": customer,
+                "reason": extReq
+              }
+            }
+
+            valFunc.insertSegment(jsonInput, function(res) {
+              console.log("segment response: " + res);
             });
             convo.next();
           });
@@ -154,7 +171,7 @@ module.exports = function(controller) {
             text: "Here's what I found for " + customer,
             attachments: [{
               "title": "SFDC Opportunity Info",
-              "color": "#1AB399",
+              "color": colorArray[i],
               "title": "VMware SalesForce",
               "title_link": "https://vmware.my.salesforce.com/" + sfdc_id,
               "fields": [{
@@ -177,26 +194,6 @@ module.exports = function(controller) {
                   "value": jsonStr[0].accountname,
                   "short": true
                 },
-                /*  {
-                    "title": "Geo",
-                    "value": jsonStr[i].Geo,
-                    "short": true
-                  },
-                  {
-                    "title": "Industry",
-                    "value": jsonStr[i].Industry,
-                    "short": true
-                  },
-                  {
-                    "title": "Country",
-                    "value": jsonStr[i].Country,
-                    "short": true
-                  },
-                  {
-                    "title": "Vertical",
-                    "value": jsonStr[i].Sales_Classification,
-                    "short": true
-                  },*/
                 {
                   "title": "Stage",
                   "value": jsonStr[0].stagename,
