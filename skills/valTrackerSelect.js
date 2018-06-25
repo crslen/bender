@@ -171,7 +171,7 @@ module.exports = function(controller) {
             text: "Here's what I found for " + customer,
             attachments: [{
               "title": "SFDC Opportunity Info",
-              "color": colorArray[i],
+              "color": "#629aca",
               "title": "VMware SalesForce",
               "title_link": "https://vmware.my.salesforce.com/" + sfdc_id,
               "fields": [{
