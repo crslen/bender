@@ -8,7 +8,8 @@ module.exports = function(controller) {
     valFunc.validateUser(bot, message, function(cb) {
       if (cb == 1) {
         let customer;
-
+        bot.reply(message, "Sorry unable to create a new POC org.  Please check back later");
+        
         let askCustomer = (response, convo) => {
           convo.ask("What's the customer name?", (response, convo) => {
             customer = response.text;
@@ -56,8 +57,8 @@ module.exports = function(controller) {
             });
           });
         };
-        bot.reply(message, "OK, I can help you with that!");
-        bot.startConversation(message, askCustomer);
+        //bot.reply(message, "OK, I can help you with that!");
+        //bot.startConversation(message, askCustomer);
       } else {
         bot.reply(message, "Sorry you do not have access to perform this operation.");
       }
