@@ -11,16 +11,7 @@ respond immediately with a single line response.
 
 var wordfilter = require('wordfilter');
 var valFunc = require('../model/valFunctions')
-const sql = require('mssql')
-const config = {
-  user: process.env.sql_user,
-  password: process.env.sql_password,
-  server: process.env.sql_server, // You can use 'localhost\\instance' to connect to named instance
-  database: process.env.sql_database,
-  options: {
-    encrypt: false // Use this if you're on Windows Azure
-  }
-}
+
 var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
   '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
   '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
