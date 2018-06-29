@@ -8,7 +8,7 @@ module.exports = function(controller) {
     valFunc.validateUser(bot, message, function(cb) {
       if (cb == 1) {
         let customer;
-        bot.reply(message, "Sorry unable to create a new POC org.  Please check back later");
+        //bot.reply(message, "Sorry unable to create a new POC org.  Please check back later");
         
         let askCustomer = (response, convo) => {
           convo.ask("What's the customer name?", (response, convo) => {
