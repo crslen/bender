@@ -57,8 +57,8 @@ module.exports = function(controller) {
             });
           });
         };
-        //bot.reply(message, "OK, I can help you with that!");
-        //bot.startConversation(message, askCustomer);
+        bot.reply(message, "OK, I can help you with that!");
+        bot.startConversation(message, askCustomer);
       } else {
         bot.reply(message, "Sorry you do not have access to perform this operation.");
       }
