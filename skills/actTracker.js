@@ -205,7 +205,7 @@ module.exports = function(controller) {
         var jsonStr = JSON.parse(jsonParse);
 
         for (var i = 0; i < jsonStr.length; i++) {
-          var date = new Date(jsonStr[i].date_inserted)
+          var date = new Date(jsonStr[i].timestamp)
           var otDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
           bot.reply(message, {
             text: "`" + otDate + "` - *" + jsonStr[i].activity + "* " + jsonStr[i].notes + "\n *" + jsonStr[i].se_specialist + "*"
