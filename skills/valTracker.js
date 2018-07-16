@@ -686,7 +686,7 @@ module.exports = function(controller) {
             "event": "Tech Validation",
             "userId": "bender@vmware.com",
             "properties": {
-              "sfdc_oppty_id": sfOpp,
+              "sfdc_oppty_id_raw": sfOpp,
               "customer_name": customer,
               "partner_name": partnerName,
               "type": custType,
