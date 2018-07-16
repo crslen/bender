@@ -684,7 +684,7 @@ module.exports = function(controller) {
 
           var jsonInput = {
             "event": "Tech Validation",
-            "userId": "clennon@vmware.com",
+            "userId": "bender@vmware.com",
             "properties": {
               "sfdc_oppty_id": sfOpp,
               "customer_name": customer,
@@ -728,7 +728,7 @@ module.exports = function(controller) {
               });
             } else {
               bot.reply(message, {
-                text: "Your info has been added!  I've also set a reminder for you to make updates for " + customer + " on Tuesdays and Fridays.\nTo delete the reminder just type `/remind list`"
+                text: "Your info has been added and will be available to view within the *next hour*. I've also set a reminder for you to make updates for " + customer + " on Tuesdays and Fridays.\nTo delete the reminder just type `/remind list`"
               });
               bot.api.users.info({
                 user: message.user

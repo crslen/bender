@@ -667,7 +667,7 @@ module.exports = function(controller) {
                 });
               } else {
                 bot.reply(message, {
-                  text: "Your info has been updated!"
+                  text: "Your info has been updated and will be available to view within the *next hour*."
                 });
               }
               //let us know if more fields need to be updated if marked complete won.
@@ -718,7 +718,7 @@ module.exports = function(controller) {
                 {
                   pattern: "no",
                   callback: function(reply, convo) {
-                    convo.say('Buh bye');
+                    convo.say('Byeeee');
                     //askStatus(response, convo);
                     convo.next();
                   }

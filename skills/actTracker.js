@@ -85,18 +85,18 @@ module.exports = function(controller) {
           valFunc.insertActivity(rows, function(res) {
             if (res == 0) {
               bot.reply(message, {
-                text: "Your info was not added for whatever reason."
+                text: "Your info was not added for whatever reason. ╯°□°）╯︵ ┻━┻"
               });
             } else {
               bot.reply(message, {
-                text: "Your info has been added!"
+                text: "Your info has been added and will be available to view within the *next hour*."
               });
             }
           });
 
           var jsonInput = {
             "event": "SET Activities",
-            "userId": "clennon@vmware.com",
+            "userId": "bender@vmware.com",
             "properties": {
               "customer_name": customer,
               "sf_id": sfdc_id,
@@ -115,7 +115,7 @@ module.exports = function(controller) {
       bot.startConversation(message, askActivity);
     } else {
       if (action_id == 'no-act') {
-        bot.reply(message, "Ok going back to my hole.");
+        bot.reply(message, "Ok going back to my hole. Byeeee!");
       }
     }
 
@@ -177,6 +177,7 @@ module.exports = function(controller) {
             //text: "Here's what I found for " + customer,
             attachments: [{
               "text": sfMessage,
+              "color": colorArray [i],
               callback_id: 'actions-act|' + jsonStr[i].accountname + "|" + jsonStr[i].id,
               actions: [{
                 "name": "select",

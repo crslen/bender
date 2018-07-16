@@ -71,6 +71,7 @@ var bot_options = {
     studio_token: process.env.studio_token,
     studio_command_uri: process.env.studio_command_uri
 };
+
 //console.log(bot_options)
 
 // Use a mongo database if specified, otherwise store in a JSON file local to the app.
@@ -120,13 +121,13 @@ if (!process.env.clientId || !process.env.clientSecret) {
   })
   // Set up a simple storage backend for keeping a record of customers
   // who sign up for the app via the oauth
-  require(__dirname + '/components/user_registration.js')(controller);
+  //require(__dirname + '/components/user_registration.js')(controller);
 
   // Send an onboarding message when a new team joins
-  require(__dirname + '/components/onboarding.js')(controller);
+  //require(__dirname + '/components/onboarding.js')(controller);
 
   // Load in some helpers that make running Botkit on Glitch.com better
-  require(__dirname + '/components/plugin_glitch.js')(controller);
+  //require(__dirname + '/components/plugin_glitch.js')(controller);
 
   // enable advanced botkit studio metrics
   require('botkit-studio-metrics')(controller);

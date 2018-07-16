@@ -55,7 +55,7 @@ module.exports = function(controller) {
           }
 
           //db data
-          var rows = "('" + todayDate + "','" + category + "','" + seName + "','" + oneThing.replace("'","\'") + "')"
+          var rows = "('" + todayDate + "','" + category + "','" + seName + "','" + oneThing.replace("'", "\'") + "')"
           insertRows(rows, function(res) {
             if (res == 0) {
               bot.reply(message, {
@@ -63,14 +63,14 @@ module.exports = function(controller) {
               });
             } else {
               bot.reply(message, {
-                text: "Your info has been added!"
+                text: "Your info has been added and will be available to view within the *next hour*."
               });
             }
           });
           //segment data
           var jsonInput = {
             "event": "One Thing Report",
-            "userId": "clennon@vmware.com",
+            "userId": "bender@vmware.com",
             "properties": {
               "datetime_created": todayDate,
               "Category": category,
@@ -90,7 +90,7 @@ module.exports = function(controller) {
   controller.hears(['export one thing report'], 'direct_message,direct_mention,mention', (bot, message) => {
 
     bot.reply(message, "Please hold.....");
-    getRows(function(res) {
+    valFunc.getOTR(function(res) {
       if (res.length == 0) {
         bot.reply(message, {
           text: "Hmm something bad happend, I can't query this information."
@@ -147,30 +147,4 @@ module.exports = function(controller) {
     })
   }
 
-  /*  function to insert data into sql server */
-  function getRows(callback) {
-    // Imports the mssql query
-    let sqlQuery;
-
-    // insert val tracker
-    sqlQuery = `SELECT * FROM [dbo].[one_thing_report]
-                WHERE [datetime_created] >= DATEADD(DAY, -14, GETDATE())
-                order by [datetime_created]`;
-
-    console.log(sqlQuery);
-    sql.connect(config, err => {
-      // Query
-      new sql.Request().query(sqlQuery, (err, result) => {
-        // ... error checks
-        sql.close();
-        console.log(result);
-        return callback(result.recordset);
-      })
-
-    })
-
-    sql.on('error', err => {
-      console.log(err)
-    })
-  }
 }; /*the end*/

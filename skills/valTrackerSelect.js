@@ -125,10 +125,10 @@ module.exports = function(controller) {
           convo.ask("Please give me a description of why the POC needs to be extended and how long. (i.e. technical issues, unfinished testing, customer sat issue, etc.)", (response, convo) => {
             extReq = response.text;
             //sweemer hardcastle reedy
-            if (process.env.env_type = "dev"){
+            if (process.env.env_type == "set_dev"){
               var approvers = "<@U40TBNTTQ> <@U3U3D17MK> <@U3U3K6HM2>";
             } else {
-              var approvers = "<@WAATAPVQD> <@U3U3D17MK> <@U3U3K6HM2>";
+              var approvers = "<@WAATAPVQD>";
             }
             var message_options = [
               "Hear ye hear ye, a request from " + real_name + " to extend " + customer + "'s POC has been requested. \n *" + extReq + "*  \n" + approvers + " do you approve? ",
@@ -143,7 +143,7 @@ module.exports = function(controller) {
             });
             var jsonInput = {
               "event": "POC Extension Request",
-              "userId": "clennon@vmware.com",
+              "userId": "bender@vmware.com",
               "properties": {
                 "submitted_by": real_name,
                 "account_name": customer,
@@ -166,7 +166,7 @@ module.exports = function(controller) {
         //don't ask me why
         var jsonParse = JSON.stringify(sfdc);
         var jsonStr = JSON.parse(jsonParse);
-        if (jsonStr[0].SF_Opportunity_ID !== null) {
+        if (jsonStr[0].opportunity_id !== null) {
           bot.reply(message, {
             text: "Here's what I found for " + customer,
             attachments: [{
@@ -176,47 +176,47 @@ module.exports = function(controller) {
               "title_link": "https://vmware.my.salesforce.com/" + sfdc_id,
               "fields": [{
                   "title": "Opportunity Name",
-                  "value": jsonStr[0].name,
+                  "value": jsonStr[0].oportunity_name,
                   "short": true
                 },
                 {
                   "title": "SF Opportunity ID",
-                  "value": jsonStr[0].id + "\n" + jsonStr[0].opportunity_id__c,
+                  "value": jsonStr[0].opportunity_number + "\n" + jsonStr[0].opportunity_id,
                   "short": true
                 },
                 {
                   "title": "Opportunity Type",
-                  "value": jsonStr[0].recordtype,
+                  "value": jsonStr[0].record_type,
                   "short": true
                 },
                 {
                   "title": "Account Name",
-                  "value": jsonStr[0].accountname,
+                  "value": jsonStr[0].account_name,
                   "short": true
                 },
                 {
                   "title": "Stage",
-                  "value": jsonStr[0].stagename,
+                  "value": jsonStr[0].opportunity_stage,
                   "short": true
                 },
                 {
                   "title": "Opportunity Owner",
-                  "value": jsonStr[0].opportunity_owner_name__c,
+                  "value": jsonStr[0].opportunity_owner_name,
                   "short": true
                 },
                 {
                   "title": "Amount",
-                  "value": jsonStr[0].amount,
+                  "value": jsonStr[0].opportunity_amount,
                   "short": true
                 },
                 {
                   "title": "Sales Territory",
-                  "value": jsonStr[0].primary_field_sales_territory__c,
+                  "value": jsonStr[0].primary_field_sales_territory,
                   "short": true
                 },
                 {
                   "title": "Next Steps",
-                  "value": jsonStr[0].next_steps__c,
+                  "value": jsonStr[0].next_steps_desc,
                   "short": false
                 }
               ],
@@ -235,7 +235,7 @@ module.exports = function(controller) {
     var searchType = 0; //SE Search
     bot.reply(message, "Please hold.....");
     bot.createConversation(message, function(err, convo) {
-      selectCustomer(seName, searchType, function(res) {
+      valFunc.selectCustomer(seName, searchType, function(res) {
         if (res.length == 0) {
           bot.reply(message, {
             text: "I couldn't find any info on " + seName + "."
@@ -245,19 +245,19 @@ module.exports = function(controller) {
           var jsonStr = JSON.parse(jsonParse);
 
           for (var i = 0; i < jsonStr.length; i++) {
-            if (jsonStr[i].Actual_Start_Date == null) {
+            if (jsonStr[i].actual_start_date == null) {
               var startDate = "None"
             } else {
-              var startDate = jsonStr[i].Actual_Start_Date.value
+              var startDate = jsonStr[i].actual_start_date.value
             }
-            if (jsonStr[i].End_Date == null) {
+            if (jsonStr[i].end_date == null) {
               var endDate = "None"
             } else {
-              var endDate = jsonStr[i].End_Date.value
+              var endDate = jsonStr[i].end_date.value
             }
 
             bot.reply(message, {
-              text: "Here's what I found for " + jsonStr[i].Customer_Name,
+              text: "Here's what I found for " + jsonStr[i].customer_name,
               attachments: [{
                 "title": "Validation Tracker Info",
                 "color": colorArray[i],
@@ -265,12 +265,12 @@ module.exports = function(controller) {
                 //"title_link": "https://modeanalytics.com/vmware_inc/reports/1c69ccf26a01",
                 "fields": [{
                     "title": "Customer",
-                    "value": jsonStr[i].Customer_Name,
+                    "value": jsonStr[i].customer_name,
                     "short": true
                   },
                   {
                     "title": "Status",
-                    "value": jsonStr[i].Status + " - " + jsonStr[i].Type,
+                    "value": jsonStr[i].status + " - " + jsonStr[i].type,
                     "short": true
                   }
                 ],
@@ -290,7 +290,7 @@ module.exports = function(controller) {
     var searchType = 1; //customer search
     bot.reply(message, "Please hold.....");
     //bot.createConversation(message, function(err, convo) {
-    selectCustomer(customer, searchType, function(res) {
+    valFunc.selectCustomer(customer, searchType, function(res) {
       if (res.length == 0) {
         bot.reply(message, {
           text: "I couldn't find any info on " + customer + "."
@@ -324,7 +324,7 @@ module.exports = function(controller) {
             var service = "None"
           };
           bot.reply(message, {
-            text: "Here's what I found for " + jsonStr[i].Customer_Name,
+            text: "Here's what I found for " + jsonStr[i].customer_name,
             attachments: [{
               "title": "Validation Tracker Info",
               "color": colorArray[i],
@@ -332,17 +332,17 @@ module.exports = function(controller) {
               "title_link": "https://modeanalytics.com/vmware_inc/reports/e869ce5736c1",
               "fields": [{
                   "title": "Customer",
-                  "value": jsonStr[i].Customer_Name,
+                  "value": jsonStr[i].customer_name,
                   "short": true
                 },
                 {
                   "title": "Status",
-                  "value": jsonStr[i].Status + " - " + jsonStr[i].Type,
+                  "value": jsonStr[i].status + " - " + jsonStr[i].type,
                   "short": true
                 },
                 {
                   "title": "SET Member",
-                  "value": jsonStr[i].SE_Specialist,
+                  "value": jsonStr[i].se_specialist,
                   "short": true
                 },
                 {
@@ -352,12 +352,12 @@ module.exports = function(controller) {
                 },
                 {
                   "title": "Start Date",
-                  "value": jsonStr[i].Expected_Start_Date,
+                  "value": jsonStr[i].expected_start_date,
                   "short": true
                 },
                 {
                   "title": "End Date",
-                  "value": jsonStr[i].Expected_End_Date,
+                  "value": jsonStr[i].expected_end_date,
                   "short": true
                 },
                 {
@@ -377,17 +377,17 @@ module.exports = function(controller) {
                 },
                 {
                   "title": "Org ID",
-                  "value": jsonStr[i].ORG_ID,
+                  "value": jsonStr[i].org_id,
                   "short": true
                 },
                 {
                   "title": "CS Architect",
-                  "value": jsonStr[i].CS_Architect,
+                  "value": jsonStr[i].cs_architect,
                   "short": true
                 },
                 {
                   "title": "Cloud Specialist",
-                  "value": jsonStr[i].Cloud_Specialist,
+                  "value": jsonStr[i].cloud_specialist,
                   "short": true
                 },
                 {
@@ -402,16 +402,16 @@ module.exports = function(controller) {
                 },
                 {
                   "title": "SF Opportunity ID",
-                  "value": jsonStr[i].SFDC_OPPTY_ID_RAW, //https://vmware.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&str=
+                  "value": jsonStr[i].sfdc_oppty_id, //https://vmware.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&str=
                   "short": true
                 },
                 {
                   "title": "Notes",
-                  "value": jsonStr[i].Notes,
+                  "value": jsonStr[i].notes,
                   "short": false
                 }
               ],
-              callback_id: 'actions-select|' + customer + "|" + jsonStr[i].SFDC_OPPTY_ID_RAW + "|" + jsonStr[i].ORG_ID,
+              callback_id: 'actions-select|' + customer + "|" + jsonStr[i].sfdc_oppty_id + "|" + jsonStr[i].org_id,
               actions: [{
                   "name": "sddc",
                   "text": "Show SDDC",
@@ -437,38 +437,4 @@ module.exports = function(controller) {
       }
     });
   });
-
-  //function to get customer tracker information
-  function selectCustomer(customer, searchType, callback) {
-    customer = customer.replace("&", "_");
-    let sqlQuery;
-    if (searchType == 1) {
-      // Search by customer name
-      sqlQuery = `SELECT *
-                      FROM dbo.tech_validation_tracker_view
-                      WHERE lower(Customer_name) like '%${customer}%'`;
-    } else {
-      //search by SE
-      sqlQuery = `SELECT *
-                      FROM dbo.tech_validation_tracker_view
-                      WHERE lower(SE_Specialist) like '%${customer}%'`;
-    }
-    sql.connect(config, err => {
-      console.log("connect error: " + err);
-
-      // Query
-
-      new sql.Request().query(sqlQuery, (err, result) => {
-        // ... error checks
-        sql.close();
-        console.log(result.recordset);
-        return callback(result.recordset);
-      })
-
-    })
-
-    sql.on('error', err => {
-      console.log("on error:" + err);
-    })
-  }
 }; /* the end */
