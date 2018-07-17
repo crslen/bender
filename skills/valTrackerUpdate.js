@@ -24,7 +24,7 @@ module.exports = function(controller) {
         var updateValue = "";
         var updateField = "";
         let askField = (response, convo) => {
-
+          console.log("updatedata: " + updateData);
           convo.ask({
             attachments: [{
               title: 'Which field do you want to update?',
@@ -656,7 +656,7 @@ module.exports = function(controller) {
         let confTask = (response, convo) => {
           //update info
           if (response.text === 'cancel') {
-            convo.say('Okay');
+            convo.say('Okay. Byeeee!');
             convo.next();
           } else {
             valFunc.updateCustomer(customer, updateField, updateValue, function(res) {
@@ -736,8 +736,10 @@ module.exports = function(controller) {
           }
         };
         //check to see if customer is already in tech validation table
-        valFunc.getCustomer(customer, function(res) {
-          if (res[0].result.indexOf("Yes") >= 0) {
+        valFunc.selectCustomer(customer, 1, function(res) {
+          if (res[0].result.indexOf(customer) >= 0) {
+            var updateData = res[0].result;
+    
             bot.startConversation(message, askField);
           } else {
             bot.reply(message, "I can't find " + customer + ". Use `@bender get " + customer + "` to get more information.  Also try using the exact customer name entered into tech validation.")
