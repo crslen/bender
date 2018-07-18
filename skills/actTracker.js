@@ -166,19 +166,19 @@ module.exports = function(controller) {
         for (var i = 0; i < jsonStr.length; i++) {
 
           var sfMessage = '' +
-            '*Account Name:* ' + jsonStr[i].accountname + '\n' +
-            '*Opportunity ID:* ' + jsonStr[i].id + ' or ' + jsonStr[i].opportunity_id__c + '\n' +
-            '*Opportunity Type:* ' + jsonStr[i].recordtype + '\n' +
-            '*Stage:* ' + jsonStr[i].stagename + '\n' +
-            '*Date Created:* ' + jsonStr[i].createddate + '\n' +
-            '*Opportunity Owner:* ' + jsonStr[i].opportunity_owner_name__c + '\n';
+            '*Account Name:* ' + jsonStr[i].account_name + '\n' +
+            '*Opportunity ID:* ' + jsonStr[i].opportunity_id + ' or ' + jsonStr[i].opportunity_name + '\n' +
+            '*Opportunity Type:* ' + jsonStr[i].record_type + '\n' +
+            '*Stage:* ' + jsonStr[i].opportunity_stage + '\n' +
+            '*Date Created:* ' + jsonStr[i].opportunity_create_date + '\n' +
+            '*Opportunity Owner:* ' + jsonStr[i].opportunity_owner_name + '\n';
 
           bot.reply(message, {
             //text: "Here's what I found for " + customer,
             attachments: [{
               "text": sfMessage,
               "color": colorArray [i],
-              callback_id: 'actions-act|' + jsonStr[i].accountname + "|" + jsonStr[i].id,
+              callback_id: 'actions-act|' + jsonStr[i].account_name + "|" + jsonStr[i].opportunity_id,
               actions: [{
                 "name": "select",
                 "text": "Select",
