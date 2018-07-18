@@ -125,7 +125,7 @@ module.exports = function(controller) {
           convo.ask("Please give me a description of why the POC needs to be extended and how long. (i.e. technical issues, unfinished testing, customer sat issue, etc.)", (response, convo) => {
             extReq = response.text;
             //sweemer hardcastle reedy
-            if (process.env.env_type == "set_dev"){
+            if (process.env.env_type == "set_dev") {
               var approvers = "<@U40TBNTTQ> <@U3U3D17MK> <@U3U3K6HM2>";
             } else {
               var approvers = "<@WAATAPVQD>";
@@ -402,7 +402,7 @@ module.exports = function(controller) {
                 },
                 {
                   "title": "SF Opportunity ID",
-                  "value": jsonStr[i].sfdc_oppty_id, //https://vmware.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&str=
+                  "value": jsonStr[i].sfdc_oppty_id_raw, //https://vmware.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&str=
                   "short": true
                 },
                 {
@@ -411,7 +411,7 @@ module.exports = function(controller) {
                   "short": false
                 }
               ],
-              callback_id: 'actions-select|' + customer + "|" + jsonStr[i].sfdc_oppty_id + "|" + jsonStr[i].org_id,
+              callback_id: 'actions-select|' + customer + "|" + jsonStr[i].sfdc_oppty_id_raw + "|" + jsonStr[i].org_id,
               actions: [{
                   "name": "sddc",
                   "text": "Show SDDC",

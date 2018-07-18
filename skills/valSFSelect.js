@@ -13,6 +13,7 @@ module.exports = function(controller) {
   controller.middleware.receive.use(luis.middleware.receive(luisOptions));
   controller.hears(['salesforce','sf opp'], 'direct_message,direct_mention,mention', function(bot, message) {
     //controller.hears(['get (.*) sf opp', 'get (.*) salesforce opp'], 'direct_message,direct_mention,mention',  function(bot, message) {
+    console.log(JSON.stringify(message));
     if (message.topIntent.intent == "salesforce") {
       valFunc.validateUser(bot, message, function(cb) {
         if (cb == 1) {
