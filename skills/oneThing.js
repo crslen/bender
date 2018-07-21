@@ -104,7 +104,7 @@ module.exports = function(controller) {
           var date = new Date(jsonStr[i].datetime_created)
           var otDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
           bot.reply(message, {
-            text: "`" + otDate + "` - " + jsonStr[i].The_One_Thing + " *" + jsonStr[i].Specialist + "*"
+            text: "`" + otDate + "` - " + jsonStr[i].the_ene_ehing + " *" + jsonStr[i].specialist + "*"
           });
         }
       }
