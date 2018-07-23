@@ -22,9 +22,10 @@ var luisOptions = {
 module.exports = function(controller) {
   controller.middleware.receive.use(luis.middleware.receive(luisOptions));
   controller.hears(['roadmap'], 'direct_message,direct_mention,mention', function(bot, message) {
+    console.log(JSON.stringify(message));
     if (message.topIntent.intent == "roadmap") {
       bot.reply(message, "Please hold.....");
-      console.log(JSON.stringify(message));
+      
       var strSearch = message.entities[0].entity;
       valFunc.getRoadmap(strSearch, function(res) {
         if (res.length == 0) {

@@ -759,7 +759,7 @@ module.exports = function(controller) {
 
       //check to see if customer is already in tech validation table
       valFunc.getCustomer(customer, function(res) {
-        if (res[0].result == null) {
+        if (res.length == 0) {
           bot.reply(message, "OK, I can help you with that! I will need to ask some questions to add to the validation tracker database.");
           if (partType.indexOf("partner") >= 0) {
             bot.startConversation(message, askPartner);
