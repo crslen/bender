@@ -94,8 +94,18 @@ module.exports = function(controller) {
                         "short": true
                       },
                       {
-                        "title": "Sales Territory",
-                        "value": jsonStr[i].primary_field_sales_territory,
+                        "title": "CSM",
+                        "value": jsonStr[i].csm_name,
+                        "short": true
+                      },
+                      {
+                        "title": "Use Cases",
+                        "value": jsonStr[i].use_case,
+                        "short": true
+                      },
+                      {
+                        "title": "Opportunity Details",
+                        "value": "*Geo*: " + jsonStr[i].geo + "\n" + "*Region*: " + jsonStr[i].region + "\n" + "*Industry*: " + jsonStr[i].industry + "\n" + "*Classification*: " + jsonStr[i].sales_classification,
                         "short": true
                       },
                       {

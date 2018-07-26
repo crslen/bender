@@ -1,13 +1,22 @@
 module.exports = function(controller) {
   //module.exports.use = function(controller) {
   controller.hears('help', 'direct_message,direct_mention,mention', function(bot, message) {
-    var botName = '@' + bot.identity.name,
+    var benderQuestions = require("../json/BenderQuestions.json");
+    var botName = '@bender',
+      i = 0,
+      dataCollection = "",
       helpMessage;
 
+    while (i < benderQuestions.length) {
+      dataCollection = dataCollection + '`' + botName + ' ' + benderQuestions[i].helper + '`: ' + benderQuestions[i].description + '.\n'
+      i++
+    }
+    
     helpMessage = '' +
       'I\'m here to help! Here are some of the commands available to assist you with. ' +
-      'For more information about the POC process visit the confluence page - https://confluence.eng.vmware.com/display/CloudSE/Technical+Validation \n\n' +
+      'For more information about the POC process visit the confluence page - https://confluence.eng.vmware.com/display/CloudSE/Technical+Validation \n' +
 
+      '\n' +
       '_Tech Validation Tracker:_\n' +
       '`' + botName + ' add <POC or Partner POC or Paid Pilot> for <Account Name>`: Adds new entry for the tech validation tracker into Mode Analytics.\n' +
       '`' + botName + ' get <Account Name> or show <Account Name>`: Gets customer information from the validation tracker.\n' +
@@ -18,22 +27,24 @@ module.exports = function(controller) {
       '`' + botName + ' get <Account Name> or <SF OPP ID> sf opp`: Get basic information about a cloud or managed sales opportunity.\n' +
       '`' + botName + ' new activity for <Account Name>`: Add an entry for tracking activities i.e. demo, presentation, workshop etc.\n' +
       '`' + botName + ' get activities for <Account Name>`: Return all SET activities for an account.\n' +
-      
+
       '\n' +
       '_VMC Workshops:_\n' +
       '`' + botName + ' add <email> to <vmc-ws#>`: Add student to workshop org.\n' +
-      '`' + botName + ' remove <email> from <vmc-ws#>`: remove student from workshop org\n' +
-      '`' + botName + ' get workshop status`: Gets the status of SDDCs running in the workshop orgs\n' +
+      '`' + botName + ' remove <email> from <vmc-ws#>`: remove student from workshop org.\n' +
+      '`' + botName + ' get workshop status`: Gets the status of SDDCs running in the workshop orgs.\n' +
 
       '\n' +
       '_Misc:_\n' +
       '`' + botName + ' new one thing report for <me or SET name>`: Adds your one thing you want to share with upper management. If you type "me" then I will use your name or type somebody elses name if you\'re reporting for that person.\n' +
-      '';
+
+      '\n' +
+      '_BU Data Collection:_\n' + dataCollection + '';
 
     bot.reply(message, helpMessage);
   });
 
-  controller.hears('one thing help', 'direct_message,direct_mention,mention', function(bot, message) {
+  /*controller.hears('one thing help', 'direct_message,direct_mention,mention', function(bot, message) {
     var botName = '@' + bot.identity.name,
       helpMessage;
 
@@ -45,4 +56,5 @@ module.exports = function(controller) {
 
     bot.reply(message, helpMessage);
   });
+  */
 };
