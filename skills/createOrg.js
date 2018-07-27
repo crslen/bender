@@ -9,7 +9,7 @@ module.exports = function(controller) {
       if (cb == 1) {
         let customer;
         //bot.reply(message, "Sorry unable to create a new POC org.  Please check back later");
-        
+
         let askCustomer = (response, convo) => {
           convo.ask("What's the customer name?", (response, convo) => {
             customer = response.text;
@@ -37,6 +37,7 @@ module.exports = function(controller) {
                     } else {
                       var tvType = "CUSTOMER_POC";
                     }
+
                     confTask(tvType, response, convo);
                     convo.next();
                   });
@@ -55,6 +56,28 @@ module.exports = function(controller) {
             bot.reply(message, {
               text: "Once the org is created make sure to update the tech validation with the new org ID using `@bender Update " + customer + "`."
             });
+            //insert into slingshot
+            bot.api.users.info({
+              user: message.user
+            }, (error, response) => {
+              let {
+                name,
+                real_name
+              } = response.user;
+              var jsonInput = {
+                "event": "set org tracking",
+                "userId": "bender@vmware.com",
+                "properties": {
+                  "customer_name": customer,
+                  "invite_url": vmcInvite,
+                  "org_type": tvType,
+                  "se_specialist": real_name
+                }
+              }
+              valFunc.insertSegment(jsonInput, function(res) {
+                console.log("segment response: " + res);
+              });
+            })
           });
         };
         bot.reply(message, "OK, I can help you with that!");
