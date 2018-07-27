@@ -58,7 +58,7 @@ module.exports = function(controller) {
           }], {}, pos);
         } else { */
           convo.addQuestion(obj.Questions[i].Question, function(response, convo) {
-            jsonProperties = jsonProperties + '"' + obj.Questions[i].variable + '": "' + response.text + '",';
+            jsonProperties = jsonProperties + '"' + obj.Questions[0].variable + '": "' + response.text + '",';
 
             convo.gotoThread(goto);
           }, {}, pos);

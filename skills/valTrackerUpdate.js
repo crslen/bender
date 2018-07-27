@@ -660,6 +660,22 @@ module.exports = function(controller) {
 
           let confTask = (response, convo) => {
             //update info
+            //get date in mm/dd/yyyy format
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+            var yyyy = today.getFullYear();
+
+            if (dd < 10) {
+              dd = '0' + dd
+            }
+
+            if (mm < 10) {
+              mm = '0' + mm
+            }
+
+            var upDate = mm + '/' + dd + '/' + yyyy;
+
             console.log("updates: " + JSON.stringify(updateData));
             if (response.text === 'cancel') {
               convo.say('Okay. Byeeee!');
