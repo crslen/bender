@@ -463,7 +463,7 @@ module.exports = function(controller) {
                   ]);
                 };
                 break;
-              case "aws_region":
+              case "region":
                 convo.ask({
                   attachments: [{
                     title: 'Select the desired AWS region(s) for  ' + customer,
