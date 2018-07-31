@@ -23,6 +23,7 @@ module.exports = function(controller) {
         let customer = message.match[1];
         var updateValue = "";
         var updateField = "";
+        bot.reply(message, "Looking up " + customer);
         //check to see if customer is already in tech validation table
         valFunc.selectCustomer(customer, 1, function(updateData) {
           console.log("update res: " + JSON.stringify(updateData));
@@ -70,12 +71,27 @@ module.exports = function(controller) {
                 });
                 break;
               case "se_specialist":
-                convo.ask("Name of the SET Member?", (response, convo) => {
-                  updateValue = response.text;
-                  console.log("update res: " + JSON.stringify(updateData));
-                  confTask(response, convo);
-                  convo.next();
-                });
+                convo.ask({
+                  attachments: [{
+                    title: 'Name of the SET Member?',
+                    callback_id: 'setMember',
+                    attachment_type: 'default',
+                    color: color,
+                    actions: [{
+                      "name": "setTeam",
+                      "text": "SET Member...",
+                      "type": "select",
+                      "options": fields.setTeam()
+                    }]
+                  }]
+                }, [{
+                  default: true,
+                  callback: function(response, convo) {
+                    updateValue = response.text;
+                    confTask(response, convo);
+                    convo.next();
+                  }
+                }]);
                 break;
               case "aws_resource":
                 convo.ask("Name of the AWS resource assigned to " + customer + "?", (response, convo) => {
@@ -646,7 +662,7 @@ module.exports = function(controller) {
                 });
                 break;
               case "use_case_scenario":
-                convo.ask("Use case scenario????", (response, convo) => {
+                convo.ask("Use case scenario?", (response, convo) => {
                   updateValue = response.text;
                   confTask(response, convo);
                   convo.next();
@@ -682,7 +698,7 @@ module.exports = function(controller) {
               convo.next();
             } else {
               if (updateField == 'notes') {
-                updateValue = updateData[0].notes + '\r' + upDate + "-" + updateValue;
+                updateValue = updateData[0].notes + '|' + upDate + "-" + updateValue;
               }
               if (updateValue == 'Complete Won') {
                 bot.reply(message, {
@@ -790,3 +806,4 @@ module.exports = function(controller) {
     return !(/\D/.test(String(d))) && d > 0 && d <= daysInMonth[--m]
   }
 }; /* the end */
+

@@ -406,8 +406,13 @@ module.exports = function(controller) {
                   "short": true
                 },
                 {
+                  "title": "Last Updated",
+                  "value": jsonStr[i].timestamp, //https://vmware.my.salesforce.com/_ui/search/ui/UnifiedSearchResults?searchType=2&str=
+                  "short": true
+                },
+                {
                   "title": "Notes",
-                  "value": jsonStr[i].notes,
+                  "value": jsonStr[i].notes.replace("|", "\n"),
                   "short": false
                 }
               ],
