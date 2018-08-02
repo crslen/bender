@@ -771,7 +771,9 @@ module.exports = function(controller) {
         }
       });
     } else {
-      bot.reply(message, "Ok be that way. Byeee");
+      if (action_id == 'No-poc') {
+        bot.reply(message, "Ok be that way. Byeee");
+      }
     }
 
   });

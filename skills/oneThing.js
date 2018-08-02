@@ -23,6 +23,7 @@ module.exports = function(controller) {
     console.log("name:" + JSON.stringify(message));
 
     let askOneThing = (response, convo) => {
+      bot.reply(message, "Type `cancel` or `exit` to back out of this conversation.")
       convo.ask("What is your one thing you want to report this week?", (response, convo) => {
         if ((response.text.toLowerCase() === 'cancel') || (response.text.toLowerCase() === 'exit')) {
           convo.say('Okay. Byeeee!');

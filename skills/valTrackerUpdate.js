@@ -29,7 +29,7 @@ module.exports = function(controller) {
           console.log("update res: " + JSON.stringify(updateData));
 
           let askField = (response, convo) => {
-
+            bot.reply(message, "Type `cancel` or `exit` to back out of this conversation.")
             convo.ask({
               attachments: [{
                 title: 'Which field do you want to update?',
@@ -806,4 +806,3 @@ module.exports = function(controller) {
     return !(/\D/.test(String(d))) && d > 0 && d <= daysInMonth[--m]
   }
 }; /* the end */
-

@@ -16,7 +16,7 @@ module.exports = function(controller) {
       console.log("action: " + action_id);
       console.log("name:" + JSON.stringify(message));
       let askActivity = (response, convo) => {
-
+        bot.reply(message, "Type `cancel` or `exit` to back out of this conversation.")
         convo.ask({
           attachments: [{
             title: "Select an activity?",
@@ -50,71 +50,75 @@ module.exports = function(controller) {
       };
 
       let confTask = (response, convo) => {
+        if ((response.text.toLowerCase() === 'cancel') || (response.text.toLowerCase() === 'exit')) {
+          convo.say('Okay. Byeeee!');
+          convo.next();
+        } else {
+          bot.api.users.info({
+            user: message.user
+          }, (error, response) => {
+            let {
+              name,
+              real_name
+            } = response.user;
 
-        bot.api.users.info({
-          user: message.user
-        }, (error, response) => {
-          let {
-            name,
-            real_name
-          } = response.user;
+            //get date in mm/dd/yyyy format
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+            var yyyy = today.getFullYear();
 
-          //get date in mm/dd/yyyy format
-          var today = new Date();
-          var dd = today.getDate();
-          var mm = today.getMonth() + 1; //January is 0!
-          var yyyy = today.getFullYear();
-
-          if (dd < 10) {
-            dd = '0' + dd
-          }
-
-          if (mm < 10) {
-            mm = '0' + mm
-          }
-
-          var estDate = mm + '/' + dd + '/' + yyyy;
-
-          var rows = "('" + customer + "','" +
-            sfdc_id + "','" +
-            actCat + "','" +
-            real_name + "','" +
-            notes + "','" +
-            estDate + "')";
-
-          valFunc.insertActivity(rows, function(res) {
-            if (res == 0) {
-              bot.reply(message, {
-                text: "Your info was not added for whatever reason. ╯°□°）╯︵ ┻━┻"
-              });
-            } else {
-              bot.reply(message, {
-                text: "Your info has been added and will be available to view within the *next hour*."
-              });
+            if (dd < 10) {
+              dd = '0' + dd
             }
-          });
 
-          var jsonInput = {
-            "event": "SET Activities",
-            "userId": "bender@vmware.com",
-            "properties": {
-              "customer_name": customer,
-              "sf_id": sfdc_id,
-              "Activity": actCat,
-              "se_specialist": real_name,
-              "date_inserted": estDate,
-              "notes": notes
+            if (mm < 10) {
+              mm = '0' + mm
             }
-          }
-          valFunc.insertSegment(jsonInput, function(res) {
-            console.log("segment response: " + res);
-          });
 
-        })
+            var estDate = mm + '/' + dd + '/' + yyyy;
+
+            var rows = "('" + customer + "','" +
+              sfdc_id + "','" +
+              actCat + "','" +
+              real_name + "','" +
+              notes + "','" +
+              estDate + "')";
+
+            valFunc.insertActivity(rows, function(res) {
+              if (res == 0) {
+                bot.reply(message, {
+                  text: "Your info was not added for whatever reason. ╯°□°）╯︵ ┻━┻"
+                });
+              } else {
+                bot.reply(message, {
+                  text: "Your info has been added and will be available to view within the *next hour*."
+                });
+              }
+            });
+
+            var jsonInput = {
+              "event": "SET Activities",
+              "userId": "bender@vmware.com",
+              "properties": {
+                "customer_name": customer,
+                "sf_id": sfdc_id,
+                "Activity": actCat,
+                "se_specialist": real_name,
+                "date_inserted": estDate,
+                "notes": notes
+              }
+            }
+            valFunc.insertSegment(jsonInput, function(res) {
+              console.log("segment response: " + res);
+            });
+
+          })
+        }
       };
       bot.startConversation(message, askActivity);
     } else {
-      if (action_id == 'no-act') {
+      if (action_id == 'No-act') {
         bot.reply(message, "Ok going back to my hole. Byeeee!");
       }
     }
@@ -177,7 +181,7 @@ module.exports = function(controller) {
             //text: "Here's what I found for " + customer,
             attachments: [{
               "text": sfMessage,
-              "color": colorArray [i],
+              "color": colorArray[i],
               callback_id: 'actions-act|' + jsonStr[i].account_name + "|" + jsonStr[i].opportunity_id,
               actions: [{
                 "name": "select",
