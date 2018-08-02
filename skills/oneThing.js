@@ -24,64 +24,69 @@ module.exports = function(controller) {
 
     let askOneThing = (response, convo) => {
       convo.ask("What is your one thing you want to report this week?", (response, convo) => {
-        oneThing = response.text;
-        convo.next();
-        bot.api.users.info({
-          user: message.user
-        }, (error, response) => {
-          let {
-            name,
-            real_name
-          } = response.user;
-          console.log(name, real_name);
-          //do something
-          //get date in mm/dd/yyyy format
-          var today = new Date();
-          var dd = today.getDate();
-          var mm = today.getMonth() + 1; //January is 0!
-          var yyyy = today.getFullYear();
+        if ((response.text.toLowerCase() === 'cancel') || (response.text.toLowerCase() === 'exit')) {
+          convo.say('Okay. Byeeee!');
+          convo.next();
+        } else {
+          oneThing = response.text;
+          //convo.next();
+          bot.api.users.info({
+            user: message.user
+          }, (error, response) => {
+            let {
+              name,
+              real_name
+            } = response.user;
+            console.log(name, real_name);
+            //do something
+            //get date in mm/dd/yyyy format
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+            var yyyy = today.getFullYear();
 
-          if (dd < 10) {
-            dd = '0' + dd
-          }
-
-          if (mm < 10) {
-            mm = '0' + mm
-          }
-          var todayDate = mm + '/' + dd + '/' + yyyy;
-
-          if (seName == "me") {
-            seName = real_name;
-          }
-
-          //db data
-          var rows = "('" + todayDate + "','" + category + "','" + seName + "','" + oneThing.replace("'", "\'") + "')"
-          insertRows(rows, function(res) {
-            if (res == 0) {
-              bot.reply(message, {
-                text: "Your info was not added for whatever reason."
-              });
-            } else {
-              bot.reply(message, {
-                text: "Your info has been added and will be available to view within the *next hour*."
-              });
+            if (dd < 10) {
+              dd = '0' + dd
             }
-          });
-          //segment data
-          var jsonInput = {
-            "event": "One Thing Report",
-            "userId": "bender@vmware.com",
-            "properties": {
-              "datetime_created": todayDate,
-              "Category": category,
-              "Specialist": seName,
-              "The_One_Thing": oneThing
+
+            if (mm < 10) {
+              mm = '0' + mm
             }
-          }
-          valFunc.insertSegment(jsonInput, function(res) {
-            console.log("segment response: " + res);
+            var todayDate = mm + '/' + dd + '/' + yyyy;
+
+            if (seName == "me") {
+              seName = real_name;
+            }
+
+            //db data
+            var rows = "('" + todayDate + "','" + category + "','" + seName + "','" + oneThing.replace("'", "\'") + "')"
+            insertRows(rows, function(res) {
+              if (res == 0) {
+                bot.reply(message, {
+                  text: "Your info was not added for whatever reason."
+                });
+              } else {
+                bot.reply(message, {
+                  text: "Your info has been added and will be available to view within the *next hour*."
+                });
+              }
+            });
+            //segment data
+            var jsonInput = {
+              "event": "One Thing Report",
+              "userId": "bender@vmware.com",
+              "properties": {
+                "datetime_created": todayDate,
+                "Category": category,
+                "Specialist": seName,
+                "The_One_Thing": oneThing
+              }
+            }
+            valFunc.insertSegment(jsonInput, function(res) {
+              console.log("segment response: " + res);
+            });
           });
-        });
+        }
       });
     };
     bot.startConversation(message, askOneThing);

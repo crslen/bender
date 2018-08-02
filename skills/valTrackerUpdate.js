@@ -693,7 +693,7 @@ module.exports = function(controller) {
             var upDate = mm + '/' + dd + '/' + yyyy;
 
             console.log("updates: " + JSON.stringify(updateData));
-            if (response.text === 'cancel') {
+            if ((response.text.toLowerCase() === 'cancel') || (response.text.toLowerCase() === 'exit')) {
               convo.say('Okay. Byeeee!');
               convo.next();
             } else {
