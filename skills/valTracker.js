@@ -589,13 +589,13 @@ module.exports = function(controller) {
             actions: [{
                 "name": "yes",
                 "text": "Yes",
-                "value": "Yes",
+                "value": "yes",
                 "type": "button",
               },
               {
                 "name": "no",
                 "text": "No",
-                "value": "No",
+                "value": "no",
                 "type": "button",
               }
             ]
@@ -770,6 +770,8 @@ module.exports = function(controller) {
           bot.reply(message, "Looks like there's already an entry in the Tech Validation database for " + customer + ". Use `@bender get " + customer + "` to get more information.")
         }
       });
+    } else {
+      bot.reply(message, "Ok be that way. Byeee");
     }
 
   });
