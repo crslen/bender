@@ -52,7 +52,7 @@ module.exports = function(controller) {
       let confTask = (response, convo) => {
         if ((response.text.toLowerCase() === 'cancel') || (response.text.toLowerCase() === 'exit')) {
           convo.say('Okay. Byeeee!');
-          convo.next();
+          convo.stop();
         } else {
           bot.api.users.info({
             user: message.user

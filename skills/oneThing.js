@@ -27,10 +27,10 @@ module.exports = function(controller) {
       convo.ask("What is your one thing you want to report this week?", (response, convo) => {
         if ((response.text.toLowerCase() === 'cancel') || (response.text.toLowerCase() === 'exit')) {
           convo.say('Okay. Byeeee!');
-          convo.next();
+          convo.stop();
         } else {
           oneThing = response.text;
-          //convo.next();
+          convo.next();
           bot.api.users.info({
             user: message.user
           }, (error, response) => {
