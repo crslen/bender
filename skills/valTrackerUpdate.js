@@ -87,11 +87,81 @@ module.exports = function(controller) {
                 }, [{
                   default: true,
                   callback: function(response, convo) {
-                    updateValue = response.text;
-                    confTask(response, convo);
+                    updateValue = response.text + '|';
+                    askSERepeat(response, convo);
                     convo.next();
                   }
                 }]);
+                let askSERepeat = (response, convo) => {
+
+                  convo.ask({
+                    attachments: [{
+                      title: 'Are there more SET resources involved?',
+                      callback_id: 'SE_spec',
+                      attachment_type: 'default',
+                      color: color,
+                      actions: [{
+                          "name": "yes",
+                          "text": "Yes",
+                          "value": "Yes",
+                          "type": "button",
+                        },
+                        {
+                          "name": "no",
+                          "text": "No",
+                          "value": "No",
+                          "type": "button",
+                        }
+                      ]
+                    }]
+                  }, [{
+                      pattern: "yes",
+                      callback: function(reply, convo) {
+                        //askCompType(response, convo);
+                        convo.ask({
+                          attachments: [{
+                            title: 'Name of the SET Member?',
+                            callback_id: 'setMember',
+                            attachment_type: 'default',
+                            color: color,
+                            actions: [{
+                              "name": "setTeam",
+                              "text": "SET Member...",
+                              "type": "select",
+                              "options": fields.setTeam()
+                            }]
+                          }]
+                        }, [{
+                          default: true,
+                          callback: function(response, convo) {
+                            updateValue = updateValue + response.text + '|';
+                            askSERepeat(response, convo);
+                            convo.next();
+                          }
+                        }]);
+                        convo.next();
+
+                      }
+                    },
+                    {
+                      pattern: "no",
+                      callback: function(reply, convo) {
+                        convo.say('Cool beans :coolbean:');
+                        //compType = "NA";
+                        confTask(response, convo);
+                        convo.next();
+                      }
+                    },
+                    {
+                      default: true,
+                      callback: function(response, convo) {
+                        // = response.text;
+                        conf(response, convo);
+                        convo.next();
+                      }
+                    }
+                  ]);
+                };
                 break;
               case "aws_resource":
                 convo.ask("Name of the AWS resource assigned to " + customer + "?", (response, convo) => {

@@ -342,7 +342,7 @@ module.exports = function(controller) {
                 },
                 {
                   "title": "SET Member",
-                  "value": jsonStr[i].se_specialist,
+                  "value": jsonStr[i].se_specialist.replace("|", "\n"),
                   "short": true
                 },
                 {
