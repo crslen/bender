@@ -26,7 +26,7 @@ module.exports = function(controller) {
         console.log("stdout again: ", results);
         bot.reply(message, "Results: " + results);
       });    
-      bot.reply(message, "Deleting student workshops 1 thru 10.  This can take up to 10 minutes to complete.")
+      bot.reply(message, "Deleting student workshops 1 thru 10.  I'll share the results once complete, which may take up to 10 minutes.")
     }
   });
 
@@ -51,7 +51,7 @@ module.exports = function(controller) {
         console.log(JSON.stringify(obj[i]));
         provider = obj[i].Provider;
         console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName);
-        valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, "ZEROCLOUD", obj[i].RefreshToken, function(res) {
+        valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, "AWS", obj[i].RefreshToken, function(res) {
           var jsonParse = JSON.stringify(res);
           var jsonStr = JSON.parse(jsonParse);
           console.log("response: " + jsonStr.status);
