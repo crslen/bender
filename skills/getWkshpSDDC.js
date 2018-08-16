@@ -9,62 +9,139 @@ var oToken;
 var sddcName;
 var provider;
 var cidr;
+var region
 var subnetId;
 
 module.exports = function(controller) {
 
   controller.hears(['delete workshop (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
-    var sddc = message.match[1]
-    var jsonWKS = require("../json/workshop.json");
-    console.log(message.match[1]);
-    //console.log(jsonWKS);
-    jsonStr = JSON.stringify(jsonWKS);
-    obj = JSON.parse(jsonStr);
-    var i = 0;
-    if (sddc.toLowerCase() == 'all') {
-      deleteSDDC(function callback(results) {
-        console.log("stdout again: ", results);
-        bot.reply(message, "Results: " + results);
-      });    
-      bot.reply(message, "Deleting student workshops 1 thru 10.  I'll share the results once complete, which may take up to 10 minutes.")
-    }
+    valFunc.validateUser(bot, message, function(cb) {
+      if (cb == 1) {
+        var sddc = message.match[1]
+        var jsonWKS = require("../json/workshop.json");
+        console.log(message.match[1]);
+        //console.log(jsonWKS);
+        jsonStr = JSON.stringify(jsonWKS);
+        obj = JSON.parse(jsonStr);
+        var i = 0;
+        if (sddc.toLowerCase() == 'all') {
+          deleteSDDC(function callback(results) {
+            console.log("stdout again: ", results);
+            bot.reply(message, "Results: " + results);
+          });
+          bot.reply(message, "Deleting student workshops 1 thru 10.  I'll share the results once complete, which may take up to 10 minutes.")
+        }
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
   });
 
   controller.hears(['deploy workshop (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
-    var sddc = message.match[1]
-    var jsonWKS = require("../json/workshop.json");
-    console.log(message.match[1]);
-    //console.log(jsonWKS);
-    jsonStr = JSON.stringify(jsonWKS);
-    obj = JSON.parse(jsonStr);
-    var i = 0;
-    if (sddc.toLowerCase() == 'all') {
-      deploySDDC(function callback(results) {
-        console.log("stdout again: ", results);
-        bot.reply(message, "Results: " + results);
-      });      
-      bot.reply(message, "Deploying student workshops 1 thru 10. You can ask me `@bender get workshop status` to see if all have been deployed succesfully.")
-    }
-    while (i < obj.length) {
-      //for (var i = 0; i < obj.length; i++) {
-      if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
-        console.log(JSON.stringify(obj[i]));
-        provider = obj[i].Provider;
-        console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName);
-        valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, "AWS", obj[i].RefreshToken, function(res) {
-          var jsonParse = JSON.stringify(res);
-          var jsonStr = JSON.parse(jsonParse);
-          console.log("response: " + jsonStr.status);
-          if (jsonStr.status == "STARTED") {
-            bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.  Please wait 45 seconds before deploying another SDDC.");
-          } else {
-            bot.reply(message, "Error message *" + jsonStr.status + "*.  Waiting 45 seconds to deploy the next.");
+    valFunc.validateUser(bot, message, function(cb) {
+      if (cb == 1) {
+        var sddc = message.match[1]
+        var jsonWKS = require("../json/workshop.json");
+        console.log(message.match[1]);
+        //console.log(jsonWKS);
+        jsonStr = JSON.stringify(jsonWKS);
+        obj = JSON.parse(jsonStr);
+        var i = 0;
+        if (sddc.toLowerCase() == 'all') {
+          deploySDDC(function callback(results) {
+            console.log("stdout again: ", results);
+            bot.reply(message, "Results: " + results);
+          });
+          bot.reply(message, "Deploying student workshops 1 thru 10. You can ask me `@bender get workshop status` to see if all have been deployed succesfully.")
+        }
+        while (i < obj.length) {
+          //for (var i = 0; i < obj.length; i++) {
+          if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
+            console.log(JSON.stringify(obj[i]));
+            provider = obj[i].Provider;
+            console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName);
+            valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, "AWS", obj[i].RefreshToken, "US-WEST-2", 3, function(res) {
+              var jsonParse = JSON.stringify(res);
+              var jsonStr = JSON.parse(jsonParse);
+              console.log("response: " + jsonStr.status);
+              if (jsonStr.status == "STARTED") {
+                bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.  Please wait 45 seconds before deploying another SDDC.");
+              } else {
+                bot.reply(message, "Error message *" + jsonStr.status + "*.  Waiting 45 seconds to deploy the next.");
+              }
+            });
           }
-        });
+          i++;
+        }
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
       }
-      i++;
-    }
+    });
+  });
 
+  controller.hears(['delete elw (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    valFunc.validateUser(bot, message, function(cb) {
+      if (cb == 1) {
+        var sddc = message.match[1]
+        var jsonWKS = require("../json/elw.json");
+        console.log(message.match[1]);
+        //console.log(jsonWKS);
+        jsonStr = JSON.stringify(jsonWKS);
+        obj = JSON.parse(jsonStr);
+        var i = 0;
+        if (sddc.toLowerCase() == 'all') {
+          deleteELWSDDC(function callback(results) {
+            console.log("stdout again: ", results);
+            bot.reply(message, "Results: " + results);
+          });
+          bot.reply(message, "Deleting elw workshops 1 thru 50.  I'll share the results once complete, which may take up to 10 minutes.")
+        }
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
+  });
+
+  controller.hears(['deploy elw (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    valFunc.validateUser(bot, message, function(cb) {
+      if (cb == 1) {
+        var sddc = message.match[1]
+        var jsonWKS = require("../json/elw.json");
+        console.log(message.match[1]);
+        //console.log(jsonWKS);
+        jsonStr = JSON.stringify(jsonWKS);
+        obj = JSON.parse(jsonStr);
+        var i = 0;
+        if (sddc.toLowerCase() == 'all') {
+          deployELWSDDC(function callback(results) {
+            console.log("stdout again: ", results);
+            bot.reply(message, "Results: " + results);
+          });
+          bot.reply(message, "Deploying elw workshops 1 thru 50. You can ask me `@bender get workshop status` to see if all have been deployed succesfully.")
+        }
+        while (i < obj.length) {
+          //for (var i = 0; i < obj.length; i++) {
+          if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
+            console.log(JSON.stringify(obj[i]));
+            provider = obj[i].Provider;
+            console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName + " and region: " + obj[i].Region);
+            valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, "AWS", obj[i].RefreshToken, obj[i].Region, "1", function(res) {
+              var jsonParse = JSON.stringify(res);
+              var jsonStr = JSON.parse(jsonParse);
+              console.log("response: " + jsonStr.status);
+              if (jsonStr.status == "STARTED") {
+                bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.  Please wait 45 seconds before deploying another SDDC.");
+              } else {
+                bot.reply(message, "Error message *" + jsonStr.status + "*.  Waiting 45 seconds to deploy the next.");
+              }
+            });
+          }
+          i++;
+        }
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
   });
 
   controller.hears(['get workshop status'], 'direct_message,direct_mention,mention', (bot, message) => {
@@ -142,25 +219,46 @@ module.exports = function(controller) {
       }
     });
   });
-function deploySDDC(callback) {
-  execSh(["/data/bender/vmc/create_sddc.sh"], true,
-    function(err, stdout, stderr) {
-      console.log("error: ", err);
-      console.log("stdout: ", stdout);
-      console.log("stderr: ", stderr);
-      return callback(stdout);
-    });
-}
 
-function deleteSDDC(callback) {
-  execSh(["/data/bender/vmc/delete_sddc.sh"], true,
-    function(err, stdout, stderr) {
-      console.log("error: ", err);
-      console.log("stdout: ", stdout);
-      console.log("stderr: ", stderr);
-      return callback(stdout);
-    });
-}
+  function deploySDDC(callback) {
+    execSh(["/data/bender/vmc/create_sddc.sh"], true,
+      function(err, stdout, stderr) {
+        console.log("error: ", err);
+        console.log("stdout: ", stdout);
+        console.log("stderr: ", stderr);
+        return callback(stdout);
+      });
+  }
+
+  function deployELWSDDC(callback) {
+    execSh(["/data/bender/vmc/create_elw_sddc.sh"], true,
+      function(err, stdout, stderr) {
+        console.log("error: ", err);
+        console.log("stdout: ", stdout);
+        console.log("stderr: ", stderr);
+        return callback(stdout);
+      });
+  }
+
+  function deleteSDDC(callback) {
+    execSh(["/data/bender/vmc/delete_sddc.sh"], true,
+      function(err, stdout, stderr) {
+        console.log("error: ", err);
+        console.log("stdout: ", stdout);
+        console.log("stderr: ", stderr);
+        return callback(stdout);
+      });
+  }
+
+  function deleteELWSDDC(callback) {
+    execSh(["/data/bender/vmc/delete_elw_sddc.sh"], true,
+      function(err, stdout, stderr) {
+        console.log("error: ", err);
+        console.log("stdout: ", stdout);
+        console.log("stderr: ", stderr);
+        return callback(stdout);
+      });
+  }
   /*  function wait(timeout) {
       return new Promise((resolve) => {
         setTimeout(() => {
