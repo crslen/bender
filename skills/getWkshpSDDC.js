@@ -93,6 +93,10 @@ module.exports = function(controller) {
           deleteELWSDDC(function callback(results) {
             console.log("stdout again: ", results);
             bot.reply(message, "Results: " + results);
+            bot.say({
+              channel: "#vmc-se-elw",
+              text: "Deleting elw workshops 1 thru 50.  The following have been started: \n" + results
+            });
           });
           bot.reply(message, "Deleting elw workshops 1 thru 50.  I'll share the results once complete, which may take up to 10 minutes.")
         }
@@ -116,8 +120,13 @@ module.exports = function(controller) {
           deployELWSDDC(function callback(results) {
             console.log("stdout again: ", results);
             bot.reply(message, "Results: " + results);
+            //put results in #vmc-se-elw channel
+            bot.say({
+              channel: "#vmc-se-elw",
+              text: "Deploying elw workshops 1 thru 50.  The following have been started: \n" + results
+            });
           });
-          bot.reply(message, "Deploying elw workshops 1 thru 50. You can ask me `@bender get workshop status` to see if all have been deployed succesfully.")
+          bot.reply(message, "Deploying elw workshops 1 thru 50. You can ask me `@bender get elw status` to see if all have been deployed succesfully.")
         }
         while (i < obj.length) {
           //for (var i = 0; i < obj.length; i++) {
@@ -131,8 +140,16 @@ module.exports = function(controller) {
               console.log("response: " + jsonStr.status);
               if (jsonStr.status == "STARTED") {
                 bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.  Please wait 45 seconds before deploying another SDDC.");
+                bot.say({
+                  channel: "#vmc-se-elw",
+                  text: "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*."
+                });
               } else {
-                bot.reply(message, "Error message *" + jsonStr.status + "*.  Waiting 45 seconds to deploy the next.");
+                bot.reply(message, "Error message *" + jsonStr.status + "*.  Wait 45 seconds to deploy the next.");
+                bot.say({
+                  channel: "#vmc-se-elw",
+                  text: "Error message *" + jsonStr.status + "*."
+                });
               }
             });
           }
