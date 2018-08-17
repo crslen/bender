@@ -161,6 +161,51 @@ module.exports = function(controller) {
     });
   });
 
+  controller.hears(['get elw status'], 'direct_message,direct_mention,mention', (bot, message) => {
+
+    //var customer = message.match[1];
+    bot.reply(message, "Checking status....");
+    //get orgid and refresh token
+    var jsonWKS = require("../json/elw.json");
+    jsonStr = JSON.stringify(jsonWKS);
+    obj = JSON.parse(jsonStr);
+    var i = 0;
+    var r = 0;
+    while (i < obj.length) {
+      var rToken = obj[i].RefreshToken;
+      var orgId = obj[i].OrgId;
+      //  if (obj[i].OrgName.toUpperCase() == "HOL-ELW-002") {
+      valFunc.getELWStatus(orgId, rToken, function(sddc) {
+        console.log(JSON.stringify(sddc.length));
+        if (sddc.length == 2) {
+          bot.reply(message, "I couldn't find any workshop SDDC's deployed.");
+        } else {
+          var sddcStr = JSON.parse(sddc);
+          //var jsonStr = JSON.parse(sddcStr);
+          //bot.reply(message, "A total of *" + sddcStr.length + "* SDDC's are deploying or have been deployed.");
+          //console.log("results:" + sddcStr.length);
+
+          for (var s = 0; s < sddcStr.length; s++) {
+            if (sddcStr[s].sddc_state == "READY") {
+              r = r + 1;
+            }
+            var sddcMessage = '' +
+              '*SDDC Name:* ' + sddcStr[s].name + ' ' +
+              '*SDDC State:* ' + sddcStr[s].sddc_state + '\n';
+            bot.reply(message, sddcMessage);
+          }
+        }
+      });
+      //}
+      i++;
+    }
+    //if (i == 50) {
+    bot.say({
+      text: "Ready: *" + r + "*"
+    });
+    //  }
+  });
+
   controller.hears(['get workshop status'], 'direct_message,direct_mention,mention', (bot, message) => {
 
     //var customer = message.match[1];
