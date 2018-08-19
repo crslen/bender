@@ -14,7 +14,8 @@ module.exports = function(controller) {
           convo.ask("What's the customer name?", (response, convo) => {
             customer = response.text;
             valFunc.getCustomer(customer, function(res) {
-              if (res[0].result == null) {
+              console.log(res);
+              if (res == 'No') {
                 bot.reply(message, "I don't see " + customer + " in the tech validation database or this has been selected as a <b>paid pilot</b>. If it's not a paid pilot make sure " + customer + " is added by asking me `@bender add POC for " + customer + "`")
                 convo.stop();
               } else {
