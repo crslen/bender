@@ -1,3 +1,5 @@
+var valFunc = require('../model/valFunctions');
+
 module.exports = function(controller) {
   //module.exports.use = function(controller) {
   controller.hears('help', 'direct_message,direct_mention,mention', function(bot, message) {
@@ -11,7 +13,7 @@ module.exports = function(controller) {
       dataCollection = dataCollection + '`' + botName + ' ' + benderQuestions[i].helper + '`: ' + benderQuestions[i].description + '.\n'
       i++
     }
-    
+
     helpMessage = '' +
       'I\'m here to help! Here are some of the commands available to assist you with. ' +
       'For more information about the POC process visit the confluence page - https://confluence.eng.vmware.com/display/CloudSE/Technical+Validation \n' +
@@ -31,7 +33,7 @@ module.exports = function(controller) {
       '\n' +
       '_VMC Workshops:_\n' +
       '`' + botName + ' add <email> to <vmc-ws#>`: Add student to workshop org.\n' +
-      '`' + botName + ' remove <email> from <vmc-ws#>`: remove student from workshop org.\n' +
+      '`' + botName + ' remove <email> from <vmc-ws#>`: Remove student from workshop org.\n' +
       '`' + botName + ' get workshop status`: Gets the status of SDDCs running in the workshop orgs.\n' +
 
       '\n' +
@@ -40,6 +42,21 @@ module.exports = function(controller) {
 
       '\n' +
       '_BU Data Collection:_\n' + dataCollection + '';
+
+    valFunc.validateUser(bot, message, function(cb) {
+      if (cb == 1) {
+        helpMessage = helpMessage + '' +
+          '\n' +
+          '_VMC Expert Led Workshops:_\n' +
+          '`' + botName + ' deploy elw <elw org name>`: Deploy SDDC in a ELW org (HOL-ELW-###).\n' +
+          '`' + botName + ' deploy elw all`: Deploy all 50 SDDCs in ELW.\n' +
+          '`' + botName + ' delete elw <elw org name>`: Delete SDDC in a ELW org (HOL-ELW-###).\n' +
+          '`' + botName + ' delete elw all`: Delete all 50 SDDCs in ELW.\n' +
+          '`' + botName + ' get elw status`: Gets the status of SDDCs running in the ELW orgs.\n' +
+          '`' + botName + ' add elw users`: Adds all users to ELW orgs.\n' +
+          '`' + botName + ' remove elw users`: Removes all users from ELW orgs.\n';
+      }
+    });
 
     bot.reply(message, helpMessage);
   });
