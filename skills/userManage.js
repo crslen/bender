@@ -34,7 +34,7 @@ module.exports = function(controller) {
         }
         bot.say({
           channel: "#vmc-se-elw",
-          text: "Successfully added ELW users to orgs."
+          text: "Adding ELW users to orgs in progress."
         });
       }
     });
@@ -60,7 +60,7 @@ module.exports = function(controller) {
         }
         bot.say({
           channel: "#vmc-se-elw",
-          text: "Successfully removed ELW users from orgs."
+          text: "Removing ELW users in progress from orgs."
         });
       }
     });
