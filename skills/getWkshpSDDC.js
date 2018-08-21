@@ -178,7 +178,8 @@ module.exports = function(controller) {
       valFunc.getELWStatus(orgId, rToken, function(sddc) {
         console.log(JSON.stringify(sddc.length));
         if (sddc.length == 2) {
-          bot.reply(message, "I couldn't find any workshop SDDC's deployed.");
+          //do nothing for now
+          //bot.reply(message, "I couldn't find any workshop SDDC's deployed.");
         } else {
           var sddcStr = JSON.parse(sddc);
           //var jsonStr = JSON.parse(sddcStr);

@@ -352,12 +352,12 @@ module.exports = function(controller) {
                 },
                 {
                   "title": "Start Date",
-                  "value": jsonStr[i].expected_start_date,
+                  "value": jsonStr[i].est_start_date,
                   "short": true
                 },
                 {
                   "title": "End Date",
-                  "value": jsonStr[i].expected_end_date,
+                  "value": jsonStr[i].est_end_date,
                   "short": true
                 },
                 {
