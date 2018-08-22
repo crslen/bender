@@ -109,52 +109,150 @@ module.exports = function(controller) {
   controller.hears(['deploy elw (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     valFunc.validateUser(bot, message, function(cb) {
       if (cb == 1) {
-        var sddc = message.match[1]
-        var jsonWKS = require("../json/elw.json");
-        console.log(message.match[1]);
-        //console.log(jsonWKS);
-        jsonStr = JSON.stringify(jsonWKS);
-        obj = JSON.parse(jsonStr);
-        var i = 0;
-        if (sddc.toLowerCase() == 'all') {
-          deployELWSDDC(function callback(results) {
-            console.log("stdout again: ", results);
-            bot.reply(message, "Results: " + results);
-            //put results in #vmc-se-elw channel
-            bot.say({
-              channel: "#vmc-se-elw",
-              text: "Deploying elw workshops 1 thru 50.  The following have been started: \n" + results
-            });
-          });
-          bot.reply(message, "Deploying elw workshops 1 thru 50. You can ask me `@bender get elw status` to see if all have been deployed succesfully.")
-        }
-        while (i < obj.length) {
-          //for (var i = 0; i < obj.length; i++) {
-          if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
-            console.log(JSON.stringify(obj[i]));
-            provider = obj[i].Provider;
-            console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName + " and region: " + obj[i].Region);
-            valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, "AWS", obj[i].RefreshToken, obj[i].Region, "1", function(res) {
-              var jsonParse = JSON.stringify(res);
-              var jsonStr = JSON.parse(jsonParse);
-              console.log("response: " + jsonStr.status);
-              if (jsonStr.status == "STARTED") {
-                bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.  Please wait 45 seconds before deploying another SDDC.");
+        bot.createConversation(message, function(err, convo) {
+          convo.addQuestion({
+
+            attachments: [{
+              title: 'Are you sure you want to do this?',
+              callback_id: 'ELWQ1',
+              attachment_type: 'default',
+              //color: color,
+              actions: [{
+                  "name": "yes",
+                  "text": "Yes",
+                  "value": "yes",
+                  "type": "button",
+                },
+                {
+                  "name": "no",
+                  "text": "No",
+                  "value": "no",
+                  "type": "button",
+                }
+              ]
+            }]
+
+          }, [{
+              pattern: "yes",
+              callback: function(reply, convo) {
+                convo.gotoThread('ELWQ2');
+                // do something awesome here.
+              }
+            },
+            {
+              pattern: "no",
+              callback: function(reply, convo) {
+                convo.gotoThread('noend');
+              }
+            },
+            {
+              default: true,
+              callback: function(response, convo) {
+                // = response.text;
+                //askStatus(response, convo);
+                //convo.next();
+              }
+            }
+          ], {}, 'default');
+
+          convo.addQuestion({
+
+            attachments: [{
+              title: 'Are you really really sure you want to do this?',
+              callback_id: 'ELWQ2',
+              attachment_type: 'default',
+              //color: color,
+              actions: [{
+                  "name": "yes",
+                  "text": "Yes",
+                  "value": "yes",
+                  "type": "button",
+                },
+                {
+                  "name": "no",
+                  "text": "No",
+                  "value": "no",
+                  "type": "button",
+                }
+              ]
+            }]
+
+          }, [{
+              pattern: "yes",
+              callback: function(reply, convo) {
+                convo.gotoThread('end');
+                // do something awesome here.
+              }
+            },
+            {
+              pattern: "no",
+              callback: function(reply, convo) {
+                convo.gotoThread('noend');
+              }
+            },
+            {
+              default: true,
+              callback: function(response, convo) {
+                // = response.text;
+                //askStatus(response, convo);
+                //convo.next();
+              }
+            }
+          ], {}, 'ELWQ2');
+
+          convo.addMessage('Here we go weeeee!', 'end');
+          convo.addMessage('Ok byeeee!', 'noend');
+          convo.activate();
+
+          let confTask = (response, convo) => {
+            var sddc = message.match[1]
+            var jsonWKS = require("../json/elw.json");
+            console.log(message.match[1]);
+            //console.log(jsonWKS);
+            jsonStr = JSON.stringify(jsonWKS);
+            obj = JSON.parse(jsonStr);
+            var i = 0;
+            if (sddc.toLowerCase() == 'all') {
+              deployELWSDDC(function callback(results) {
+                console.log("stdout again: ", results);
+                bot.reply(message, "Results: " + results);
+                //put results in #vmc-se-elw channel
                 bot.say({
                   channel: "#vmc-se-elw",
-                  text: "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*."
+                  text: "Deploying elw workshops 1 thru 50.  The following have been started: \n" + results
                 });
-              } else {
-                bot.reply(message, "Error message *" + jsonStr.status + "*.  Wait 45 seconds to deploy the next.");
-                bot.say({
-                  channel: "#vmc-se-elw",
-                  text: "Error message *" + jsonStr.status + "*."
+              });
+              bot.reply(message, "Deploying elw workshops 1 thru 50. You can ask me `@bender get elw status` to see if all have been deployed succesfully.")
+            }
+            while (i < obj.length) {
+              //for (var i = 0; i < obj.length; i++) {
+              if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
+                console.log(JSON.stringify(obj[i]));
+                provider = obj[i].Provider;
+                console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName + " and region: " + obj[i].Region);
+                valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, "AWS", obj[i].RefreshToken, obj[i].Region, "1", function(res) {
+                  var jsonParse = JSON.stringify(res);
+                  var jsonStr = JSON.parse(jsonParse);
+                  console.log("response: " + jsonStr.status);
+                  if (jsonStr.status == "STARTED") {
+                    bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.  Please wait 45 seconds before deploying another SDDC.");
+                    bot.say({
+                      channel: "#vmc-se-elw",
+                      text: "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*."
+                    });
+                  } else {
+                    bot.reply(message, "Error message *" + jsonStr.status + "*.  Wait 45 seconds to deploy the next.");
+                    bot.say({
+                      channel: "#vmc-se-elw",
+                      text: "Error message *" + jsonStr.status + "*."
+                    });
+                  }
                 });
               }
-            });
+              i++;
+            }
           }
-          i++;
-        }
+        });
       } else {
         bot.reply(message, "Sorry you do not have access to perform this operation.");
       }
