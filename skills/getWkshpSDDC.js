@@ -149,6 +149,7 @@ module.exports = function(controller) {
           }, [{
               pattern: "yes",
               callback: function(reply, convo) {
+                confTask(response, convo);
                 convo.gotoThread('end');
                 // do something awesome here.
               }
@@ -276,6 +277,7 @@ module.exports = function(controller) {
           }, [{
               pattern: "yes",
               callback: function(reply, convo) {
+                confTask(response, convo);
                 convo.gotoThread('end');
                 // do something awesome here.
               }
