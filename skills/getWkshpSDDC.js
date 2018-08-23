@@ -149,7 +149,7 @@ module.exports = function(controller) {
           }, [{
               pattern: "yes",
               callback: function(reply, convo) {
-                confTask(response, convo);
+                confTask(convo);
                 convo.gotoThread('end');
                 // do something awesome here.
               }
@@ -162,7 +162,7 @@ module.exports = function(controller) {
             },
             {
               default: true,
-              callback: function(response, convo) {
+              callback: function(convo) {
                 // = response.text;
                 //askStatus(response, convo);
                 //convo.next();
@@ -173,7 +173,7 @@ module.exports = function(controller) {
           convo.addMessage('Here we go weeeee! :dancing-bender:', 'end');
           convo.addMessage('Ok byeeee! :dancing-bender:', 'noend');
           convo.activate();
-          let confTask = (response, convo) => {
+          let confTask = (convo) => {
             var env = message.match[1]
             var sddc = message.match[2]
             console.log(message.match[1]);
@@ -277,7 +277,7 @@ module.exports = function(controller) {
           }, [{
               pattern: "yes",
               callback: function(reply, convo) {
-                confTask(response, convo);
+                confTask(convo);
                 convo.gotoThread('end');
                 // do something awesome here.
               }
@@ -290,7 +290,7 @@ module.exports = function(controller) {
             },
             {
               default: true,
-              callback: function(response, convo) {
+              callback: function(convo) {
                 // = response.text;
                 //askStatus(response, convo);
                 //convo.next();
@@ -302,7 +302,7 @@ module.exports = function(controller) {
           convo.addMessage('Ok byeeee! :dancing-bender:', 'noend');
           convo.activate();
 
-          let confTask = (response, convo) => {
+          let confTask = (convo) => {
             var env = message.match[1]
             var sddc = message.match[2]
             console.log(message.match[1]);
