@@ -79,39 +79,11 @@ module.exports = function(controller) {
     });
   });
 
-  controller.hears(['delete elw (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
-    valFunc.validateUser(bot, message, function(cb) {
-      if (cb == 1) {
-        var sddc = message.match[1]
-        var jsonWKS = require("../json/elw.json");
-        console.log(message.match[1]);
-        //console.log(jsonWKS);
-        jsonStr = JSON.stringify(jsonWKS);
-        obj = JSON.parse(jsonStr);
-        var i = 0;
-        if (sddc.toLowerCase() == 'all') {
-          deleteELWSDDC(function callback(results) {
-            console.log("stdout again: ", results);
-            bot.reply(message, "Results: " + results);
-            bot.say({
-              channel: "#vmc-se-elw",
-              text: "Deleting elw workshops 1 thru 50.  The following have been started: \n" + results
-            });
-          });
-          bot.reply(message, "Deleting elw workshops 1 thru 50.  I'll share the results once complete, which may take up to 10 minutes.")
-        }
-      } else {
-        bot.reply(message, "Sorry you do not have access to perform this operation.");
-      }
-    });
-  });
-
-  controller.hears(['deploy elw (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.hears(['delete (.*) (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     valFunc.validateUser(bot, message, function(cb) {
       if (cb == 1) {
         bot.createConversation(message, function(err, convo) {
           convo.addQuestion({
-
             attachments: [{
               title: 'Are you sure you want to do this?',
               callback_id: 'ELWQ1',
@@ -131,7 +103,6 @@ module.exports = function(controller) {
                 }
               ]
             }]
-
           }, [{
               pattern: "yes",
               callback: function(reply, convo) {
@@ -156,7 +127,6 @@ module.exports = function(controller) {
           ], {}, 'default');
 
           convo.addQuestion({
-
             attachments: [{
               title: 'Are you really really sure you want to do this?',
               callback_id: 'ELWQ2',
@@ -176,7 +146,6 @@ module.exports = function(controller) {
                 }
               ]
             }]
-
           }, [{
               pattern: "yes",
               callback: function(reply, convo) {
@@ -200,14 +169,146 @@ module.exports = function(controller) {
             }
           ], {}, 'ELWQ2');
 
-          convo.addMessage('Here we go weeeee!', 'end');
-          convo.addMessage('Ok byeeee!', 'noend');
+          convo.addMessage('Here we go weeeee! :dancing-bender:', 'end');
+          convo.addMessage('Ok byeeee! :dancing-bender:', 'noend');
+          convo.activate();
+          let confTask = (response, convo) => {
+            var env = message.match[1]
+            var sddc = message.match[2]
+            console.log(message.match[1]);
+            if (env == 'elw') {
+              var jsonWKS = require("../json/elw.json");
+            } else {
+              var jsonWKS = require("../json/workshop.json");
+            }
+            //console.log(jsonWKS);
+            jsonStr = JSON.stringify(jsonWKS);
+            obj = JSON.parse(jsonStr);
+            var i = 0;
+            if (sddc.toLowerCase() == 'all') {
+              deleteELWSDDC(function callback(results) {
+                console.log("stdout again: ", results);
+                bot.reply(message, "Results: " + results);
+                bot.say({
+                  channel: "#vmc-se-elw",
+                  text: "Deleting elw workshops 1 thru 50.  The following have been started: \n" + results
+                });
+              });
+              bot.reply(message, "Deleting elw workshops 1 thru 50.  I'll share the results once complete, which may take up to 10 minutes.")
+            }
+          };
+        });
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
+  });
+
+  controller.hears(['deploy (.*) (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    console.log("env: " + message.match[1]);
+    console.log("sddc: " + message.match[2]);
+    valFunc.validateUser(bot, message, function(cb) {
+      if (cb == 1) {
+        bot.createConversation(message, function(err, convo) {
+          convo.addQuestion({
+            attachments: [{
+              title: 'Are you sure you want to do this?',
+              callback_id: 'ELWQ1',
+              attachment_type: 'default',
+              //color: color,
+              actions: [{
+                  "name": "yes",
+                  "text": "Yes",
+                  "value": "yes",
+                  "type": "button",
+                },
+                {
+                  "name": "no",
+                  "text": "No",
+                  "value": "no",
+                  "type": "button",
+                }
+              ]
+            }]
+          }, [{
+              pattern: "yes",
+              callback: function(reply, convo) {
+                convo.gotoThread('ELWQ2');
+                // do something awesome here.
+              }
+            },
+            {
+              pattern: "no",
+              callback: function(reply, convo) {
+                convo.gotoThread('noend');
+              }
+            },
+            {
+              default: true,
+              callback: function(response, convo) {
+                // = response.text;
+                //askStatus(response, convo);
+                //convo.next();
+              }
+            }
+          ], {}, 'default');
+
+          convo.addQuestion({
+            attachments: [{
+              title: 'Are you really really sure you want to do this?',
+              callback_id: 'ELWQ2',
+              attachment_type: 'default',
+              //color: color,
+              actions: [{
+                  "name": "yes",
+                  "text": "Yes",
+                  "value": "yes",
+                  "type": "button",
+                },
+                {
+                  "name": "no",
+                  "text": "No",
+                  "value": "no",
+                  "type": "button",
+                }
+              ]
+            }]
+          }, [{
+              pattern: "yes",
+              callback: function(reply, convo) {
+                convo.gotoThread('end');
+                // do something awesome here.
+              }
+            },
+            {
+              pattern: "no",
+              callback: function(reply, convo) {
+                convo.gotoThread('noend');
+              }
+            },
+            {
+              default: true,
+              callback: function(response, convo) {
+                // = response.text;
+                //askStatus(response, convo);
+                //convo.next();
+              }
+            }
+          ], {}, 'ELWQ2');
+
+          convo.addMessage('Here we go weeeee! :dancing-bender:', 'end');
+          convo.addMessage('Ok byeeee! :dancing-bender:', 'noend');
           convo.activate();
 
           let confTask = (response, convo) => {
-            var sddc = message.match[1]
-            var jsonWKS = require("../json/elw.json");
+            var env = message.match[1]
+            var sddc = message.match[2]
             console.log(message.match[1]);
+            if (env == 'elw') {
+              var jsonWKS = require("../json/elw.json");
+            } else {
+              var jsonWKS = require("../json/workshop.json");
+            }
             //console.log(jsonWKS);
             jsonStr = JSON.stringify(jsonWKS);
             obj = JSON.parse(jsonStr);
