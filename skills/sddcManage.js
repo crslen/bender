@@ -14,71 +14,6 @@ var subnetId;
 
 module.exports = function(controller) {
 
-  controller.hears(['delete workshop (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
-    valFunc.validateUser(bot, message, function(cb) {
-      if (cb == 1) {
-        var sddc = message.match[1]
-        var jsonWKS = require("../json/workshop.json");
-        console.log(message.match[1]);
-        //console.log(jsonWKS);
-        jsonStr = JSON.stringify(jsonWKS);
-        obj = JSON.parse(jsonStr);
-        var i = 0;
-        if (sddc.toLowerCase() == 'all') {
-          deleteSDDC(function callback(results) {
-            console.log("stdout again: ", results);
-            bot.reply(message, "Results: " + results);
-          });
-          bot.reply(message, "Deleting student workshops 1 thru 10.  I'll share the results once complete, which may take up to 10 minutes.")
-        }
-      } else {
-        bot.reply(message, "Sorry you do not have access to perform this operation.");
-      }
-    });
-  });
-
-  controller.hears(['deploy workshop (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
-    valFunc.validateUser(bot, message, function(cb) {
-      if (cb == 1) {
-        var sddc = message.match[1]
-        var jsonWKS = require("../json/workshop.json");
-        console.log(message.match[1]);
-        //console.log(jsonWKS);
-        jsonStr = JSON.stringify(jsonWKS);
-        obj = JSON.parse(jsonStr);
-        var i = 0;
-        if (sddc.toLowerCase() == 'all') {
-          deploySDDC(function callback(results) {
-            console.log("stdout again: ", results);
-            bot.reply(message, "Results: " + results);
-          });
-          bot.reply(message, "Deploying student workshops 1 thru 10. You can ask me `@bender get workshop status` to see if all have been deployed succesfully.")
-        }
-        while (i < obj.length) {
-          //for (var i = 0; i < obj.length; i++) {
-          if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
-            console.log(JSON.stringify(obj[i]));
-            provider = obj[i].Provider;
-            console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName);
-            valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, "AWS", obj[i].RefreshToken, "US-WEST-2", 3, function(res) {
-              var jsonParse = JSON.stringify(res);
-              var jsonStr = JSON.parse(jsonParse);
-              console.log("response: " + jsonStr.status);
-              if (jsonStr.status == "STARTED") {
-                bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.  Please wait 45 seconds before deploying another SDDC.");
-              } else {
-                bot.reply(message, "Error message *" + jsonStr.status + "*.  Waiting 45 seconds to deploy the next.");
-              }
-            });
-          }
-          i++;
-        }
-      } else {
-        bot.reply(message, "Sorry you do not have access to perform this operation.");
-      }
-    });
-  });
-
   controller.hears(['delete (.*) (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     valFunc.validateUser(bot, message, function(cb) {
       if (cb == 1) {
@@ -178,8 +113,10 @@ module.exports = function(controller) {
             var sddc = message.match[2]
             console.log(message.match[1]);
             if (env == 'elw') {
+              var chnl = '#vmc-se-elw';
               var jsonWKS = require("../json/elw.json");
             } else {
+              var chnl = '#vmc-workshops';
               var jsonWKS = require("../json/workshop.json");
             }
             //console.log(jsonWKS);
@@ -187,15 +124,26 @@ module.exports = function(controller) {
             obj = JSON.parse(jsonStr);
             var i = 0;
             if (sddc.toLowerCase() == 'all') {
-              deleteELWSDDC(function callback(results) {
-                console.log("stdout again: ", results);
-                bot.reply(message, "Results: " + results);
-                bot.say({
-                  channel: "#vmc-se-elw",
-                  text: "Deleting elw workshops 1 thru 50.  The following have been started: \n" + results
+              if (env == 'elw') {
+                deleteELWSDDC(function callback(results) {
+                  console.log("stdout again: ", results);
+                  bot.reply(message, "Results:\n" + results);
+                  bot.say({
+                    channel: chnl,
+                    text: "Deleting elw workshops 1 thru 50.  The following have been started: \n" + results
+                  });
                 });
-              });
-              bot.reply(message, "Deleting elw workshops 1 thru 50.  I'll share the results once complete, which may take up to 10 minutes.")
+              } else {
+                deleteSDDC(function callback(results) {
+                  console.log("stdout again: ", results);
+                  bot.reply(message, "Results:\n" + results);
+                  bot.say({
+                    channel: chnl,
+                    text: "Deleting workshops 1 thru 10.  The following have been started: \n" + results
+                  });
+                });
+              }
+              //bot.reply(message, "Deleting elw workshops 1 thru 50.  I'll share the results once complete, which may take up to 10 minutes.")
             }
           };
         });
@@ -303,12 +251,14 @@ module.exports = function(controller) {
           convo.activate();
 
           let confTask = (convo) => {
-            var env = message.match[1]
-            var sddc = message.match[2]
+            var env = message.match[1];
+            var sddc = message.match[2];
             console.log(message.match[1]);
             if (env == 'elw') {
+              var chnl = '#vmc-se-elw';
               var jsonWKS = require("../json/elw.json");
             } else {
+              var chnl = '#vmc-workshops';
               var jsonWKS = require("../json/workshop.json");
             }
             //console.log(jsonWKS);
@@ -316,16 +266,28 @@ module.exports = function(controller) {
             obj = JSON.parse(jsonStr);
             var i = 0;
             if (sddc.toLowerCase() == 'all') {
-              deployELWSDDC(function callback(results) {
-                console.log("stdout again: ", results);
-                bot.reply(message, "Results: " + results);
-                //put results in #vmc-se-elw channel
-                bot.say({
-                  channel: "#vmc-se-elw",
-                  text: "Deploying elw workshops 1 thru 50.  The following have been started: \n" + results
+              if (env == 'elw') {
+                deployELWSDDC(function callback(results) {
+                  console.log("stdout again: ", results);
+                  bot.reply(message, "Results:\n" + results);
+                  //put results in #vmc-se-elw channel
+                  bot.say({
+                    channel: chnl,
+                    text: "Deploying elw workshops 1 thru 50.  The following have been started: \n" + results
+                  });
                 });
-              });
-              bot.reply(message, "Deploying elw workshops 1 thru 50. You can ask me `@bender get elw status` to see if all have been deployed succesfully.")
+              } else {
+                deploySDDC(function callback(results) {
+                  console.log("stdout again: ", results);
+                  bot.reply(message, "Results:\n" + results);
+                  //put results in #vmc-se-elw channel
+                  bot.say({
+                    channel: chnl,
+                    text: "Deploying workshops 1 thru 10.  The following have been started: \n" + results
+                  });
+                });
+              }
+              //bot.reply(message, "Deploying elw workshops 1 thru 50. You can ask me `@bender get elw status` to see if all have been deployed succesfully.")
             }
             while (i < obj.length) {
               //for (var i = 0; i < obj.length; i++) {
@@ -333,20 +295,20 @@ module.exports = function(controller) {
                 console.log(JSON.stringify(obj[i]));
                 provider = obj[i].Provider;
                 console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName + " and region: " + obj[i].Region);
-                valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, "AWS", obj[i].RefreshToken, obj[i].Region, "1", function(res) {
+                valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, obj[i].Provider, obj[i].RefreshToken, obj[i].Region, obj[i].NumHost, function(res) {
                   var jsonParse = JSON.stringify(res);
                   var jsonStr = JSON.parse(jsonParse);
                   console.log("response: " + jsonStr.status);
                   if (jsonStr.status == "STARTED") {
                     bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.  Please wait 45 seconds before deploying another SDDC.");
                     bot.say({
-                      channel: "#vmc-se-elw",
+                      channel: chnl,
                       text: "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*."
                     });
                   } else {
                     bot.reply(message, "Error message *" + jsonStr.status + "*.  Wait 45 seconds to deploy the next.");
                     bot.say({
-                      channel: "#vmc-se-elw",
+                      channel: chnl,
                       text: "Error message *" + jsonStr.status + "*."
                     });
                   }
@@ -362,22 +324,27 @@ module.exports = function(controller) {
     });
   });
 
-  controller.hears(['get elw status'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.hears(['get (.*) status'], 'direct_message,direct_mention,mention', (bot, message) => {
 
     //var customer = message.match[1];
     bot.reply(message, "Checking status....");
-    //get orgid and refresh token
-    var jsonWKS = require("../json/elw.json");
+    var env = message.match[1];
+    if (env == 'elw') {
+      var jsonWKS = require("../json/elw.json");
+    } else {
+      var jsonWKS = require("../json/workshop.json");
+    }
     jsonStr = JSON.stringify(jsonWKS);
     obj = JSON.parse(jsonStr);
     var i = 0;
     var r = 0;
+    var sddcMessage = '';
     while (i < obj.length) {
       var rToken = obj[i].RefreshToken;
       var orgId = obj[i].OrgId;
       //  if (obj[i].OrgName.toUpperCase() == "HOL-ELW-002") {
-      valFunc.getELWStatus(orgId, rToken, function(sddc) {
-        console.log(JSON.stringify(sddc.length));
+      results = valFunc.getELWStatus(orgId, rToken, function(sddc) {
+        console.log(JSON.stringify(sddc));
         if (sddc.length == 2) {
           //do nothing for now
           //bot.reply(message, "I couldn't find any workshop SDDC's deployed.");
@@ -391,97 +358,18 @@ module.exports = function(controller) {
             if (sddcStr[s].sddc_state == "READY") {
               r = r + 1;
             }
-            var sddcMessage = '' +
+            sddcMessage = '' +
               '*SDDC Name:* ' + sddcStr[s].name + ' ' +
               '*SDDC State:* ' + sddcStr[s].sddc_state + '\n';
-            bot.reply(message, sddcMessage);
           }
+          bot.reply(message, sddcMessage);
         }
       });
-      //}
       i++;
     }
-    //if (i == 50) {
-    bot.say({
-      text: "Ready: *" + r + "*"
-    });
-    //  }
-  });
-
-  controller.hears(['get workshop status'], 'direct_message,direct_mention,mention', (bot, message) => {
-
-    //var customer = message.match[1];
-    bot.reply(message, "Checking status....");
-    valFunc.getWkshpSDDC(function(sddc) {
-      if (sddc.length == 2) {
-        bot.reply(message, {
-          text: "I couldn't find any workshop SDDC's deployed."
-        });
-      } else {
-        var sddcStr = JSON.stringify(sddc);
-        var jsonStr = JSON.parse(sddcStr);
-        bot.reply(message, "A total of *" + jsonStr.length + "* SDDC's have been deployed.");
-        console.log("results:" + jsonStr.length);
-        for (var i = 0; i < jsonStr.length; i++) {
-          bot.reply(message, {
-            //text: "Here's what I found",
-            attachments: [{
-              "title": jsonStr[i].name,
-              "color": colorArray[i],
-              //"title": "Mode Analytics Report",
-              //"title_link": "https://modeanalytics.com/vmware_inc/reports/1c69ccf26a01",
-              "fields": [{
-                  "title": "Status",
-                  "value": jsonStr[i].sddc_state,
-                  "short": true
-                },
-                {
-                  "title": "Created",
-                  "value": jsonStr[i].created,
-                  "short": true
-                },
-                {
-                  "title": "Age in Days",
-                  "value": jsonStr[i].age_days,
-                  "short": true
-                },
-                {
-                  "title": "Powered on VMs",
-                  "value": jsonStr[i].powered_on_vms,
-                  "short": true
-                }
-                /*{
-                  "title": "AWS Region",
-                  "value": jsonStr[i].region,
-                  "short": true
-                },
-
-                {
-                  "title": "VMC Version",
-                  "value": jsonStr[i].vmc_version,
-                  "short": true
-                },
-                {
-                  "title": "VMC Internal Version",
-                  "value": jsonStr[i].vmc_internal_version,
-                  "short": true
-                },
-                {
-                  "title": "Org ID",
-                  "value": jsonStr[i].org_id,
-                  "short": true
-                },
-                {
-                  "title": "SDDC ID",
-                  "value": jsonStr[i].sddc_id,
-                  "short": true
-                }*/
-              ],
-            }]
-          });
-        }
-      }
-    });
+    sddcMessage = '[' + sddcMessage + ']';
+    console.log(sddcMessage);
+    //bot.say(message, sddcMessage);
   });
 
   function deploySDDC(callback) {
@@ -523,23 +411,5 @@ module.exports = function(controller) {
         return callback(stdout);
       });
   }
-  /*  function wait(timeout) {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          console.log("done");
-          resolve()
-        }, timeout)
-      })
-    }*/
-  /*function sleep(milliseconds) {
-    setTimeout(function() {
-    console.log("timeout");
-  },60000);
-    /*var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-      if ((new Date().getTime() - start) > milliseconds) {
-        break;
-      }
-    }
-  }*/
+
 }; /* the end */
