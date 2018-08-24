@@ -343,16 +343,17 @@ module.exports = function(controller) {
       var rToken = obj[i].RefreshToken;
       var orgId = obj[i].OrgId;
       //  if (obj[i].OrgName.toUpperCase() == "HOL-ELW-002") {
-      results = valFunc.getELWStatus(orgId, rToken, function(sddc) {
+      valFunc.getELWStatus(orgId, rToken, function(sddc) {
         console.log(JSON.stringify(sddc));
         if (sddc.length == 2) {
+          console.log("results:" + sddc.length);
           //do nothing for now
           //bot.reply(message, "I couldn't find any workshop SDDC's deployed.");
         } else {
           var sddcStr = JSON.parse(sddc);
           //var jsonStr = JSON.parse(sddcStr);
           //bot.reply(message, "A total of *" + sddcStr.length + "* SDDC's are deploying or have been deployed.");
-          //console.log("results:" + sddcStr.length);
+          console.log("results:" + sddcStr.length);
 
           for (var s = 0; s < sddcStr.length; s++) {
             if (sddcStr[s].sddc_state == "READY") {
@@ -367,8 +368,8 @@ module.exports = function(controller) {
       });
       i++;
     }
-    sddcMessage = '[' + sddcMessage + ']';
-    console.log(sddcMessage);
+    
+    console.log("sddcmsg " + sddcMessage);
     //bot.say(message, sddcMessage);
   });
 
