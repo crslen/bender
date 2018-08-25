@@ -109,8 +109,8 @@ module.exports = function(controller) {
           convo.addMessage('Ok byeeee! :dancing-bender:', 'noend');
           convo.activate();
           let confTask = (convo) => {
-            var env = message.match[1]
-            var sddc = message.match[2]
+            var env = message.match[1].toLowerCase();
+            var sddc = message.match[2];
             console.log(message.match[1]);
             if (env == 'elw') {
               var chnl = '#vmc-se-elw';
@@ -251,7 +251,7 @@ module.exports = function(controller) {
           convo.activate();
 
           let confTask = (convo) => {
-            var env = message.match[1];
+            var env = message.match[1].toLowerCase();
             var sddc = message.match[2];
             console.log(message.match[1]);
             if (env == 'elw') {
@@ -328,7 +328,7 @@ module.exports = function(controller) {
 
     //var customer = message.match[1];
     bot.reply(message, "Checking status....");
-    var env = message.match[1];
+    var env = message.match[1].toLowerCase();
     if (env == 'elw') {
       var jsonWKS = require("../json/elw.json");
     } else {
