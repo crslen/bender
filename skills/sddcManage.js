@@ -344,7 +344,7 @@ module.exports = function(controller) {
       var orgId = obj[i].OrgId;
       //  if (obj[i].OrgName.toUpperCase() == "HOL-ELW-002") {
       valFunc.getELWStatus(orgId, rToken, function(sddc) {
-        console.log(JSON.stringify(sddc));
+        //console.log(JSON.stringify(sddc));
         if (sddc.length == 2) {
           console.log("results:" + sddc.length);
           //do nothing for now
