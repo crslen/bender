@@ -17,6 +17,7 @@ module.exports = function(controller) {
       console.log("name:" + JSON.stringify(message));
       let askActivity = (response, convo) => {
         bot.reply(message, "Type `cancel` or `exit` to back out of this conversation.")
+        convo.task.timeLimit = 60000
         convo.ask({
           attachments: [{
             title: "Select an activity?",
@@ -43,6 +44,7 @@ module.exports = function(controller) {
       let askNotes = (response, convo) => {
 
         convo.ask("Please provide the details of " + actCat + " for " + customer, (response, convo) => {
+          convo.task.timeLimit = 60000
           notes = response.text;
           confTask(response, convo);
           convo.next();

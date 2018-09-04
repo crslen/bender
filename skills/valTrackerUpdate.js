@@ -768,7 +768,7 @@ module.exports = function(controller) {
               convo.next();
             } else {
               if (updateField == 'notes') {
-                updateValue = updateData[0].notes + '|' + upDate + "-" + updateValue;
+                updateValue = updateData[0].notes.replace(/[\r\n]/g, "|") + '|' + upDate + "-" + updateValue;
               }
               if (updateValue == 'Complete Won') {
                 bot.reply(message, {

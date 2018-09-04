@@ -34,34 +34,34 @@ module.exports = function(controller) {
         }
 
         console.log(goto);
-      /*  if (obj.Questions[i].field_type == "dropdown") {
+        /*  if (obj.Questions[i].field_type == "dropdown") {
 
-          convo.addQuestion({
-            attachments: [{
-              title: obj.Questions[i].Question,
-              callback_id: `Q${i}`,
-              attachment_type: 'default',
-              color: '#629aca',
-              actions: [{
-                "name": `Q${i}`,
-                "text": "Pick something...",
-                "type": "select",
-                "options": obj.Questions[i].fields
+            convo.addQuestion({
+              attachments: [{
+                title: obj.Questions[i].Question,
+                callback_id: `Q${i}`,
+                attachment_type: 'default',
+                color: '#629aca',
+                actions: [{
+                  "name": `Q${i}`,
+                  "text": "Pick something...",
+                  "type": "select",
+                  "options": obj.Questions[i].fields
+                }]
               }]
-            }]
-          }, [{
-            default: true,
-            callback: function(response, convo) {
-              jsonProperties = jsonProperties + '"' + obj.Questions[i].variable + '": "' + response.text + '",';
-              convo.gotoThread(goto);
-            }
-          }], {}, pos);
-        } else { */
-          convo.addQuestion(obj.Questions[i].Question, function(response, convo) {
-            jsonProperties = jsonProperties + '"' + obj.Questions[0].variable + '": "' + response.text + '",';
+            }, [{
+              default: true,
+              callback: function(response, convo) {
+                jsonProperties = jsonProperties + '"' + obj.Questions[i].variable + '": "' + response.text + '",';
+                convo.gotoThread(goto);
+              }
+            }], {}, pos);
+          } else { */
+        convo.addQuestion(obj.Questions[i].Question, function(response, convo) {
+          jsonProperties = jsonProperties + '"' + obj.Questions[0].variable + '": "' + response.text + '",';
 
-            convo.gotoThread(goto);
-          }, {}, pos);
+          convo.gotoThread(goto);
+        }, {}, pos);
         //}
         i++
       }
@@ -261,6 +261,7 @@ module.exports = function(controller) {
 
   controller.hears(['Provide Storage Information'], 'direct_message, direct_mention', function(bot, message) {
     bot.createConversation(message, function(err, convo) {
+      convo.task.timeLimit = 60000
       var jsonProperties = "";
       //var strQuestion = "";
       //var strVariable = "";
@@ -402,6 +403,12 @@ module.exports = function(controller) {
 
       convo.addMessage('Okay thank you very much for the valuable info, human.', 'end');
       convo.activate();
+      convo.on('end', function(convo) {
+        if (convo.status == 'timeout') {
+          console.log("timeout");
+          convo.say("session ended");
+        }
+      });
 
       let confTask = (response, convo) => {
         bot.api.users.info({
