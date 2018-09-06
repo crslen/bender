@@ -247,6 +247,29 @@ module.exports = function(controller) {
                   }
                 }]);
                 break;
+              case "onboard_status":
+                convo.ask({
+                  attachments: [{
+                    title: 'What is the current status of customer being onboarded?',
+                    callback_id: 'obStatus',
+                    attachment_type: 'default',
+                    color: color,
+                    actions: [{
+                      "name": "onboard_status",
+                      "text": "Current Status...",
+                      "type": "select",
+                      "options": fields.obStatus()
+                    }]
+                  }]
+                }, [{
+                  default: true,
+                  callback: function(response, convo) {
+                    updateValue = response.text;
+                    confTask(response, convo);
+                    convo.next();
+                  }
+                }]);
+                break;
               case "type":
                 convo.ask({
                   attachments: [{
