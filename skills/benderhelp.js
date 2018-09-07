@@ -38,17 +38,17 @@ module.exports = function(controller) {
 
       '\n' +
       '_Misc:_\n' +
-      '`' + botName + ' new one thing report for <me or SET name>`: Adds your one thing you want to share with upper management. If you type "me" then I will use your name or type somebody elses name if you\'re reporting for that person.\n' +
+      '`' + botName + ' new one thing report`: Adds your one thing you want to share with upper management.\n' +
 
       '\n' +
-      '_BU Data Collection:_\n' + dataCollection + '' + 
+      '_BU Data Collection:_\n' + dataCollection + '' +
 
-    //valFunc.validateUser(bot, message, function(cb) {
-    //  if (cb == 1) {
-    //helpMessage = helpMessage + '' +
-    '\n' +
-    '_VMC Expert Led Workshops (restricted access):_\n' +
-    '`' + botName + ' deploy elw <elw org name>`: Deploy SDDC in a ELW org (HOL-ELW-###).\n' +
+      //valFunc.validateUser(bot, message, function(cb) {
+      //  if (cb == 1) {
+      //helpMessage = helpMessage + '' +
+      '\n' +
+      '_VMC Expert Led Workshops (restricted access):_\n' +
+      '`' + botName + ' deploy elw <elw org name>`: Deploy SDDC in a ELW org (HOL-ELW-###).\n' +
       '`' + botName + ' deploy elw all`: Deploy all 50 SDDCs in ELW.\n' +
       '`' + botName + ' delete elw <elw org name>`: Delete SDDC in a ELW org (HOL-ELW-###).\n' +
       '`' + botName + ' delete elw all`: Delete all 50 SDDCs in ELW.\n' +

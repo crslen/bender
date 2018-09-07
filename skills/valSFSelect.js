@@ -12,14 +12,14 @@ module.exports = function(controller) {
 
   //controller.middleware.receive.use(luis.middleware.receive(luisOptions));
   //controller.hears(['salesforce','sf opp'], 'direct_message,direct_mention,mention', function(bot, message) {
-  controller.hears(['get (.*) sf opp', 'find (.*) salesforce opp'], 'direct_message,direct_mention,mention', function(bot, message) {
+  controller.hears(['(find|show|get) (.*) (salesforce|opportunity|sf opp)'], 'direct_message,direct_mention,mention', function(bot, message) {
     console.log(JSON.stringify(message));
     //if (message.topIntent.intent == "salesforce") {
     valFunc.validateUser(bot, message, function(cb) {
       if (cb == 1) {
         //var sfCustomer = message.entities[0].entity;
-        var sfCustomer = message.match[1];
-        bot.reply(message, "Please hold.....");
+        var sfCustomer = message.match[2];
+        bot.reply(message, "Searching for opportunities.....");
         valFunc.getSFDC(sfCustomer, 'All', function(res) {
           if (res.length == 0) {
             bot.reply(message, {

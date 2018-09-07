@@ -21,12 +21,12 @@ var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
 
 module.exports = function(controller) {
   //controller.middleware.receive.use(luis.middleware.receive(luisOptions));
-  controller.hears(['get roadmap (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
+  controller.hears(['(find|show|get) roadmap (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
     console.log(JSON.stringify(message));
     //  if (message.topIntent.intent == "roadmap") {
     bot.reply(message, "Please hold.....");
 
-    var strSearch = message.match[1];
+    var strSearch = message.match[2];
     valFunc.getRoadmap(strSearch, function(res) {
       if (res.length == 0) {
         bot.reply(message, {

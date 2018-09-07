@@ -14,13 +14,13 @@ const config = {
 
 module.exports = function(controller) {
 
-  controller.hears(['new one thing report for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.hears(['(new|add) one thing report'], 'direct_message,direct_mention,mention', (bot, message) => {
 
     var oneThing; //customer name
     var category = "";
     var seName = "";
-    seName = message.match[1];
-    console.log("name:" + JSON.stringify(message));
+    //seName = message.match[1];
+    //console.log("name:" + JSON.stringify(message));
 
     let askOneThing = (response, convo) => {
       bot.reply(message, "Type `cancel` or `exit` to back out of this conversation.")
@@ -54,10 +54,7 @@ module.exports = function(controller) {
               mm = '0' + mm
             }
             var todayDate = mm + '/' + dd + '/' + yyyy;
-
-            if (seName == "me") {
-              seName = real_name;
-            }
+            var seName = real_name;
 
             //db data
             var rows = "('" + todayDate + "','" + category + "','" + seName + "','" + oneThing.replace("'", "\'") + "')"

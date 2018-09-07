@@ -23,8 +23,8 @@ module.exports = function(controller) {
                 if (results[0] == "Yes" && results[1].toLowerCase().indexOf("poc") >= 0) {
                   bot.reply(message, "Glad to see " + customer + " is in the tech validation database.");
                   valFunc.getPreFlight(customer, function(res) {
-                    console.log("response: " + res[0].response);
-                    if (res[0].response == 'No') {
+                    console.log("response: " + res[0].result);
+                    if (res[0].result == 'No') {
                       bot.reply(message, {
                         text: "I couldn't find any pre-flight info on " + customer + ".  Make sure the customer and account team fills out this survey - https://www.surveymonkey.com/r/vmc-tech-val-preflight"
                       });
