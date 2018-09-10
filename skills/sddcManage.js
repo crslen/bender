@@ -145,6 +145,32 @@ module.exports = function(controller) {
               }
               //bot.reply(message, "Deleting elw workshops 1 thru 50.  I'll share the results once complete, which may take up to 10 minutes.")
             }
+            while (i < obj.length) {
+              //for (var i = 0; i < obj.length; i++) {
+              if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
+                console.log(JSON.stringify(obj[i]));
+                provider = obj[i].Provider;
+                valFunc.deleteSDDC(obj[i].OrgId, obj[i].RefreshToken, function(res) {
+                  var jsonParse = JSON.stringify(res);
+                  var jsonStr = JSON.parse(res);
+                  console.log("response: " + jsonStr);
+                  if (jsonStr.status == "STARTED") {
+                    bot.reply(message, "Removal of *" + jsonStr.params.SDDC_DELETE_CONTEXT_PARAM.sddc_id + "* has *" + jsonStr.status + "*. ");
+                    bot.say({
+                      channel: chnl,
+                      text: "Removal of *" + jsonStr.params.SDDC_DELETE_CONTEXT_PARAM.sddc_id + "* has *" + jsonStr.status + "*."
+                    });
+                  } else {
+                    bot.reply(message, "Error message *" + jsonStr.status + "*.");
+                    bot.say({
+                      channel: chnl,
+                      text: "Error message *" + jsonStr.status + "*."
+                    });
+                  }
+                });
+              }
+              i++;
+            }
           };
         });
       } else {
@@ -342,9 +368,7 @@ module.exports = function(controller) {
     while (i < obj.length) {
       var rToken = obj[i].RefreshToken;
       var orgId = obj[i].OrgId;
-      //  if (obj[i].OrgName.toUpperCase() == "HOL-ELW-002") {
       valFunc.getELWStatus(orgId, rToken, function(sddc) {
-        //console.log(JSON.stringify(sddc));
         if (sddc.length == 2) {
           console.log("results:" + sddc.length);
           //do nothing for now
@@ -364,12 +388,14 @@ module.exports = function(controller) {
               '*SDDC State:* ' + sddcStr[s].sddc_state + '\n';
           }
           bot.reply(message, sddcMessage);
+          return sddcMessage;
         }
+        console.log("sddcmsg=: " + r);
       });
       i++;
+
     }
-    
-    console.log("sddcmsg " + sddcMessage);
+
     //bot.say(message, sddcMessage);
   });
 
