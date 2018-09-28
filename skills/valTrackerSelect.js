@@ -300,22 +300,22 @@ module.exports = function(controller) {
           //  if (jsonStr[i].Actual_Start_Date == null) {var startDate = "None"} else {var startDate = jsonStr[i].Actual_Start_Date.value}
           //if (jsonStr[i].End_Date == null) {var endDate = ""} else {var endDate = jsonStr[i].End_Date.value}
           if (jsonStr[i].compliance !== null) {
-            var compliance = jsonStr[i].compliance.replace("|", "\n")
+            var compliance = jsonStr[i].compliance.replace(/\|/g, "\n")
           } else {
             var compliance = "None"
           };
           if (jsonStr[i].use_case !== null) {
-            var use_case = jsonStr[i].use_case.replace("|", "\n")
+            var use_case = jsonStr[i].use_case.replace(/\|/g, "\n")
           } else {
             var use_case = "None"
           };
           if (jsonStr[i].region !== null) {
-            var region = jsonStr[i].region.replace("|", "\n")
+            var region = jsonStr[i].region.replace(/\|/g, "\n")
           } else {
             var region = "None"
           };
           if (jsonStr[i].services !== null) {
-            var service = jsonStr[i].services.replace("|", "\n")
+            var service = jsonStr[i].services.replace(/\|/g, "\n")
           } else {
             var service = "None"
           };
@@ -338,7 +338,7 @@ module.exports = function(controller) {
                 },
                 {
                   "title": "SET Member",
-                  "value": jsonStr[i].se_specialist.replace("|", "\n"),
+                  "value": jsonStr[i].se_specialist.replace(/\|/g, "\n"),
                   "short": true
                 },
                 {
@@ -408,7 +408,7 @@ module.exports = function(controller) {
                 },
                 {
                   "title": "Notes",
-                  "value": jsonStr[i].notes.replace("|", "\n"),
+                  "value": jsonStr[i].notes.replace(/\|/g, "\n"),
                   "short": false
                 }
               ],
@@ -439,4 +439,3 @@ module.exports = function(controller) {
     });
   });
 }; /* the end */
-

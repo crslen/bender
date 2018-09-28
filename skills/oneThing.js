@@ -55,20 +55,6 @@ module.exports = function(controller) {
             }
             var todayDate = mm + '/' + dd + '/' + yyyy;
             var seName = real_name;
-
-            //db data
-            var rows = "('" + todayDate + "','" + category + "','" + seName + "','" + oneThing.replace("'", "\'") + "')"
-            insertRows(rows, function(res) {
-              if (res == 0) {
-                bot.reply(message, {
-                  text: "Your info was not added for whatever reason."
-                });
-              } else {
-                bot.reply(message, {
-                  text: "Your info has been added and will be available to view within the *next hour*."
-                });
-              }
-            });
             //segment data
             var jsonInput = {
               "event": "One Thing Report",
@@ -82,6 +68,10 @@ module.exports = function(controller) {
             }
             valFunc.insertSegment(jsonInput, function(res) {
               console.log("segment response: " + res);
+
+            });
+            bot.reply(message, {
+              text: "Your info has been added and will be available to view within the *next hour*."
             });
           });
         }
@@ -114,40 +104,5 @@ module.exports = function(controller) {
     });
   });
 
-
-  /*  function to insert data into sql server */
-  function insertRows(rows, callback) {
-    // Imports the mssql query
-    let sqlQuery;
-
-    // insert val tracker
-    sqlQuery = `INSERT INTO [dbo].[one_thing_report]
-                            ([datetime_created]
-                            ,[category]
-                            ,[Specialist]
-                            ,[The_One_Thing])
-                      VALUES
-                      ${rows}`;
-
-    console.log(sqlQuery);
-    sql.connect(config, err => {
-      // Query
-      new sql.Request().query(sqlQuery, (err, result) => {
-        // ... error checks
-        sql.close();
-        console.log(result, err)
-        if (err == null) {
-          return callback(err);
-        } else {
-          return callback(result.rowsAffected);
-        }
-      })
-
-    })
-
-    sql.on('error', err => {
-      console.log(err)
-    })
-  }
 
 }; /*the end*/

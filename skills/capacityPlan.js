@@ -7,11 +7,14 @@ module.exports = function(controller) {
 
   controller.on('interactive_message_callback', function(bot, message) {
     var action_id = message.actions[0].value;
-
+    var ids = message.callback_id.split('|');
+    var customer = ids[1];
+    var sfOpp = ids[2];
     if (action_id == 'select-cap' || action_id == 'Yes-cap') {
       bot.createConversation(message, function(err, convo) {
         var jsonProperties = "";
-
+        jsonProperties = jsonProperties + '"customer_name": "' + customer + '",';
+        jsonProperties = jsonProperties + '"opportunity_id": "' + sfOpp + '",';
 
         //convo.addMessage("");
         //Question #1

@@ -86,25 +86,6 @@ module.exports = function(controller) {
 
             var estDate = mm + '/' + dd + '/' + yyyy;
 
-            var rows = "('" + customer + "','" +
-              sfdc_id + "','" +
-              actCat + "','" +
-              real_name + "','" +
-              notes + "','" +
-              estDate + "')";
-
-            valFunc.insertActivity(rows, function(res) {
-              if (res == 0) {
-                bot.reply(message, {
-                  text: "Your info was not added for whatever reason. ╯°□°）╯︵ ┻━┻"
-                });
-              } else {
-                bot.reply(message, {
-                  text: "Your info has been added and will be available to view within the *next hour*."
-                });
-              }
-            });
-
             var jsonInput = {
               "event": "SET Activities",
               "userId": "bender@vmware.com",
@@ -120,7 +101,9 @@ module.exports = function(controller) {
             valFunc.insertSegment(jsonInput, function(res) {
               console.log("segment response: " + res);
             });
-
+            bot.reply(message, {
+              text: "Your info has been added and will be available to view within the *next hour*."
+            });
           })
         }
       };
