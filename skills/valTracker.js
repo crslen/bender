@@ -721,12 +721,7 @@ module.exports = function(controller) {
             console.log("segment response: " + res);
           });
 
-          insertRowsAsStream(rows, function(res) {
-            if (res == 0) {
-              bot.reply(message, {
-                text: customer + " was not added for whatever reason."
-              });
-            } else {
+          /*else {
               bot.reply(message, {
                 text: "Your info has been added and will be available to view within the *next hour*. I've also set a reminder for you to make updates for " + customer + " on Tuesdays and Fridays.\nTo delete the reminder just type `/remind list`"
               });
@@ -748,12 +743,15 @@ module.exports = function(controller) {
                   console.log(error, response);
                 })
               })
-            }
-            bot.say({
-              channel: "#vmc-tech-validation",
-              text: "A new " + custType + " entry for " + customer + " has been added to the tech validation tracker."
-            });
+            }*/
+          bot.reply(message, {
+            text: "Your info has been added and will be available to view within the *next hour*. I've also set a reminder for you to make updates for " + customer + " on Tuesdays and Fridays.\nTo delete the reminder just type `/remind list`"
           });
+          bot.say({
+            channel: "#vmc-tech-validation",
+            text: "A new " + custType + " entry for " + customer + " has been added to the tech validation tracker."
+          });
+
         })
       };
 
@@ -761,14 +759,14 @@ module.exports = function(controller) {
       valFunc.getCustomer(customer, function(res) {
         console.log(res);
         if (res == 'No') {
+          bot.reply(message, "Looks like there's already an entry in the Tech Validation database for " + customer + ". Use `@bender get " + customer + "` to get more information.")
+        } else {
           bot.reply(message, "OK, I can help you with that! I will need to ask some questions to add to the validation tracker database.");
           if (partType.indexOf("partner") >= 0) {
             bot.startConversation(message, askPartner);
           } else {
             bot.startConversation(message, askPriUC);
           }
-        } else {
-          bot.reply(message, "Looks like there's already an entry in the Tech Validation database for " + customer + ". Use `@bender get " + customer + "` to get more information.")
         }
       });
     } else {
