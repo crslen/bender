@@ -35,6 +35,7 @@ module.exports = function(controller) {
       '`' + botName + ' deploy workshop <workshop org name>`: Deploy SDDC in a workshop org (VMC-WS#).\n' +
       '`' + botName + ' deploy workshop all`: Deploy all 10 SDDCs in VMC workshop.\n' +
       '`' + botName + ' delete workshop <workshop org name>`: Delete SDDC in a workshop org (VMC-WS#)).\n' +
+      '`' + botName + ' delete workshop all`: Deletes all 10 SDDCs in a workshop.\n' +
       '`' + botName + ' add <email> to <vmc-ws#>`: Add student to workshop org.\n' +
       '`' + botName + ' remove <email> from <vmc-ws#>`: Remove student from workshop org.\n' +
       '`' + botName + ' get workshop status`: Gets the status of SDDCs running in the workshop orgs.\n' +
