@@ -100,7 +100,7 @@ module.exports = function(controller) {
             //jsonProperties = jsonProperties.substring(0, jsonProperties.length - 1);
             console.log("jsonProperties: " + JSON.stringify(jsonProperties));
             var jsonInput = `{
-            "event": "Capacity Plan",
+            "event": "Deployment Plan",
             "userId": "bender@vmware.com",
             "properties": {${jsonProperties}}
           }`;

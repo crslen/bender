@@ -320,8 +320,8 @@ module.exports = function(controller) {
               if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
                 console.log(JSON.stringify(obj[i]));
                 provider = obj[i].Provider;
-                console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName + " and region: " + obj[i].Region);
-                valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, obj[i].Provider, obj[i].RefreshToken, obj[i].Region, obj[i].NumHost, function(res) {
+                console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName + " and region: " + obj[i].Region + " and hosts: " + obj[i].NumHosts);
+                valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, obj[i].Provider, obj[i].RefreshToken, obj[i].Region, obj[i].NumHosts, function(res) {
                   var jsonParse = JSON.stringify(res);
                   var jsonStr = JSON.parse(jsonParse);
                   console.log("response: " + jsonStr.status);
