@@ -38,8 +38,18 @@ module.exports = function(controller) {
           default: true,
           callback: function(response, convo) {
             actCat = response.text;
-            askNotes(response, convo);
-            convo.next();
+            
+            var catList = fields.actCategory();
+            console.log(catList);
+            console.log(catList.indexOf(response.text));
+            //if (catList.indexOf(actCat) >= 0) {
+              askNotes(response, convo);
+              convo.next();
+            //} else {
+            //  bot.reply(message,"You didn't select anything in the dropdown.  Try again.");
+            //  askActivity(response, convo);
+            //  convo.next();
+            //}
           }
         }]);
       };
@@ -47,10 +57,6 @@ module.exports = function(controller) {
       let askNotes = (response, convo) => {
 
         convo.ask("Please provide the details of " + actCat + " for " + customer, (response, convo) => {
-          convo.setTimeout(60000 * 1);
-          convo.onTimeout(function(convo) {
-            convo.say('Adiós')
-          })
           notes = response.text;
           confTask(response, convo);
           convo.next();

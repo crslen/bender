@@ -35,7 +35,7 @@ module.exports = function(controller) {
               "name": "capRegion",
               "text": "Pick region...",
               "type": "select",
-              "option_groups": fields.awsRegions()
+              "option_groups": fields.awsRegionsCap()
             }]
           }]
         }, [{
@@ -120,7 +120,7 @@ module.exports = function(controller) {
 
   });
 
-  controller.hears(['(new|add) capacity for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.hears(['(new|add) deployment plan for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
 
     var activity; //customer name
     var category = "";

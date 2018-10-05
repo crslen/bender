@@ -758,16 +758,16 @@ module.exports = function(controller) {
       //check to see if customer is already in tech validation table
       valFunc.getCustomer(customer, function(res) {
         console.log(res);
-        if (res == 'No') {
-          bot.reply(message, "Looks like there's already an entry in the Tech Validation database for " + customer + ". Use `@bender get " + customer + "` to get more information.")
-        } else {
+      //  if (res.indexOf('Yes')) {
+      //    bot.reply(message, "Looks like there's already an entry in the Tech Validation database for " + customer + ". Use `@bender get " + customer + "` to get more information.")
+      //  } else {
           bot.reply(message, "OK, I can help you with that! I will need to ask some questions to add to the validation tracker database.");
           if (partType.indexOf("partner") >= 0) {
             bot.startConversation(message, askPartner);
           } else {
             bot.startConversation(message, askPriUC);
           }
-        }
+        //}
       });
     } else {
       if (action_id == 'No-poc') {
