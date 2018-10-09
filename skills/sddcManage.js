@@ -288,33 +288,42 @@ module.exports = function(controller) {
               var jsonWKS = require("../json/workshop.json");
             }
             //console.log(jsonWKS);
+
+
             jsonStr = JSON.stringify(jsonWKS);
             obj = JSON.parse(jsonStr);
             var i = 0;
-            if (sddc.toLowerCase() == 'all') {
+            var sddcreg = /^([0-9]|[1-9][0-9])$/;
+            if (sddc.toLowerCase() == 'all' || sddcreg.test(sddc)) {
               if (env == 'elw') {
-                deployELWSDDC(function callback(results) {
+                if (sddc.toLowerCase() == 'all') {
+                  sddc = 50;
+                }
+                deployELWSDDC(sddc, function callback(results) {
                   console.log("stdout again: ", results);
                   bot.reply(message, "Results:\n" + results);
                   //put results in #vmc-se-elw channel
                   bot.say({
                     channel: chnl,
-                    text: "Deploying elw workshops 1 thru 50.  The following have been started: \n" + results
+                    text: "Deploying elw workshops 1 thru " + sddc + ".  The following have been started: \n" + results
                   });
                 });
               } else {
-                deploySDDC(function callback(results) {
+                if (sddc.toLowerCase() == 'all') {
+                  sddc = 10;
+                }
+                deploySDDC(sddc, function callback(results) {
                   console.log("stdout again: ", results);
                   bot.reply(message, "Results:\n" + results);
                   //put results in #vmc-se-elw channel
                   bot.say({
                     channel: chnl,
-                    text: "Deploying workshops 1 thru 10.  The following have been started: \n" + results
+                    text: "Deploying workshops 1 thru " + sddc + ".  The following have been started: \n" + results
                   });
                 });
               }
               //bot.reply(message, "Deploying elw workshops 1 thru 50. You can ask me `@bender get elw status` to see if all have been deployed succesfully.")
-            }
+            } else {
             while (i < obj.length) {
               //for (var i = 0; i < obj.length; i++) {
               if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
@@ -342,6 +351,7 @@ module.exports = function(controller) {
               }
               i++;
             }
+          }
           }
         });
       } else {
@@ -399,8 +409,8 @@ module.exports = function(controller) {
     //bot.say(message, sddcMessage);
   });
 
-  function deploySDDC(callback) {
-    execSh(["/data/bender/vmc/create_sddc.sh"], true,
+  function deploySDDC(sddc, callback) {
+    execSh([`/data/bender/vmc/create_sddc.sh ${sddc}`], true,
       function(err, stdout, stderr) {
         console.log("error: ", err);
         console.log("stdout: ", stdout);
@@ -409,8 +419,8 @@ module.exports = function(controller) {
       });
   }
 
-  function deployELWSDDC(callback) {
-    execSh(["/data/bender/vmc/create_elw_sddc.sh"], true,
+  function deployELWSDDC(sddc, callback) {
+    execSh([`/data/bender/vmc/create_elw_sddc.sh ${sddc}`], true,
       function(err, stdout, stderr) {
         console.log("error: ", err);
         console.log("stdout: ", stdout);
