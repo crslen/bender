@@ -34,6 +34,7 @@ module.exports = function(controller) {
       '_VMC Workshops:_\n' +
       '`' + botName + ' deploy workshop <workshop org name>`: Deploy SDDC in a workshop org (VMC-WS#).\n' +
       '`' + botName + ' deploy workshop all`: Deploy all 10 SDDCs in VMC workshop.\n' +
+      '`' + botName + ' deploy workshop <numeric value>`: Deploy X number of SDDCs in VMC workshop.\n' +
       '`' + botName + ' delete workshop <workshop org name>`: Delete SDDC in a workshop org (VMC-WS#)).\n' +
       '`' + botName + ' delete workshop all`: Deletes all 10 SDDCs in a workshop.\n' +
       '`' + botName + ' add <email> to <vmc-ws#>`: Add student to workshop org.\n' +
@@ -54,6 +55,7 @@ module.exports = function(controller) {
       '_VMC Expert Led Workshops (restricted access):_\n' +
       '`' + botName + ' deploy elw <elw org name>`: Deploy SDDC in a ELW org (HOL-ELW-###).\n' +
       '`' + botName + ' deploy elw all`: Deploy all 50 SDDCs in ELW.\n' +
+      '`' + botName + ' deploy elw <numeric value>`: Deploy X number of SDDCs in ELW.\n' +
       '`' + botName + ' delete elw <elw org name>`: Delete SDDC in a ELW org (HOL-ELW-###).\n' +
       '`' + botName + ' delete elw all`: Delete all 50 SDDCs in ELW.\n' +
       '`' + botName + ' get elw status`: Gets the status of SDDCs running in the ELW orgs.\n' +
