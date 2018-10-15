@@ -44,6 +44,8 @@ module.exports = function(controller) {
       '\n' +
       '_Misc:_\n' +
       '`' + botName + ' new one thing report`: Adds your one thing you want to share with upper management.\n' +
+      '`' + botName + ' show|find|get compliance <search item>`: Search CIAQ database for Vendor Risk Managment, RFP\'s and other stuff.\n' +
+      '`' + botName + ' show|find|get roadmap <search item>`: Search public facing VMC roadmap database for features that are available, in development or planned.\n' +
 
       '\n' +
       '_BU Data Collection:_\n' + dataCollection + '' +
