@@ -38,13 +38,13 @@ module.exports = function(controller) {
           default: true,
           callback: function(response, convo) {
             actCat = response.text;
-            
+
             var catList = fields.actCategory();
             console.log(catList);
             console.log(catList.indexOf(response.text));
             //if (catList.indexOf(actCat) >= 0) {
-              askNotes(response, convo);
-              convo.next();
+            askNotes(response, convo);
+            convo.next();
             //} else {
             //  bot.reply(message,"You didn't select anything in the dropdown.  Try again.");
             //  askActivity(response, convo);
@@ -128,68 +128,94 @@ module.exports = function(controller) {
     var category = "";
     var customer = "";
     customer = message.match[1];
+    bot.createConversation(message, function(err, convo) {
+      convo.addMessage({
+        text: "Searching opportunities for " + customer + "....."
+      }, {}, "default")
 
-    bot.reply(message, {
-      text: "Searching opportunities for " + customer + "....."
-    });
-
-    valFunc.getSFDC(customer, null, function(res) {
-      if (res.length == 0) {
-        bot.reply(message, {
-          text: "I couldn't find any opportunities for " + customer + " :shocked:"
-        });
-        bot.reply(message, {
-          attachments: [{
-            title: 'You still want to enter an activity?',
-            callback_id: 'actions-act|' + customer + "|null",
-            attachment_type: 'default',
-            actions: [{
-                "name": "yes",
-                "text": "Yes",
-                "value": "Yes-act",
-                "type": "button",
-              },
-              {
-                "name": "no",
-                "text": "No",
-                "value": "No-act",
-                "type": "button",
-              }
-            ]
-          }]
-        });
-      } else {
-        var jsonParse = JSON.stringify(res);
-        console.log("return: " + jsonParse);
-        var jsonStr = JSON.parse(jsonParse);
-        bot.reply(message, "If possible select a Cloud Opportunity");
-
-        for (var i = 0; i < jsonStr.length; i++) {
-
-          var sfMessage = '' +
-            '*Account Name:* ' + jsonStr[i].account_name + '\n' +
-            '*Opportunity ID:* ' + jsonStr[i].opportunity_id + ' or ' + jsonStr[i].opportunity_name + '\n' +
-            '*Opportunity Type:* ' + jsonStr[i].record_type + '\n' +
-            '*Stage:* ' + jsonStr[i].opportunity_stage + '\n' +
-            '*Date Created:* ' + jsonStr[i].opportunity_create_date + '\n' +
-            '*Opportunity Owner:* ' + jsonStr[i].opportunity_owner_name + '\n';
-
-          bot.reply(message, {
-            //text: "Here's what I found for " + customer,
+      valFunc.getSFDC(customer, null, function(res) {
+        if (res.length == 0) {
+          convo.addMessage({
+            text: "I couldn't find any opportunities for " + customer + " :shocked:"
+          });
+          convo.addMessage({
             attachments: [{
-              "text": sfMessage,
-              "color": colorArray[i],
-              callback_id: 'actions-act|' + jsonStr[i].account_name + "|" + jsonStr[i].opportunity_id,
+              title: 'You still want to enter an activity?',
+              callback_id: 'actions-act|' + customer + "|null",
+              attachment_type: 'default',
               actions: [{
-                "name": "select",
-                "text": "Select",
-                "value": "select-act",
-                "type": "button",
-              }],
+                  "name": "yes",
+                  "text": "Yes",
+                  "value": "Yes-act",
+                  "type": "button",
+                },
+                {
+                  "name": "no",
+                  "text": "No",
+                  "value": "No-act",
+                  "type": "button",
+                }
+              ]
+            }]
+          });
+        } else {
+          var jsonParse = JSON.stringify(res);
+          console.log("return: " + jsonParse);
+          var jsonStr = JSON.parse(jsonParse);
+
+          convo.addMessage({
+            text: "If possible select a Cloud Opportunity"
+          });
+
+          for (var i = 0; i < jsonStr.length; i++) {
+
+            var sfMessage = '' +
+              '*Account Name:* ' + jsonStr[i].account_name + '\n' +
+              '*Opportunity ID:* ' + jsonStr[i].opportunity_id + ' or ' + jsonStr[i].opportunity_name + '\n' +
+              '*Opportunity Type:* ' + jsonStr[i].record_type + '\n' +
+              '*Stage:* ' + jsonStr[i].opportunity_stage + '\n' +
+              '*Date Created:* ' + jsonStr[i].opportunity_create_date + '\n' +
+              '*Opportunity Owner:* ' + jsonStr[i].opportunity_owner_name + '\n';
+
+            convo.addMessage({
+              //text: "Here's what I found for " + customer,
+              attachments: [{
+                "text": sfMessage,
+                "color": colorArray[i],
+                callback_id: 'actions-act|' + jsonStr[i].account_name + "|" + jsonStr[i].opportunity_id,
+                actions: [{
+                  "name": "select",
+                  "text": "Select",
+                  "value": "select-act",
+                  "type": "button",
+                }],
+              }]
+            });
+          }
+          convo.addMessage({
+            attachments: [{
+              title: 'Click Continue if you would like to bypass the above SF selection.',
+              callback_id: 'actions-act|' + customer + "|null",
+              attachment_type: 'default',
+              actions: [{
+                  "name": "continue",
+                  "text": "Continue",
+                  "value": "Yes-act",
+                  "type": "button",
+                },
+                {
+                  "name": "exit",
+                  "text": "Exit",
+                  "value": "No-act",
+                  "type": "button",
+                }
+              ]
             }]
           });
         }
-      }
+        convo.activate();
+      });
+      convo.activate();
     });
   });
   controller.hears(['get activities for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
