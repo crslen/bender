@@ -91,8 +91,14 @@ module.exports = function(controller) {
           default: true,
           callback: function(response, convo) {
             priUC = priUC + response.text + "|";
-            askUCRepeat(response, convo);
-            convo.next();
+            if (JSON.stringify(fields.useCases()).indexOf(response.text) >= 0) {
+              askUCRepeat(response, convo);
+              convo.next();
+            } else {
+              bot.reply(message, "You didn't select anything in the dropdown.  Try again.");
+              askPriUC(response, convo);
+              convo.next();
+            }
           }
         }]);
       };
@@ -166,8 +172,14 @@ module.exports = function(controller) {
           default: true,
           callback: function(response, convo) {
             depReg = depReg + response.text + "|";
-            askRegRepeat(response, convo);
-            convo.next();
+            if (JSON.stringify(fields.awsRegions()).indexOf(response.text) >= 0) {
+              askRegRepeat(response, convo);
+              convo.next();
+            } else {
+              bot.reply(message, "You didn't select anything in the dropdown.  Try again.");
+              askDepReg(response, convo);
+              convo.next();
+            }
           }
         }]);
       };
@@ -291,8 +303,14 @@ module.exports = function(controller) {
           default: true,
           callback: function(response, convo) {
             compType = compType + response.text + "|";
-            askCompRepeat(response, convo);
-            convo.next();
+            if (JSON.stringify(fields.compliance()).indexOf(response.text) >= 0) {
+              askCompRepeat(response, convo);
+              convo.next();
+            } else {
+              bot.reply(message, "You didn't select anything in the dropdown.  Try again.");
+              askCompType(response, convo);
+              convo.next();
+            }
           }
         }]);
       };
@@ -416,12 +434,18 @@ module.exports = function(controller) {
           default: true,
           callback: function(response, convo) {
             servType = servType + response.text + "|";
-            if (servType.indexOf("None") >= 0) {
-              askStatus(response, convo);
+            if (JSON.stringify(fields.services()).indexOf(response.text) >= 0) {
+              if (servType.indexOf("None") >= 0) {
+                askStatus(response, convo);
+              } else {
+                askServRepeat(response, convo);
+              }
+              convo.next();
             } else {
-              askServRepeat(response, convo);
+              bot.reply(message, "You didn't select anything in the dropdown.  Try again.");
+              askServType(response, convo);
+              convo.next();
             }
-            convo.next();
           }
         }]);
       };
@@ -495,8 +519,14 @@ module.exports = function(controller) {
           default: true,
           callback: function(response, convo) {
             statusType = response.text;
-            askStartEnd(response, convo);
-            convo.next();
+            if (JSON.stringify(fields.status()).indexOf(response.text) >= 0) {
+              askStartEnd(response, convo);
+              convo.next();
+            } else {
+              bot.reply(message, "You didn't select anything in the dropdown.  Try again.");
+              askStatus(response, convo);
+              convo.next();
+            }
           }
         }]);
       };
@@ -758,15 +788,15 @@ module.exports = function(controller) {
       //check to see if customer is already in tech validation table
       valFunc.getCustomer(customer, function(res) {
         console.log(res);
-      //  if (res.indexOf('Yes')) {
-      //    bot.reply(message, "Looks like there's already an entry in the Tech Validation database for " + customer + ". Use `@bender get " + customer + "` to get more information.")
-      //  } else {
-          bot.reply(message, "OK, I can help you with that! I will need to ask some questions to add to the validation tracker database.");
-          if (partType.indexOf("partner") >= 0) {
-            bot.startConversation(message, askPartner);
-          } else {
-            bot.startConversation(message, askPriUC);
-          }
+        //  if (res.indexOf('Yes')) {
+        //    bot.reply(message, "Looks like there's already an entry in the Tech Validation database for " + customer + ". Use `@bender get " + customer + "` to get more information.")
+        //  } else {
+        bot.reply(message, "OK, I can help you with that! I will need to ask some questions to add to the validation tracker database.");
+        if (partType.indexOf("partner") >= 0) {
+          bot.startConversation(message, askPartner);
+        } else {
+          bot.startConversation(message, askPriUC);
+        }
         //}
       });
     } else {

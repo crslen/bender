@@ -40,16 +40,17 @@ module.exports = function(controller) {
             actCat = response.text;
 
             var catList = fields.actCategory();
-            console.log(catList);
-            console.log(catList.indexOf(response.text));
-            //if (catList.indexOf(actCat) >= 0) {
-            askNotes(response, convo);
-            convo.next();
-            //} else {
-            //  bot.reply(message,"You didn't select anything in the dropdown.  Try again.");
-            //  askActivity(response, convo);
-            //  convo.next();
-            //}
+            console.log(JSON.stringify(catList));
+            console.log(actCat);
+            console.log(JSON.stringify(catList).indexOf(actCat));
+            if (JSON.stringify(catList).indexOf(actCat) >= 0) {
+              askNotes(response, convo);
+              convo.next();
+            } else {
+              bot.reply(message, "You didn't select anything in the dropdown.  Try again.");
+              askActivity(response, convo);
+              convo.next();
+            }
           }
         }]);
       };
