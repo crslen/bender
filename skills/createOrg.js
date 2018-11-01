@@ -1,6 +1,7 @@
 var wordfilter = require('wordfilter');
 let fields = require("../model/valFields");
 let valFunc = require("../model/valFunctions");
+var color = ['#629aca', '#9ecbde', '#6392ac', '#e6f1f7', '#64818f'];
 
 module.exports = function(controller) {
 
@@ -14,8 +15,7 @@ module.exports = function(controller) {
           convo.ask("What's the customer name?", (response, convo) => {
             customer = response.text;
             valFunc.getCustomer(customer, function(res) {
-              console.log(res);
-              if (res == 'No') {
+              if (res[0].result == null) {
                 bot.reply(message, "I don't see " + customer + " in the tech validation database or this has been selected as a <b>paid pilot</b>. If it's not a paid pilot make sure " + customer + " is added by asking me `@bender add POC for " + customer + "`")
                 convo.stop();
               } else {
@@ -23,8 +23,8 @@ module.exports = function(controller) {
                 if (results[0] == "Yes" && results[1].toLowerCase().indexOf("poc") >= 0) {
                   bot.reply(message, "Glad to see " + customer + " is in the tech validation database.");
                   valFunc.getPreFlight(customer, function(res) {
-                    console.log("response: " + res[0].result);
-                    if (res[0].result == 'No') {
+                    console.log("response: " + res[0].response);
+                    if (res[0].response == 'No') {
                       bot.reply(message, {
                         text: "I couldn't find any pre-flight info on " + customer + ".  Make sure the customer and account team fills out this survey - https://www.surveymonkey.com/r/vmc-tech-val-preflight"
                       });
@@ -39,7 +39,7 @@ module.exports = function(controller) {
                       var tvType = "CUSTOMER_POC";
                     }
 
-                    confTask(tvType, response, convo);
+                    askNetwork(tvType, response, convo);
                     convo.next();
                   });
                 }
@@ -48,7 +48,66 @@ module.exports = function(controller) {
           });
         };
 
-        let confTask = (tvType, response, convo) => {
+        let askNetwork = (tvType, response, convo) => {
+
+          convo.ask({
+            attachments: [{
+              title: 'Will NSX-T need to be enabled?',
+              callback_id: 'networkType',
+              attachment_type: 'default',
+              color: color,
+              actions: [{
+                  "name": "yes",
+                  "text": "Yes",
+                  "value": "Yes",
+                  "type": "button",
+                },
+                {
+                  "name": "no",
+                  "text": "No",
+                  "value": "No",
+                  "type": "button",
+                }
+              ]
+            }]
+          }, [{
+              pattern: "yes",
+              callback: function(reply, convo) {
+                let ntwkType = "NSXT";
+                var ntMessage = '' +
+                  'Before you provision a new SDDC submit a `VMC Request` ticket in Jira - https://servicedesk.eng.vmware.com/servicedesk/customer/portal/3/create/166 with the following details in the description field:\n' + 
+                  'Please enable NSX-T for customer ' + customer + '\n' +
+                  '*Org ID:* <long unique ID>\n' +
+                  '*Planned Deployment Region:* <Region Name>\n' +
+                  '*Current SDDCs in Org:* <None>\n' +
+                  'To expedite the request post the ticket URL and customer name to slack channel #m5-p1-rollout-support'
+                  convo.say(ntMessage);
+                confTask(ntwkType, tvType, response, convo);
+                convo.next();
+                // do something awesome here.
+              }
+            },
+            {
+              pattern: "no",
+              callback: function(reply, convo) {
+                convo.say('Ok good to know');
+                let ntwkType = "NSXV";
+                confTask(ntwkType, tvType, response, convo);
+                convo.next();
+              }
+            },
+            {
+              default: true,
+              callback: function(response, convo) {
+                // = response.text;
+                confTask(tvType, response, convo);
+                convo.next();
+              }
+            }
+          ]);
+        };
+
+        let confTask = (ntwkType, tvType, response, convo) => {
           valFunc.getInvite(tvType, function(vmcInvite) {
             vmcInvite = JSON.stringify(vmcInvite);
             bot.reply(message, {
@@ -72,6 +131,7 @@ module.exports = function(controller) {
                   "customer_name": customer,
                   "invite_url": vmcInvite,
                   "org_type": tvType,
+                  "network_type": ntwkType,
                   "se_specialist": real_name
                 }
               }
