@@ -25,6 +25,83 @@ var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
 ];
 
 module.exports = function(controller) {
+  controller.hears(['(find|show|get|list) sddcs for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+
+    var orgId = message.match[2];
+    valFunc.getSDDC(orgId, function(sddc) {
+      if (sddc.length == 0) {
+        bot.reply(message, {
+          text: "I couldn't find any SDDC's deployed for " + orgId + "."
+        });
+      } else {
+        var sddcStr = JSON.stringify(sddc);
+        var jsonStr = JSON.parse(sddcStr);
+        console.log("results:" + jsonStr.length);
+        for (var i = 0; i < jsonStr.length; i++) {
+          bot.reply(message, {
+            text: "Here's what I found for " + orgId,
+            attachments: [{
+              //"title": "SDDC Info",
+              "color": colorArray[i],
+              //"title": "Mode Analytics Report",
+              //"title_link": "https://modeanalytics.com/vmware_inc/reports/1c69ccf26a01",
+              "fields": [{
+                  "title": "SDDC Name",
+                  "value": jsonStr[i].name,
+                  "short": true
+                },
+               /* {
+                  "title": "Status",
+                  "value": jsonStr[i].sddc_state,
+                  "short": true
+                },
+                {
+                  "title": "Created",
+                  "value": jsonStr[i].created,
+                  "short": true
+                },
+                {
+                  "title": "Age in Days",
+                  "value": jsonStr[i].age_days,
+                  "short": true
+                },
+                {
+                  "title": "AWS Region",
+                  "value": jsonStr[i].region,
+                  "short": true
+                },
+                {
+                  "title": "Powered on VMs",
+                  "value": jsonStr[i].powered_on_vms,
+                  "short": true
+                },
+                {
+                  "title": "VMC Version",
+                  "value": jsonStr[i].vmc_version,
+                  "short": true
+                },
+                {
+                  "title": "VMC Internal Version",
+                  "value": jsonStr[i].vmc_internal_version,
+                  "short": true
+                },
+                {
+                  "title": "Org ID",
+                  "value": jsonStr[i].org_id,
+                  "short": true
+                },*/
+                {
+                  "title": "SDDC ID",
+                  "value": jsonStr[i].sddc_id,
+                  "short": true
+                }
+              ],
+            }]
+          });
+        }
+      }
+    });
+  });
 
   controller.hears(['get (.*) sddc'], 'direct_message,direct_mention,mention', (bot, message) => {
 
