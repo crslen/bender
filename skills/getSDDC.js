@@ -26,7 +26,7 @@ var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
 
 module.exports = function(controller) {
   controller.hears(['(find|show|get|list) sddcs for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
-
+    bot.reply(message,"Searching for SDDC's....")
     var orgId = message.match[2];
     valFunc.getSDDC(orgId, function(sddc) {
       if (sddc.length == 0) {
@@ -50,7 +50,7 @@ module.exports = function(controller) {
                   "value": jsonStr[i].name,
                   "short": true
                 },
-               /* {
+                /*{
                   "title": "Status",
                   "value": jsonStr[i].sddc_state,
                   "short": true
