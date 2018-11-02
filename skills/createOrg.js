@@ -77,6 +77,15 @@ module.exports = function(controller) {
                 var ntMessage = '' +
                   'Before you provision a new SDDC submit a `VMC Request` ticket in Jira - https://servicedesk.eng.vmware.com/servicedesk/customer/portal/3/create/166 with the following details in the description field:\n' + 
                   'Please enable NSX-T for customer ' + customer + '\n' +
+                  '*White list the following flags:*\n' +
+                  'sddcLicensesInConfigService\n' +
+                  'vsanEncryption\n' +
+                  'i3pToI3MetalMigration\n' +
+                  'enableNsxtDeployment\n' +
+                  'enableDraasAddOnForNsxt\n' +
+                  '*Black list the following flags:*\n' +
+                  'accountLinkingDelay\n' +
+                  '\n' + 
                   '*Org ID:* <long unique ID>\n' +
                   '*Planned Deployment Region:* <Region Name>\n' +
                   '*Current SDDCs in Org:* <None>\n' +
