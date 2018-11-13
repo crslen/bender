@@ -324,34 +324,34 @@ module.exports = function(controller) {
               }
               //bot.reply(message, "Deploying elw workshops 1 thru 50. You can ask me `@bender get elw status` to see if all have been deployed succesfully.")
             } else {
-            while (i < obj.length) {
-              //for (var i = 0; i < obj.length; i++) {
-              if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
-                console.log(JSON.stringify(obj[i]));
-                provider = obj[i].Provider;
-                console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName + " and region: " + obj[i].Region + " and hosts: " + obj[i].NumHosts);
-                valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, obj[i].Provider, obj[i].RefreshToken, obj[i].Region, obj[i].NumHosts, function(res) {
-                  var jsonParse = JSON.stringify(res);
-                  var jsonStr = JSON.parse(jsonParse);
-                  console.log("response: " + jsonStr.status);
-                  if (jsonStr.status == "STARTED") {
-                    bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.  Please wait 45 seconds before deploying another SDDC.");
-                    bot.say({
-                      channel: chnl,
-                      text: "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*."
-                    });
-                  } else {
-                    bot.reply(message, "Error message *" + jsonStr.status + "*.  Wait 45 seconds to deploy the next.");
-                    bot.say({
-                      channel: chnl,
-                      text: "Error message *" + jsonStr.status + "*."
-                    });
-                  }
-                });
+              while (i < obj.length) {
+                //for (var i = 0; i < obj.length; i++) {
+                if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
+                  console.log(JSON.stringify(obj[i]));
+                  provider = obj[i].Provider;
+                  console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName + " and region: " + obj[i].Region + " and hosts: " + obj[i].NumHosts);
+                  valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, obj[i].Provider, obj[i].RefreshToken, obj[i].Region, obj[i].NumHosts, function(res) {
+                    var jsonParse = JSON.stringify(res);
+                    var jsonStr = JSON.parse(jsonParse);
+                    console.log("response: " + jsonStr.status);
+                    if (jsonStr.status == "STARTED") {
+                      bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.");
+                      bot.say({
+                        channel: chnl,
+                        text: "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*."
+                      });
+                    } else {
+                      bot.reply(message, "Error message *" + jsonStr.status + "*.");
+                      bot.say({
+                        channel: chnl,
+                        text: "Error message *" + jsonStr.status + "*."
+                      });
+                    }
+                  });
+                }
+                i++;
               }
-              i++;
             }
-          }
           }
         });
       } else {
