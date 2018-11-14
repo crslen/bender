@@ -128,7 +128,7 @@ module.exports = function(controller) {
             }
             var message_options = [
               "Hear ye hear ye, a request from " + real_name + " to extend " + customer + "'s POC has been requested. \n *" + extReq + "*  \n" + approvers + " do you approve? ",
-              "Attention K-Mart shoppers, " + real_name + " has requested an extention for " + customer + ".  \n *" + extReq + "*  \n" + approvers + " do you approve?"
+              "Attention K-Mart shoppers, " + real_name + " has requested an extension for " + customer + ".  \n *" + extReq + "*  \n" + approvers + " do you approve?"
             ]
             var random_index = Math.floor(Math.random() * message_options.length);
             var chosen_message = message_options[random_index];
