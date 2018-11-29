@@ -124,7 +124,7 @@ module.exports = function(controller) {
             if (process.env.env_type == "set_dev") {
               var approvers = "<@U40TBNTTQ> <@U3U3D17MK> <@U3U3K6HM2>";
             } else {
-              var approvers = "<@WAATAPVQD>";
+              var approvers = "<@WAATAPVQD> <@U0RK8D3RA> <@U9KN5EJKZ>";
             }
             var message_options = [
               "Hear ye hear ye, a request from " + real_name + " to extend " + customer + "'s POC has been requested. \n *" + extReq + "*  \n" + approvers + " do you approve? ",
