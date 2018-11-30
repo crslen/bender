@@ -25,7 +25,7 @@ module.exports = function(controller) {
         var updateField = "";
         bot.reply(message, "Looking up " + customer);
         //check to see if customer is already in tech validation table
-        valFunc.selectCustomer(customer, 1, function(updateData) {
+        valFunc.selectCustomer(customer, 3, function(updateData) {
           console.log("update res: " + JSON.stringify(updateData));
 
           let askField = (response, convo) => {
