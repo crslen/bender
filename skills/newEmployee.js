@@ -29,6 +29,10 @@ module.exports = function(controller) {
         default: true,
         callback: function(response, convo) {
           groupIds.push(response.text); //ww team
+          //if inside is selected add to americas group
+          if (response.text == "SE0UEUZEF") {
+            grouIds.push("SDYAL7FGR");
+          }
           confTask(response, convo);
           convo.gotoThread('end');
         }
