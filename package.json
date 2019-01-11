@@ -20,6 +20,7 @@
     "botkit-studio-metrics": "^0.0.2",
     "botkit-witai": "^1.1.0",
     "cb": "^0.1.0",
+    "console-stamp": "^0.2.7",
     "cookie-parser": "^1.4.3",
     "debug": "^2.3.3",
     "delay": "^3.0.0",

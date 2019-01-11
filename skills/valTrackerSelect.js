@@ -234,7 +234,7 @@ module.exports = function(controller) {
       valFunc.selectCustomer(seName, searchType, function(res) {
         if (res.length == 0) {
           bot.reply(message, {
-            text: "I couldn't find any info on " + seName + "."
+            text: "Sorry I couldn't find any info on " + seName + "."
           });
         } else {
           var jsonParse = JSON.stringify(res);

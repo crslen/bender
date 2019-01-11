@@ -63,6 +63,9 @@ if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
 var Botkit = require('botkit')
 var debug = require('debug')('botkit:main');
 
+// added by CDG
+require('console-stamp')(console, '[HH:MM:ss.l]');
+
 var bot_options = {
     clientId: process.env.clientId,
     clientSecret: process.env.clientSecret,
@@ -88,7 +91,6 @@ if (process.env.MONGO_URI) {
 var controller = Botkit.slackbot(bot_options);
 
 controller.startTicking();
-
 // Set up an Express-powered webserver to expose oauth and webhook endpoints
 var webserver = require(__dirname + '/components/express_webserver.js')(controller);
 
