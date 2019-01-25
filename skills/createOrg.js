@@ -39,7 +39,7 @@ module.exports = function(controller) {
                       var tvType = "CUSTOMER_POC";
                     }
 
-                    askNetwork(tvType, response, convo);
+                    confTask(tvType, response, convo);
                     convo.next();
                   });
                 }
@@ -75,7 +75,7 @@ module.exports = function(controller) {
               callback: function(reply, convo) {
                 let ntwkType = "NSXT";
                 var ntMessage = '' +
-                  'Before you provision a new SDDC submit a `VMC Request` ticket in Jira - https://servicedesk.eng.vmware.com/servicedesk/customer/portal/3/create/166 with the following details in the description field:\n' + 
+                  'Before you provision a new SDDC submit a `VMC Request` ticket in Jira - https://servicedesk.eng.vmware.com/servicedesk/customer/portal/3/create/166 with the following details in the description field:\n' +
                   'Please enable NSX-T for customer ' + customer + '\n' +
                   '*White list the following flags:*\n' +
                   'sddcLicensesInConfigService\n' +
@@ -85,12 +85,12 @@ module.exports = function(controller) {
                   'enableDraasAddOnForNsxt\n' +
                   '*Black list the following flags:*\n' +
                   'accountLinkingDelay\n' +
-                  '\n' + 
+                  '\n' +
                   '*Org ID:* <long unique ID>\n' +
                   '*Planned Deployment Region:* <Region Name>\n' +
                   '*Current SDDCs in Org:* <None>\n' +
                   'To expedite the request post the ticket URL and customer name to slack channel #m5-p1-rollout-support'
-                  convo.say(ntMessage);
+                convo.say(ntMessage);
                 confTask(ntwkType, tvType, response, convo);
                 convo.next();
                 // do something awesome here.
@@ -116,7 +116,7 @@ module.exports = function(controller) {
           ]);
         };
 
-        let confTask = (ntwkType, tvType, response, convo) => {
+        let confTask = (tvType, response, convo) => {
           valFunc.getInvite(tvType, function(vmcInvite) {
             vmcInvite = JSON.stringify(vmcInvite);
             bot.reply(message, {
@@ -140,7 +140,7 @@ module.exports = function(controller) {
                   "customer_name": customer,
                   "invite_url": vmcInvite,
                   "org_type": tvType,
-                  "network_type": ntwkType,
+                  "network_type": "NSXT",
                   "se_specialist": real_name
                 }
               }
