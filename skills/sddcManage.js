@@ -361,7 +361,6 @@ module.exports = function(controller) {
   });
 
   controller.hears(['get (.*) status'], 'direct_message,direct_mention,mention', (bot, message) => {
-
     //var customer = message.match[1];
     bot.reply(message, "Checking status....");
     var env = message.match[1].toLowerCase();
@@ -375,10 +374,11 @@ module.exports = function(controller) {
     var i = 0;
     var r = 0;
     var sddcMessage = '';
+    var sddcResults = '';
     while (i < obj.length) {
       var rToken = obj[i].RefreshToken;
       var orgId = obj[i].OrgId;
-      valFunc.getELWStatus(orgId, rToken, function(sddc) {
+      var results = valFunc.getELWStatus(orgId, rToken, function(sddc) {
         if (sddc.length == 2) {
           console.log("results:" + sddc.length);
           //do nothing for now
@@ -388,7 +388,6 @@ module.exports = function(controller) {
           //var jsonStr = JSON.parse(sddcStr);
           //bot.reply(message, "A total of *" + sddcStr.length + "* SDDC's are deploying or have been deployed.");
           console.log("results:" + sddcStr.length);
-
           for (var s = 0; s < sddcStr.length; s++) {
             if (sddcStr[s].sddc_state == "READY") {
               r = r + 1;
@@ -396,17 +395,23 @@ module.exports = function(controller) {
             sddcMessage = '' +
               '*SDDC Name:* ' + sddcStr[s].name + ' ' +
               '*SDDC State:* ' + sddcStr[s].sddc_state + '\n';
+            bot.reply(message, sddcMessage);
           }
-          bot.reply(message, sddcMessage);
-          return sddcMessage;
         }
         console.log("sddcmsg=: " + r);
+        return r;
       });
+      if (env == "workshop") {
+        i = i + 1; //skip very other json workshop entry
+      }
+      console.log("total: " + r);
+      if (i == obj.Length) {
+        sddcResults = '' +
+         'Total SDDCs ready: *' + r + '*\n';
+        bot.reply(message, sddcResults);
+      }
       i++;
-
     }
-
-    //bot.say(message, sddcMessage);
   });
 
   function deploySDDC(sddc, callback) {
