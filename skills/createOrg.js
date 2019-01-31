@@ -118,9 +118,9 @@ module.exports = function(controller) {
 
         let confTask = (tvType, response, convo) => {
           valFunc.getInvite(tvType, function(vmcInvite) {
-            vmcInvite = JSON.stringify(vmcInvite);
+            //vmcInvite = JSON.parse(vmcInvite);
             bot.reply(message, {
-              text: "Here's the invite for " + customer + " - " + vmcInvite
+              text: "Here's the invite for " + customer + " - " + vmcInvite.invitation_url
             });
             bot.reply(message, {
               text: "Once the org is created make sure to update the tech validation with the new org ID using `@bender Update " + customer + "`."
