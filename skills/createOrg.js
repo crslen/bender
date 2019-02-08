@@ -157,5 +157,50 @@ module.exports = function(controller) {
       }
     });
   });
+//for MOU Partner orgs
+  controller.hears(['create mou org'], 'direct_message,direct_mention,mention', (bot, message) => {
+    valFunc.validateUser(bot, message, function(cb) {
+      if (cb == 1) {
+  
+        let confTask = (response, convo) => {
+          var tvType = "PARTNER_MOU"
+          valFunc.getInvite(tvType, function(vmcInvite) {
+            //vmcInvite = JSON.parse(vmcInvite);
+            bot.reply(message, {
+              text: "Here's the MOU Partner invite - " + vmcInvite.invitation_url
+            });
+
+            //insert into slingshot
+            bot.api.users.info({
+              user: message.user
+            }, (error, response) => {
+              let {
+                name,
+                real_name
+              } = response.user;
+              var jsonInput = {
+                "event": "set org tracking",
+                "userId": "bender@vmware.com",
+                "properties": {
+                  "customer_name": "Partner",
+                  "invite_url": vmcInvite,
+                  "org_type": tvType,
+                  "network_type": "NSXT",
+                  "se_specialist": real_name
+                }
+              }
+              valFunc.insertSegment(jsonInput, function(res) {
+                console.log("segment response: " + res);
+              });
+            })
+          });
+        };
+        bot.reply(message, "OK, I can help you with that!");
+        bot.startConversation(message, confTask);
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
+  });
 
 }; /* the end */

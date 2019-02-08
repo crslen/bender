@@ -130,7 +130,7 @@ module.exports = function(controller) {
                   bot.reply(message, "Results:\n" + results);
                   bot.say({
                     channel: chnl,
-                    text: "Deleting elw workshops 1 thru 50.  The following have been started: \n" + results
+                    text: "Deleting elw workshops SDDCs 1 thru 50.  The following have been started: \n" + results
                   });
                 });
               } else {
@@ -139,7 +139,7 @@ module.exports = function(controller) {
                   bot.reply(message, "Results:\n" + results);
                   bot.say({
                     channel: chnl,
-                    text: "Deleting workshops 1 thru 10.  The following have been started: \n" + results
+                    text: "Deleting workshops SDDCs 1 thru 20.  The following have been started: \n" + results
                   });
                 });
               }
@@ -310,7 +310,7 @@ module.exports = function(controller) {
                 });
               } else {
                 if (sddc.toLowerCase() == 'all') {
-                  sddc = 10;
+                  sddc = 20;
                 }
                 deploySDDC(sddc, function callback(results) {
                   console.log("stdout again: ", results);
@@ -378,7 +378,7 @@ module.exports = function(controller) {
     while (i < obj.length) {
       var rToken = obj[i].RefreshToken;
       var orgId = obj[i].OrgId;
-      var results = valFunc.getELWStatus(orgId, rToken, function(sddc) {
+      valFunc.getELWStatus(orgId, rToken, function(sddc) {
         if (sddc.length == 2) {
           console.log("results:" + sddc.length);
           //do nothing for now
@@ -397,19 +397,18 @@ module.exports = function(controller) {
               '*SDDC State:* ' + sddcStr[s].sddc_state + '\n';
             bot.reply(message, sddcMessage);
           }
+          //return sddcMessage;
         }
         console.log("sddcmsg=: " + r);
-        return r;
       });
       if (env == "workshop") {
         i = i + 1; //skip very other json workshop entry
       }
-      console.log("total: " + r);
-      if (i == obj.Length) {
-        sddcResults = '' +
-         'Total SDDCs ready: *' + r + '*\n';
-        bot.reply(message, sddcResults);
-      }
+      //if (i == sddc.Length) {
+      //  sddcResults = '' +
+      //   'Total SDDCs ready: *' + r + '*\n';
+      //  bot.reply(message, sddcResults);
+      //}
       i++;
     }
   });
