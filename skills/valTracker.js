@@ -90,8 +90,10 @@ module.exports = function(controller) {
         }, [{
           default: true,
           callback: function(response, convo) {
-            priUC = priUC + response.text + "|";
-            if (JSON.stringify(fields.useCases()).indexOf(response.text) >= 0) {
+            var useCase = response.text;
+            priUC = priUC + useCase + "|";
+            //console.log(priUC.replace("&amp;","&"));
+            if (JSON.stringify(fields.useCases()).indexOf(useCase.replace("&amp;","&")) >= 0) {
               askUCRepeat(response, convo);
               convo.next();
             } else {
@@ -775,7 +777,7 @@ module.exports = function(controller) {
               })
             }*/
           bot.reply(message, {
-            text: "Your info has been added and will be available to view within the *next hour*. I've also set a reminder for you to make updates for " + customer + " on Tuesdays and Fridays.\nTo delete the reminder just type `/remind list`"
+            text: "Your info has been added and will be available to view within the *next hour*."
           });
           bot.say({
             channel: "#vmc-tech-validation",

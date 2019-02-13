@@ -20,7 +20,7 @@ module.exports = function(controller) {
 
       '\n' +
       '_Tech Validation Tracker:_\n' +
-      '`' + botName + ' add <POC or Partner POC or Paid Pilot> for <Account Name>`: Adds new entry for the tech validation tracker into Mode Analytics.\n' +
+      '`' + botName + ' add <POC or Partner POC or Paid Pilot> for <Account Name or CSO ID>`: Adds new entry for the tech validation tracker into Mode Analytics.\n' +
       '`' + botName + ' get <Account Name> or show <Account Name>`: Gets customer information from the validation tracker.\n' +
       '`' + botName + ' update <Account Name>`: Update fields in validation tracker. Wild Cards can be used (*)\n' +
       '`' + botName + ' What is <SE Name> working on`: Lists all Technical Validations that an Solution Engineer is assigned to.\n' +
