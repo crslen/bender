@@ -44,6 +44,10 @@ module.exports = function(controller) {
             console.log(JSON.stringify(catList));
             console.log(actCat);
             console.log(JSON.stringify(catList).indexOf(actCat));
+            if ((response.text.toLowerCase() === 'cancel') || (response.text.toLowerCase() === 'exit')) {
+              convo.stop();
+              convo.say('Okay. Byeeee!');
+            }
             if (JSON.stringify(catList).indexOf(actCat) >= 0) {
               askNotes(response, convo);
               convo.next();
