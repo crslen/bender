@@ -45,8 +45,8 @@ module.exports = function(controller) {
             console.log(actCat);
             console.log(JSON.stringify(catList).indexOf(actCat));
             if ((response.text.toLowerCase() === 'cancel') || (response.text.toLowerCase() === 'exit')) {
-              convo.stop();
               convo.say('Okay. Byeeee!');
+              convo.next();
             }
             if (JSON.stringify(catList).indexOf(actCat) >= 0) {
               askNotes(response, convo);
@@ -72,7 +72,7 @@ module.exports = function(controller) {
       let confTask = (response, convo) => {
         if ((response.text.toLowerCase() === 'cancel') || (response.text.toLowerCase() === 'exit')) {
           convo.say('Okay. Byeeee!');
-          convo.stop();
+          convo.next();
         } else {
           bot.api.users.info({
             user: message.user

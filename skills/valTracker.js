@@ -645,7 +645,65 @@ module.exports = function(controller) {
             callback: function(reply, convo) {
               convo.say('Ok when you are ready for an invite ask `@bender create new org` to generate a new invite');
               orgId = "";
+              submitReq(response, convo);
+              convo.next();
+            }
+          },
+          {
+            default: true,
+            callback: function(response, convo) {
+              // = response.text;
+              submitReq(response, convo);
+              convo.next();
+            }
+          }
+        ]);
+      };
+
+      let askOrg = (response, convo) => {
+
+        convo.ask("Please enter the Org ID.", (response, convo) => {
+          orgId = response.text;
+          submitReq(response, convo);
+          convo.next();
+        });
+      };
+
+      let submitReq = (response, convo) => {
+
+        convo.ask({
+          attachments: [{
+            title: 'Shall I enter this into the tech validation database?',
+            callback_id: 'subReq',
+            attachment_type: 'default',
+            color: color,
+            actions: [{
+                "name": "yes",
+                "text": "Yes",
+                "value": "yes",
+                "type": "button",
+              },
+              {
+                "name": "no",
+                "text": "No",
+                "value": "no",
+                "type": "button",
+              }
+            ]
+          }]
+        }, [{
+            pattern: "yes",
+            callback: function(reply, convo) {
               confTask(response, convo);
+              convo.next();
+              // do something awesome here.
+            }
+          },
+          {
+            pattern: "no",
+            callback: function(reply, convo) {
+              convo.say('Ok cancelling your request.  Byeee!');
+              //confTask(response, convo);
               convo.next();
             }
           },
@@ -658,15 +716,6 @@ module.exports = function(controller) {
             }
           }
         ]);
-      };
-
-      let askOrg = (response, convo) => {
-
-        convo.ask("Please enter the Org ID.", (response, convo) => {
-          orgId = response.text;
-          confTask(response, convo);
-          convo.next();
-        });
       };
 
       let confTask = (response, convo) => {
@@ -820,7 +869,7 @@ module.exports = function(controller) {
         if (custType.toLowerCase() == 'paid pilot' || custType.toLowerCase() == 'poc' || custType.toLowerCase() == 'partner poc' || custType.toLowerCase() == 'pilot') {
 
           bot.reply(message, {
-            text: "Searching opportunities for " + customer + "....."
+            text: "Searching *cloud opportunities* for " + customer + "....."
           });
 
           valFunc.getSFDC(customer, null, function(res) {
