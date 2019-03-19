@@ -413,6 +413,49 @@ module.exports = function(controller) {
     }
   });
 
+  controller.hears(['configure (.*) horizon'], 'direct_message,direct_mention,mention', (bot, message) => {
+    //var customer = message.match[1];
+    bot.reply(message, "Ok prepping SDDC's for Horizon this may take a few minutes....");
+    var env = message.match[1].toLowerCase();
+    if (env == 'elw') {
+      var jsonWKS = require("../json/elw.json");
+    } else {
+      var jsonWKS = require("../json/workshop.json");
+    }
+    execPSFile('workshop-config-horizon.ps1', function callback(results) {
+      console.log("stdout again: ", results);
+      bot.reply(message, "Results:\n" + results);
+      /*bot.say({
+        channel: chnl,
+        text: "Deleting workshops SDDCs 1 thru 20.  The following have been started: \n" + results
+      });*/
+    });
+  });
+
+  controller.hears(['reset workshop password to (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    var password = message.match[1];
+    bot.reply(message, "ok resetting vmcws* passwords to " + password + "....");
+
+    execPSFile(`reset-WorkshopUser-Passwords-Bender.ps1 ${password}`, function callback(results) {
+      console.log("stdout again: ", results);
+      bot.reply(message, "Results:\n" + results);
+      /*bot.say({
+        channel: chnl,
+        text: "Deleting workshops SDDCs 1 thru 20.  The following have been started: \n" + results
+      });*/
+    });
+  });
+
+  function execPSFile(psFile, callback) {
+    execSh([`pwsh /data/bender/vmc/workshops/executeFile.ps1 "${psFile}"`], true,
+      function(err, stdout, stderr) {
+        console.log("error: ", err);
+        console.log("stdout: ", stdout);
+        console.log("stderr: ", stderr);
+        return callback(stdout);
+      });
+  }
+
   function deploySDDC(sddc, callback) {
     execSh([`/data/bender/vmc/create_sddc.sh ${sddc}`], true,
       function(err, stdout, stderr) {

@@ -40,6 +40,8 @@ module.exports = function(controller) {
       '`' + botName + ' add <email> to <vmc-ws#>`: Add student to workshop org.\n' +
       '`' + botName + ' remove <email> from <vmc-ws#>`: Remove student from workshop org.\n' +
       '`' + botName + ' get workshop status`: Gets the status of SDDCs running in the workshop orgs.\n' +
+      '`' + botName + ' reset workshop password to <new password>`: Resets the passwords for all VMCWS* accounts.\n' +
+      '`' + botName + ' configure workshop horizon`: Configures SDDCs for Horizon workshops.\n' +
 
       '\n' +
       '_Misc:_\n' +
