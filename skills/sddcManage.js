@@ -434,20 +434,21 @@ module.exports = function(controller) {
 
   controller.hears(['reset workshop password to (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     var password = message.match[1];
-    bot.reply(message, "ok resetting vmcws* passwords to " + password + "....");
+    bot.reply(message, "ok resetting domain accounts vmcws* passwords to " + password + "....");
 
     execPSFile(`reset-WorkshopUser-Passwords-Bender.ps1 ${password}`, function callback(results) {
       console.log("stdout again: ", results);
+      var chnl = '#vmc-workshops';
       bot.reply(message, "Results:\n" + results);
-      /*bot.say({
+      bot.say({
         channel: chnl,
-        text: "Deleting workshops SDDCs 1 thru 20.  The following have been started: \n" + results
-      });*/
+        text: "Please note the vmcws# student accounts have all been updated with a new password `" + password + "`. Please communicate this information to the students in your workshop"
+      });
     });
   });
 
   function execPSFile(psFile, callback) {
-    execSh([`pwsh /data/bender/vmc/workshops/executeFile.ps1 "${psFile}"`], true,
+    execSh([`pwsh -nologo -noprofile /data/bender/vmc/workshops/executeFile.ps1 "${psFile}"`], true,
       function(err, stdout, stderr) {
         console.log("error: ", err);
         console.log("stdout: ", stdout);

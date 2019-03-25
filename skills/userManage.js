@@ -15,53 +15,75 @@ var valFunc = require('../model/valFunctions');
 module.exports = function(controller) {
 
   //add elw users
-  controller.hears(['add elw users'], 'direct_message,direct_mention', (bot, message) => {
+  controller.hears(['add (.*) users'], 'direct_message,direct_mention', (bot, message) => {
     valFunc.validateUser(bot, message, function(cb) {
       if (cb == 1) {
-
-        var jsonWKS = require("../json/elw.json");
+        var env = message.match[1].toLowerCase();
+        if (env == 'elw') {
+          var jsonWKS = require("../json/elw.json");
+        } else {
+          var jsonWKS = require("../json/workshop.json");
+        }
         //console.log(jsonWKS);
         jsonStr = JSON.stringify(jsonWKS);
         obj = JSON.parse(jsonStr);
         var i = 0;
         while (i < obj.length) {
-          valFunc.addUser(obj[i].OrgName, obj[i].elwUser, "elw", function(results) {
+          valFunc.addUser(obj[i].OrgName, obj[i].elwUser, env, function(results) {
             bot.reply(message, {
               text: "Results: " + results
             });
           });
           i++
         }
+        if (env == 'elw') {
         bot.say({
           channel: "#vmc-se-elw",
           text: "Adding ELW users to orgs in progress."
         });
+        } else {
+          bot.say({
+            channel: "#vmc-workshops",
+            text: "Adding workshop users to orgs in progress."
+          });
+        }
       }
     });
   });
 
   //remove elw users
-  controller.hears(['remove elw users'], 'direct_message,direct_mention', (bot, message) => {
+  controller.hears(['remove (.*) users'], 'direct_message,direct_mention', (bot, message) => {
     valFunc.validateUser(bot, message, function(cb) {
       if (cb == 1) {
-
-        var jsonWKS = require("../json/elw.json");
+        var env = message.match[1].toLowerCase();
+        if (env == 'elw') {
+          var jsonWKS = require("../json/elw.json");
+        } else {
+          var jsonWKS = require("../json/workshop.json");
+        }
         //console.log(jsonWKS);
         jsonStr = JSON.stringify(jsonWKS);
         obj = JSON.parse(jsonStr);
         var i = 0;
         while (i < obj.length) {
-          valFunc.removeUser(obj[i].OrgName, obj[i].elwUser, "elw", function(results) {
+          valFunc.removeUser(obj[i].OrgName, obj[i].elwUser, env, function(results) {
             bot.reply(message, {
               text: "Results: " + results
             });
           });
           i++
         }
+        if (env == 'elw') {
         bot.say({
           channel: "#vmc-se-elw",
           text: "Removing ELW users in progress from orgs."
         });
+      } else {
+        bot.say({
+          channel: "#vmc-workshops",
+          text: "Removing workshop users in progress from orgs."
+        });
+      }
       }
     });
   });
