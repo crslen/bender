@@ -415,25 +415,30 @@ module.exports = function(controller) {
 
   controller.hears(['configure (.*) horizon'], 'direct_message,direct_mention,mention', (bot, message) => {
     //var customer = message.match[1];
-    bot.reply(message, "Ok prepping SDDC's for Horizon this may take a few minutes....");
-    var env = message.match[1].toLowerCase();
-    if (env == 'elw') {
-      var jsonWKS = require("../json/elw.json");
+    if (cb ==1) {
+      bot.reply(message, "Ok prepping SDDC's for Horizon this may take a few minutes....");
+      var env = message.match[1].toLowerCase();
+      if (env == 'elw') {
+        var jsonWKS = require("../json/elw.json");
+      } else {
+        var jsonWKS = require("../json/workshop.json");
+      }
+      execPSFile('workshop-config-horizon.ps1', function callback(results) {
+        console.log("stdout again: ", results);
+        bot.reply(message, "Results:\n" + results);
+        /*bot.say({
+          channel: chnl,
+          text: "Deleting workshops SDDCs 1 thru 20.  The following have been started: \n" + results
+        });*/
+      });
     } else {
-      var jsonWKS = require("../json/workshop.json");
+      bot.reply(message, "Sorry you do not have access to perform this operation.");
     }
-    execPSFile('workshop-config-horizon.ps1', function callback(results) {
-      console.log("stdout again: ", results);
-      bot.reply(message, "Results:\n" + results);
-      /*bot.say({
-        channel: chnl,
-        text: "Deleting workshops SDDCs 1 thru 20.  The following have been started: \n" + results
-      });*/
-    });
   });
 
   controller.hears(['reset workshop password to (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     var password = message.match[1];
+    if (cb == 1) {
     bot.reply(message, "ok resetting domain accounts vmcws* passwords to " + password + "....");
 
     execPSFile(`reset-WorkshopUser-Passwords-Bender.ps1 ${password}`, function callback(results) {
@@ -445,6 +450,9 @@ module.exports = function(controller) {
         text: "Please note the vmcws# student accounts have all been updated with a new password `" + password + "`. Please communicate this information to the students in your workshop"
       });
     });
+    } else {
+      bot.reply(message, "Sorry you do not have access to perform this operation.");
+    }
   });
 
   function execPSFile(psFile, callback) {
