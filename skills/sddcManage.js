@@ -173,10 +173,18 @@ module.exports = function(controller) {
                   console.log("response: " + jsonStr);
                   if (jsonStr.status == "STARTED") {
                     bot.reply(message, "Removal of *" + jsonStr.params.SDDC_DELETE_CONTEXT_PARAM.sddc_id + "* has *" + jsonStr.status + "*. ");
-                    bot.say({
-                      channel: chnl,
-                      text: "Removal of *" + jsonStr.params.SDDC_DELETE_CONTEXT_PARAM.sddc_id + "* has *" + jsonStr.status + "*."
-                    });
+                    bot.api.users.info({
+                      user: message.user
+                    }, (error, response) => {
+                      let {
+                        name,
+                        real_name
+                      } = response.user;
+                      bot.say({
+                        channel: chnl,
+                        text: real_name + " Removal of *" + jsonStr.params.SDDC_DELETE_CONTEXT_PARAM.sddc_id + "* has *" + jsonStr.status + "*."
+                      });
+                    })
                   } else {
                     bot.reply(message, "Error message *" + jsonStr.status + "*.");
                     bot.say({
