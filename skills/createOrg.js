@@ -24,7 +24,7 @@ module.exports = function(controller) {
                   bot.reply(message, "Glad to see " + customer + " is in the tech validation database.");
                   valFunc.getPreFlight(customer, function(res) {
                     console.log("response: " + res[0].response);
-                    if (res[0].response == 'No') {
+                    if (res[0].response == "No") {
                       bot.reply(message, {
                         text: "I couldn't find any pre-flight info on " + customer + ".  Make sure the customer and account team fills out this survey - https://www.surveymonkey.com/r/vmc-tech-val-preflight"
                       });
@@ -33,13 +33,13 @@ module.exports = function(controller) {
                         text: fields.yayMessage() + "  I see that " + customer + " filled out the pre-flight survey.  You're one step closer to onboarding!"
                       });
                     }
+                    //define partner or customer poc
                     if (results[1].toLowerCase().indexOf("partner") >= 0) {
                       var tvType = "PARTNER_POC";
                     } else {
                       var tvType = "CUSTOMER_POC";
                     }
-
-                    confTask(tvType, response, convo);
+                    askPartner(tvType, response, convo);
                     convo.next();
                   });
                 }
@@ -47,6 +47,60 @@ module.exports = function(controller) {
             });
           });
         };
+
+        let askPartner = (tvType, response, convo) => {
+          if (tvType == "PARTNER_POC") {
+            console.log("tvtype:" + tvType)
+            convo.ask({
+              attachments: [{
+                title: 'Will this POC be for a partner or customer?',
+                callback_id: 'poctvType',
+                attachment_type: 'default',
+                color: color,
+                actions: [{
+                    "name": "Customer",
+                    "text": "Customer",
+                    "value": "Customer",
+                    "type": "button",
+                  },
+                  {
+                    "name": "Partner",
+                    "text": "Partner",
+                    "value": "Partner",
+                    "type": "button",
+                  }
+                ]
+              }]
+            }, [{
+                pattern: "Customer",
+                callback: function(reply, convo) {
+                  tvType = "CUSTOMER_POC";
+                  confTask(tvType, response, convo);
+                  convo.next();
+                }
+              },
+              {
+                pattern: "Partner",
+                callback: function(reply, convo) {
+                  tvType = "PARTNER_POC";
+                  confTask(tvType, response, convo);
+                  convo.next();
+                }
+              },
+              {
+                default: true,
+                callback: function(response, convo) {
+                  // = response.text;
+                  confTask(tvType, response, convo);
+                  convo.next();
+                }
+              }
+            ]);
+        } else {
+          confTask(tvType, response, convo);
+          convo.next();
+        }
+        }
 
         let askNetwork = (tvType, response, convo) => {
 
@@ -117,6 +171,7 @@ module.exports = function(controller) {
         };
 
         let confTask = (tvType, response, convo) => {
+          console.log("tvType to invite: " + tvType)
           valFunc.getInvite(tvType, function(vmcInvite) {
             //vmcInvite = JSON.parse(vmcInvite);
             bot.reply(message, {
