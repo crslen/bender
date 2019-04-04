@@ -137,7 +137,7 @@ module.exports = function(controller) {
                     } = response.user;
                     bot.say({
                       channel: chnl,
-                      text: real_name + " is deleting elw workshops 1 thru 50.  The following have been started: \n" + results
+                      text: real_name + " is deleting elw workshops SDDCs 1 thru 50.  The following have been started: \n" + results
                     });
                   })
 
@@ -155,9 +155,10 @@ module.exports = function(controller) {
                     } = response.user;
                     bot.say({
                       channel: chnl,
-                      text: real_name + " is deleting workshops 1 thru 20.  The following have been started: \n" + results
+                      text: real_name + " is deleting workshops SDDCs 1 thru 20.  The following have been started: \n" + results
                     });
                   })
+
                 });
               }
               //bot.reply(message, "Deleting elw workshops 1 thru 50.  I'll share the results once complete, which may take up to 10 minutes.")
@@ -182,7 +183,7 @@ module.exports = function(controller) {
                       } = response.user;
                       bot.say({
                         channel: chnl,
-                        text: real_name + " Removal of *" + jsonStr.params.SDDC_DELETE_CONTEXT_PARAM.sddc_id + "* has *" + jsonStr.status + "*."
+                        text: real_name + " removal of *" + jsonStr.params.SDDC_DELETE_CONTEXT_PARAM.sddc_id + "* has *" + jsonStr.status + "*."
                       });
                     })
                   } else {
@@ -313,12 +314,18 @@ module.exports = function(controller) {
               var jsonWKS = require("../json/workshop.json");
             }
             //console.log(jsonWKS);
+
+
             jsonStr = JSON.stringify(jsonWKS);
             obj = JSON.parse(jsonStr);
             var i = 0;
-            if (sddc.toLowerCase() == 'all') {
+            var sddcreg = /^([0-9]|[1-9][0-9])$/;
+            if (sddc.toLowerCase() == 'all' || sddcreg.test(sddc)) {
               if (env == 'elw') {
-                deployELWSDDC(function callback(results) {
+                if (sddc.toLowerCase() == 'all') {
+                  sddc = 50;
+                }
+                deployELWSDDC(sddc, function callback(results) {
                   console.log("stdout again: ", results);
                   bot.reply(message, "Results:\n" + results);
                   //put results in #vmc-se-elw channel
@@ -331,12 +338,16 @@ module.exports = function(controller) {
                     } = response.user;
                     bot.say({
                       channel: chnl,
-                      text: real_name + " is deploying elw workshops 1 thru 50.  The following have been started: \n" + results
+                      text: real_name + " is deploying elw workshops 1 thru " + sddc + ".  The following have been started: \n" + results
                     });
                   })
+
                 });
               } else {
-                deploySDDC(function callback(results) {
+                if (sddc.toLowerCase() == 'all') {
+                  sddc = 20;
+                }
+                deploySDDC(sddc, function callback(results) {
                   console.log("stdout again: ", results);
                   bot.reply(message, "Results:\n" + results);
                   //put results in #vmc-se-elw channel
@@ -349,48 +360,50 @@ module.exports = function(controller) {
                     } = response.user;
                     bot.say({
                       channel: chnl,
-                      text: real_name + " is deploying workshops 1 thru 20.  The following have been started: \n" + results
+                      text: real_name + " is deploying workshops 1 thru " + sddc + ".  The following have been started: \n" + results
                     });
                   })
+
                 });
               }
               //bot.reply(message, "Deploying elw workshops 1 thru 50. You can ask me `@bender get elw status` to see if all have been deployed succesfully.")
-            }
-            while (i < obj.length) {
-              //for (var i = 0; i < obj.length; i++) {
-              if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
-                console.log(JSON.stringify(obj[i]));
-                provider = obj[i].Provider;
-                console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName + " and region: " + obj[i].Region);
-                valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, obj[i].Provider, obj[i].RefreshToken, obj[i].Region, obj[i].NumHost, function(res) {
-                  var jsonParse = JSON.stringify(res);
-                  var jsonStr = JSON.parse(jsonParse);
-                  console.log("response: " + jsonStr.status);
-                  if (jsonStr.status == "STARTED") {
-                    bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.");
-                    bot.api.users.info({
-                      user: message.user
-                    }, (error, response) => {
-                      let {
-                        name,
-                        real_name
-                      } = response.user;
+            } else {
+              while (i < obj.length) {
+                //for (var i = 0; i < obj.length; i++) {
+                if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
+                  console.log(JSON.stringify(obj[i]));
+                  provider = obj[i].Provider;
+                  console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName + " and region: " + obj[i].Region + " and hosts: " + obj[i].NumHosts);
+                  valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, obj[i].Provider, obj[i].RefreshToken, obj[i].Region, obj[i].NumHosts, obj[i].NetworkSegment, function(res) {
+                    var jsonParse = JSON.stringify(res);
+                    var jsonStr = JSON.parse(jsonParse);
+                    console.log("response: " + jsonStr.status);
+                    if (jsonStr.status == "STARTED") {
+                      bot.reply(message, "Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*.");
+                      bot.api.users.info({
+                        user: message.user
+                      }, (error, response) => {
+                        let {
+                          name,
+                          real_name
+                        } = response.user;
+                        bot.say({
+                          channel: chnl,
+                          text: real_name + " deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*."
+                        });
+                      })
+
+                    } else {
+                      bot.reply(message, "Error message *" + jsonStr.status + "*.");
                       bot.say({
                         channel: chnl,
-                        text: real_name + " Deployment of *" + jsonStr.params.sddcConfig.name + "* has *" + jsonStr.status + "*."
+                        text: "Error message *" + jsonStr.status + "*."
                       });
-                    })
-
-                  } else {
-                    bot.reply(message, "Error message *" + jsonStr.status + "*.");
-                    bot.say({
-                      channel: chnl,
-                      text: "Error message *" + jsonStr.status + "*."
-                    });
-                  }
-                });
+                    }
+                  });
+                }
+                i++;
               }
-              i++;
             }
           }
         });
@@ -401,7 +414,6 @@ module.exports = function(controller) {
   });
 
   controller.hears(['get (.*) status'], 'direct_message,direct_mention,mention', (bot, message) => {
-
     //var customer = message.match[1];
     bot.reply(message, "Checking status....");
     var env = message.match[1].toLowerCase();
@@ -415,6 +427,7 @@ module.exports = function(controller) {
     var i = 0;
     var r = 0;
     var sddcMessage = '';
+    var sddcResults = '';
     while (i < obj.length) {
       var rToken = obj[i].RefreshToken;
       var orgId = obj[i].OrgId;
@@ -428,7 +441,6 @@ module.exports = function(controller) {
           //var jsonStr = JSON.parse(sddcStr);
           //bot.reply(message, "A total of *" + sddcStr.length + "* SDDC's are deploying or have been deployed.");
           console.log("results:" + sddcStr.length);
-
           for (var s = 0; s < sddcStr.length; s++) {
             if (sddcStr[s].sddc_state == "READY") {
               r = r + 1;
@@ -436,21 +448,72 @@ module.exports = function(controller) {
             sddcMessage = '' +
               '*SDDC Name:* ' + sddcStr[s].name + ' ' +
               '*SDDC State:* ' + sddcStr[s].sddc_state + '\n';
+            bot.reply(message, sddcMessage);
           }
-          bot.reply(message, sddcMessage);
-          return sddcMessage;
+          //return sddcMessage;
         }
         console.log("sddcmsg=: " + r);
       });
+      if (env == "workshop") {
+        i = i + 1; //skip very other json workshop entry
+      }
+      //if (i == sddc.Length) {
+      //  sddcResults = '' +
+      //   'Total SDDCs ready: *' + r + '*\n';
+      //  bot.reply(message, sddcResults);
+      //}
       i++;
-
     }
-
-    //bot.say(message, sddcMessage);
   });
 
-  function deploySDDC(callback) {
-    execSh(["/data/bender/vmc/create_sddc.sh"], true,
+  controller.hears(['configure (.*) horizon'], 'direct_message,direct_mention,mention', (bot, message) => {
+    //var customer = message.match[1];
+    valFunc.validateUser(bot, message, function(cb) {
+      if (cb ==1) {
+        bot.reply(message, "Ok prepping SDDC's for Horizon this may take a few minutes....");
+        var env = message.match[1].toLowerCase();
+        if (env == 'elw') {
+          var jsonWKS = require("../json/elw.json");
+        } else {
+          var jsonWKS = require("../json/workshop.json");
+        }
+        execPSFile('workshop-config-horizon.ps1', function callback(results) {
+          console.log("stdout again: ", results);
+          bot.reply(message, "Results:\n" + results);
+          /*bot.say({
+            channel: chnl,
+            text: "Deleting workshops SDDCs 1 thru 20.  The following have been started: \n" + results
+          });*/
+        });
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
+  });
+
+  controller.hears(['reset workshop password to (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    var password = message.match[1];
+    valFunc.validateUser(bot, message, function(cb) {
+      if (cb == 1) {
+      bot.reply(message, "ok resetting domain accounts student* passwords to " + password + "....");
+
+      execPSFile(`reset-WorkshopUser-Passwords-Bender.ps1 ${password}`, function callback(results) {
+        console.log("stdout again: ", results);
+        var chnl = '#vmc-workshops';
+        bot.reply(message, "Results:\n" + results);
+        bot.say({
+          channel: chnl,
+          text: "Please note the student# accounts have all been updated with a new password `" + password + "`. Please communicate this information to the students in your workshop."
+        });
+      });
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
+  });
+
+  function execPSFile(psFile, callback) {
+    execSh([`pwsh -nologo -noprofile /data/bender/vmc/workshops/executeFile.ps1 "${psFile}"`], true,
       function(err, stdout, stderr) {
         console.log("error: ", err);
         console.log("stdout: ", stdout);
@@ -459,8 +522,18 @@ module.exports = function(controller) {
       });
   }
 
-  function deployELWSDDC(callback) {
-    execSh(["/data/bender/vmc/create_elw_sddc.sh"], true,
+  function deploySDDC(sddc, callback) {
+    execSh([`/data/bender/vmc/create_sddc.sh ${sddc}`], true,
+      function(err, stdout, stderr) {
+        console.log("error: ", err);
+        console.log("stdout: ", stdout);
+        console.log("stderr: ", stderr);
+        return callback(stdout);
+      });
+  }
+
+  function deployELWSDDC(sddc, callback) {
+    execSh([`/data/bender/vmc/create_elw_sddc.sh ${sddc}`], true,
       function(err, stdout, stderr) {
         console.log("error: ", err);
         console.log("stdout: ", stdout);
