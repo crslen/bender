@@ -69,7 +69,7 @@ require('console-stamp')(console, '[HH:MM:ss.l]');
 var bot_options = {
     clientId: process.env.clientId,
     clientSecret: process.env.clientSecret,
- //   debug: true,
+    //debug: true,
     stats_optout: true,
     scopes: ['bot'],
     studio_token: process.env.studio_token,
@@ -161,7 +161,7 @@ if (!process.env.clientId || !process.env.clientSecret) {
                   convo.setVar('current_time', new Date());
               }
           }).catch(function(err) {
-              bot.reply(message, 'I experienced an error with a request to Botkit Studio: ' + err);
+              bot.reply(message, '¯\\_(ツ)_/¯ but you can ask me for `help`');
               debug('Botkit Studio: ', err);
           });
       });
@@ -181,6 +181,12 @@ function usage_tip() {
     console.log('Get a Botkit Studio token here: https://studio.botkit.ai/')
     console.log('~~~~~~~~~~');
 }
+var cms = require('botkit-cms')();
+cms.useLocalStudio(controller);
+
+cms.loadScriptsFromFile(__dirname + '/scripts.json').catch(function(err) {
+  console.error('Error loading scripts', err);
+  });
 /*
 controller.hears(['help'], 'direct_message,direct_mention,mention', (bot, message) => {
 	    bot.reply(message, {
