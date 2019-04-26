@@ -1,8 +1,8 @@
 var valFunc = require('../model/valFunctions');
 
-module.exports = function(controller) {
+module.exports = function (controller) {
   //module.exports.use = function(controller) {
-  controller.hears('help', 'direct_message,direct_mention,mention', function(bot, message) {
+  controller.hears('help', 'direct_message,direct_mention,mention', function (bot, message) {
     var benderQuestions = require("../json/BenderQuestions.json");
     var botName = '@bender',
       i = 0,
@@ -22,7 +22,7 @@ module.exports = function(controller) {
       '_Tech Validation Tracker:_\n' +
       '`' + botName + ' add <POC or Partner POC or Paid Pilot> for <Account Name or CSO ID>`: Adds new entry for the tech validation tracker into Mode Analytics.\n' +
       '`' + botName + ' get <Account Name> or show <Account Name>`: Gets customer information from the validation tracker.\n' +
-      '`' + botName + ' update <Account Name>`: Update fields in validation tracker. Wild Cards can be used (*)\n' +
+      '`' + botName + ' update <Account Name>`: Update fields in validation tracker. Account Name must match exactly.\n' +
       '`' + botName + ' What is <SE Name> working on`: Lists all Technical Validations that an Solution Engineer is assigned to.\n' +
       '`' + botName + ' create new org`: Creates invite for new POC org.\n' +
       '`' + botName + ' get <Account Name> sddc`: Get basic information about the customers SDDC.\n' +
@@ -45,13 +45,14 @@ module.exports = function(controller) {
 
       '\n' +
       '_Misc:_\n' +
-      '`' + botName + ' new one thing report`: Adds your one thing you want to share with upper management.\n' +
+      //'`' + botName + ' new one thing report`: Adds your one thing you want to share with upper management.\n' +
       '`' + botName + ' show|find|get compliance <search item>`: Search CIAQ database for Vendor Risk Managment, RFP\'s and other stuff.\n' +
       '`' + botName + ' show|find|get roadmap <search item>`: Search public facing VMC roadmap database for features that are available, in development or planned.\n' +
       '`' + botName + ' add|new team member <slack handle>`: Adds a new team member to appropriate slack groups.\n' +
 
       '\n' +
-      '_BU Data Collection:_\n' + dataCollection + '' +
+      '_BU Data Collection:_\n' + //dataCollection + '' +
+      '`' + botName + ' add|new|create feedback for <Account Name>`: Provide feedback to BU regarding VMware Cloud on AWS.\n' +
 
       //valFunc.validateUser(bot, message, function(cb) {
       //  if (cb == 1) {
