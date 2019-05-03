@@ -69,6 +69,7 @@ require('console-stamp')(console, '[HH:MM:ss.l]');
 var bot_options = {
     clientId: process.env.clientId,
     clientSecret: process.env.clientSecret,
+    clientSigningSecret: process.env.SLACK_TOKEN,
     //debug: true,
     stats_optout: true,
     scopes: ['bot'],

@@ -1,3 +1,15 @@
+//redshift.js
+var Redshift = require('node-redshift');
+
+var client = {
+  user: process.env.RSuser,
+  database: process.env.RSdatabase,
+  password: process.env.RSpassword,
+  port: process.env.RSport,
+  host: process.env.RShost,
+  ssl: true,
+};
+
 var wordfilter = require('wordfilter');
 let fields = require("../model/valFields");
 var valFunc = require('../model/valFunctions');
@@ -29,7 +41,6 @@ module.exports = function (controller) {
     console.log("action: " + JSON.stringify(trigger.actions[0]))
     // is the name of the clicked button "dialog?"
     if (trigger.actions[0].value == 'select-feedback' || trigger.actions[0].value == 'Yes-feedback') {
-
       var dialog = bot.createDialog(
           'Feedback',
           trigger.callback_id,
@@ -37,7 +48,7 @@ module.exports = function (controller) {
         ).addTextarea('Impact', 'Impact', '', {
           placeholder: 'If this is not resolved, what is the impact?'
         })
-        .addSelect('Timeline', 'timeline', null, fbTime, {
+        .addSelect('Urgency', 'Urgency', null, fbTime, {
           placeholder: 'Select One'
         })
         .addTextarea('Summary', 'summary', '', {
@@ -48,6 +59,32 @@ module.exports = function (controller) {
         // handle your errors!
         //bot.reply("I ran into an issue: " + err);
       });
+    } else if (trigger.actions[0].value == 'update-feedback') {
+      var ids = trigger.callback_id.split('|');
+      var timeline = ids[0];
+      var jsonResults = ids[1];
+      console.log(trigger.callback_id);
+      var jsonStr = JSON.stringify(jsonResults);
+      console.log("csname: " + jsonResults);
+      var dialog = bot.createDialog(
+          'Feedback',
+          trigger.callback_id,
+          'Update'
+        ).addTextarea('Impact', 'Impact', '', {
+          placeholder: 'If this is not resolved, what is the impact?'
+        })
+        .addSelect('Urgency', 'Urgency', timeline, fbTime, {
+          placeholder: 'Select One'
+        })
+        .addTextarea('Summary', 'summary', jsonResults, {
+          placeholder: 'Provide a summary of the feedback'
+        });
+
+      bot.replyWithDialog(trigger, dialog.asObject(), function (err, res) {
+        // handle your errors!
+        //bot.reply("I ran into an issue: " + err);
+      });
+
     } else {
       if (trigger.actions[0].value == 'No-feedback') {
         bot.reply(trigger, "Ok going back to my hole. Byeeee!");
@@ -88,7 +125,7 @@ module.exports = function (controller) {
             "cso": cso,
             "impact": submission.Impact,
             "summary": submission.summary,
-            "timeline": submission.timeline,
+            "urgency": submission.Urgency,
             "sentiment": jsonParse.Sentiment,
             "sentiment_score": jsonParse.SentimentScore,
             "keyPhrases": jsonParse.KeyPhrases,
@@ -220,24 +257,43 @@ module.exports = function (controller) {
     });
   });
 
-  controller.hears(['export one thing report'], 'direct_message,direct_mention,mention', (bot, message) => {
-
-    bot.reply(message, "Please hold.....");
-    valFunc.getOTR(function (res) {
+  controller.hears(['Update feedback for (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    var customer = "";
+    customer = message.match[1];
+    bot.reply(message, "Searching feedback please hold.....");
+    getFeedback(customer, function (res) {
       if (res.length == 0) {
         bot.reply(message, {
-          text: "Hmm something bad happend, I can't query this information."
+          text: "I couldn't find any feedback for " + customer
         });
       } else {
         var jsonParse = JSON.stringify(res);
         console.log("return: " + jsonParse);
         var jsonStr = JSON.parse(jsonParse);
+        bot.reply(message, "Select feedback to update");
 
         for (var i = 0; i < jsonStr.length; i++) {
-          var date = new Date(jsonStr[i].datetime_created)
-          var otDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+
+          var sfMessage = '' +
+            '*Customer Name:* ' + jsonStr[i].customer_name + '\n' +
+            '*Category:* ' + jsonStr[i].category + '\n' +
+            '*Area:* ' + jsonStr[i].area + '\n' +
+            '*Impact:* ' + jsonStr[i].impact + '\n' +
+            '*Submitted By:* ' + jsonStr[i].submitted_by + '\n';
+
           bot.reply(message, {
-            text: "`" + otDate + "` - " + jsonStr[i].the_one_thing + " *" + jsonStr[i].specialist + "*"
+            //text: "Here's what I found for " + customer,
+            attachments: [{
+              "text": sfMessage,
+              "color": colorArray[i],
+              callback_id: jsonStr[i].timeline + '|' + jsonStr[i].summary,
+              actions: [{
+                "name": "select",
+                "text": "Select",
+                "value": "update-feedback",
+                "type": "button",
+              }],
+            }]
           });
         }
       }
@@ -276,4 +332,32 @@ module.exports = function (controller) {
     return objects;
   }
 
+  //query SFDC data
+  function getFeedback(customerName, callback) {
+    //redshift Query
+    //connection pool
+    var redshiftClient = new Redshift(client, {
+      rawConnection: true
+    })
+
+    redshiftClient.connect(function (err) {
+      if (err) throw err;
+      else {
+        var selQuery;
+        selQuery = `select * from set_dev.vmc_aws_feedback where customer_name ilike '%${customerName}%'`;
+        // and snapshot_date = (select max(snapshot_date) from vmstar.opportunity)
+
+        redshiftClient.query(selQuery, {
+          rawConnection: true
+        }, function (err, data) {
+          if (err) throw err;
+          else {
+            console.log(data.rows);
+            redshiftClient.close();
+            return callback(data.rows);
+          }
+        });
+      }
+    });
+  }
 }; /*the end*/

@@ -41,6 +41,9 @@ module.exports = function (controller) {
       '`' + botName + ' remove <email> from <vmc-ws#>`: Remove student from workshop org.\n' +
       '`' + botName + ' get workshop status`: Gets the status of SDDCs running in the workshop orgs.\n' +
       '`' + botName + ' reset workshop password to <new password>`: Resets the passwords for all VMCWS* accounts.\n' +
+      '`' + botName + ' create workshop rds`: Creates new RDS databases for workshops.\n' +
+      '`' + botName + ' delete workshop rds`: Deletes RDS databases for workshops.\n' +
+      '`' + botName + ' get workshop rds status`: Returns status of RDS databases.\n' +
       '`' + botName + ' configure workshop horizon`: Configures SDDCs for Horizon workshops.\n' +
 
       '\n' +
@@ -52,7 +55,7 @@ module.exports = function (controller) {
 
       '\n' +
       '_BU Data Collection:_\n' + //dataCollection + '' +
-      '`' + botName + ' add|new|create feedback for <Account Name>`: Provide feedback to BU regarding VMware Cloud on AWS.\n' +
+      '`' + botName + ' add|new|create feedback for <Account Name>`: Provide feedback to CPBU regarding VMware Cloud on AWS.\n' +
 
       //valFunc.validateUser(bot, message, function(cb) {
       //  if (cb == 1) {

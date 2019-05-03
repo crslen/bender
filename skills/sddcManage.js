@@ -3,6 +3,12 @@ var valFunc = require('../model/valFunctions')
 var execSh = require("exec-sh");
 var colorArray = ['#629aca', '#9ecbde', '#6392ac', '#e6f1f7', '#64818f'];
 
+var awsCli = require('aws-cli-js');
+var Options = awsCli.Options;
+var Aws = awsCli.Aws;
+
+var aws = new Aws();
+
 var orgName;
 var orgId;
 var oToken;
@@ -12,12 +18,83 @@ var cidr;
 var region
 var subnetId;
 
-module.exports = function(controller) {
+module.exports = function (controller) {
 
-  controller.hears(['delete (.*) (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
-    valFunc.validateUser(bot, message, function(cb) {
+  controller.hears(['create (workshop|elw) rds'], 'direct_message,direct_mention,mention', (bot, message) => {
+    //var customer = message.match[1];
+    valFunc.validateUser(bot, message, function (cb) {
       if (cb == 1) {
-        bot.createConversation(message, function(err, convo) {
+        bot.reply(message, "Ok creating RDS cloudformation stack....");
+        var env = message.match[1].toLowerCase();
+        if (env == 'elw') {
+          var jsonWKS = require("../json/elw.json");
+        } else {
+          var jsonWKS = require("../json/workshop.json");
+        }
+        //do some stuff
+        aws.command(`cloudformation create-stack --profile ${env} --template-url https://s3-us-west-2.amazonaws.com/vmc-workshop-cf/RDS.yml --stack-name VMC-Workshop-Databases`).then(function (data) {
+          console.log('data = ', data);
+        });
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
+  });
+
+  controller.hears(['delete (workshop|elw) rds'], 'direct_message,direct_mention,mention', (bot, message) => {
+    //var customer = message.match[1];
+    valFunc.validateUser(bot, message, function (cb) {
+      if (cb == 1) {
+        bot.reply(message, "Ok deleting RDS cloudformation stack....");
+        var env = message.match[1].toLowerCase();
+        if (env == 'elw') {
+          var jsonWKS = require("../json/elw.json");
+        } else {
+          var jsonWKS = require("../json/workshop.json");
+        }
+        //do some stuff
+        aws.command(`cloudformation delete-stack --stack-name VMC-Workshop-Databases --profile ${env}`).then(function (data) {
+          console.log('data = ', data);
+        });
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
+  });
+
+  controller.hears(['get (workshop|elw) rds status'], 'direct_message,direct_mention,mention', (bot, message) => {
+    //var customer = message.match[1];
+    valFunc.validateUser(bot, message, function (cb) {
+      if (cb == 1) {
+        //bot.reply(message, "Ok creating RDS cloudformation stack....");
+        var env = message.match[1].toLowerCase();
+        if (env == 'elw') {
+          var jsonWKS = require("../json/elw.json");
+        } else {
+          var jsonWKS = require("../json/workshop.json");
+        }
+        //do some stuff
+        //aws.command(`cloudformation describe-stacks --stack-name VMC-Workshop-Databases --profile ${env}`).then(function (err, data) {
+        aws.command(`cloudformation describe-stacks --stack-name VMC-Workshop-Databases --profile ${env}`, function (err, data) {
+          if (err) {
+            bot.reply(message, "Status is `None`");
+            return;
+          }
+          console.log('data = ', data);
+          console.log('data = ', JSON.parse(data.raw).Stacks[0].StackStatus);
+          rdsStatus = JSON.parse(data.raw).Stacks[0].StackStatus;
+          bot.reply(message, "Status is `" + rdsStatus + "`");
+        });
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
+  });
+
+  controller.hears(['delete (workshop|elw) (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+    valFunc.validateUser(bot, message, function (cb) {
+      if (cb == 1) {
+        bot.createConversation(message, function (err, convo) {
           convo.addQuestion({
             attachments: [{
               title: 'Are you sure you want to do this?',
@@ -40,20 +117,20 @@ module.exports = function(controller) {
             }]
           }, [{
               pattern: "yes",
-              callback: function(reply, convo) {
+              callback: function (reply, convo) {
                 convo.gotoThread('ELWQ2');
                 // do something awesome here.
               }
             },
             {
               pattern: "no",
-              callback: function(reply, convo) {
+              callback: function (reply, convo) {
                 convo.gotoThread('noend');
               }
             },
             {
               default: true,
-              callback: function(response, convo) {
+              callback: function (response, convo) {
                 // = response.text;
                 //askStatus(response, convo);
                 //convo.next();
@@ -83,7 +160,7 @@ module.exports = function(controller) {
             }]
           }, [{
               pattern: "yes",
-              callback: function(reply, convo) {
+              callback: function (reply, convo) {
                 confTask(convo);
                 convo.gotoThread('end');
                 // do something awesome here.
@@ -91,13 +168,13 @@ module.exports = function(controller) {
             },
             {
               pattern: "no",
-              callback: function(reply, convo) {
+              callback: function (reply, convo) {
                 convo.gotoThread('noend');
               }
             },
             {
               default: true,
-              callback: function(convo) {
+              callback: function (convo) {
                 // = response.text;
                 //askStatus(response, convo);
                 //convo.next();
@@ -168,7 +245,7 @@ module.exports = function(controller) {
               if (obj[i].OrgName.toUpperCase() == sddc.toUpperCase()) {
                 console.log(JSON.stringify(obj[i]));
                 provider = obj[i].Provider;
-                valFunc.deleteSDDC(obj[i].OrgId, obj[i].RefreshToken, function(res) {
+                valFunc.deleteSDDC(obj[i].OrgId, obj[i].RefreshToken, function (res) {
                   var jsonParse = JSON.stringify(res);
                   var jsonStr = JSON.parse(res);
                   console.log("response: " + jsonStr);
@@ -205,12 +282,12 @@ module.exports = function(controller) {
     });
   });
 
-  controller.hears(['deploy (.*) (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.hears(['deploy (workshop|elw) (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     console.log("env: " + message.match[1]);
     console.log("sddc: " + message.match[2]);
-    valFunc.validateUser(bot, message, function(cb) {
+    valFunc.validateUser(bot, message, function (cb) {
       if (cb == 1) {
-        bot.createConversation(message, function(err, convo) {
+        bot.createConversation(message, function (err, convo) {
           convo.addQuestion({
             attachments: [{
               title: 'Are you sure you want to do this?',
@@ -233,20 +310,20 @@ module.exports = function(controller) {
             }]
           }, [{
               pattern: "yes",
-              callback: function(reply, convo) {
+              callback: function (reply, convo) {
                 convo.gotoThread('ELWQ2');
                 // do something awesome here.
               }
             },
             {
               pattern: "no",
-              callback: function(reply, convo) {
+              callback: function (reply, convo) {
                 convo.gotoThread('noend');
               }
             },
             {
               default: true,
-              callback: function(response, convo) {
+              callback: function (response, convo) {
                 // = response.text;
                 //askStatus(response, convo);
                 //convo.next();
@@ -276,7 +353,7 @@ module.exports = function(controller) {
             }]
           }, [{
               pattern: "yes",
-              callback: function(reply, convo) {
+              callback: function (reply, convo) {
                 confTask(convo);
                 convo.gotoThread('end');
                 // do something awesome here.
@@ -284,13 +361,13 @@ module.exports = function(controller) {
             },
             {
               pattern: "no",
-              callback: function(reply, convo) {
+              callback: function (reply, convo) {
                 convo.gotoThread('noend');
               }
             },
             {
               default: true,
-              callback: function(convo) {
+              callback: function (convo) {
                 // = response.text;
                 //askStatus(response, convo);
                 //convo.next();
@@ -374,7 +451,7 @@ module.exports = function(controller) {
                   console.log(JSON.stringify(obj[i]));
                   provider = obj[i].Provider;
                   console.log("Found token: " + obj[i].RefreshToken + " and org: " + obj[i].OrgId + " and name: " + obj[i].SDDCName + " and region: " + obj[i].Region + " and hosts: " + obj[i].NumHosts);
-                  valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, obj[i].Provider, obj[i].RefreshToken, obj[i].Region, obj[i].NumHosts, obj[i].NetworkSegment, function(res) {
+                  valFunc.deploySDDC(obj[i].OrgId, obj[i].SDDCName, obj[i].SubnetId, obj[i].CIDR, obj[i].Provider, obj[i].RefreshToken, obj[i].Region, obj[i].NumHosts, obj[i].NetworkSegment, function (res) {
                     var jsonParse = JSON.stringify(res);
                     var jsonStr = JSON.parse(jsonParse);
                     console.log("response: " + jsonStr.status);
@@ -413,7 +490,7 @@ module.exports = function(controller) {
     });
   });
 
-  controller.hears(['get (.*) status'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.hears(['get (workshop|elw) status'], 'direct_message,direct_mention,mention', (bot, message) => {
     //var customer = message.match[1];
     bot.reply(message, "Checking status....");
     var env = message.match[1].toLowerCase();
@@ -431,7 +508,7 @@ module.exports = function(controller) {
     while (i < obj.length) {
       var rToken = obj[i].RefreshToken;
       var orgId = obj[i].OrgId;
-      valFunc.getELWStatus(orgId, rToken, function(sddc) {
+      valFunc.getELWStatus(orgId, rToken, function (sddc) {
         if (sddc.length == 2) {
           console.log("results:" + sddc.length);
           //do nothing for now
@@ -466,10 +543,10 @@ module.exports = function(controller) {
     }
   });
 
-  controller.hears(['configure (.*) horizon'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.hears(['configure (workshop|elw) horizon'], 'direct_message,direct_mention,mention', (bot, message) => {
     //var customer = message.match[1];
-    valFunc.validateUser(bot, message, function(cb) {
-      if (cb ==1) {
+    valFunc.validateUser(bot, message, function (cb) {
+      if (cb == 1) {
         bot.reply(message, "Ok prepping SDDC's for Horizon this may take a few minutes....");
         var env = message.match[1].toLowerCase();
         if (env == 'elw') {
@@ -493,19 +570,19 @@ module.exports = function(controller) {
 
   controller.hears(['reset workshop password to (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     var password = message.match[1];
-    valFunc.validateUser(bot, message, function(cb) {
+    valFunc.validateUser(bot, message, function (cb) {
       if (cb == 1) {
-      bot.reply(message, "ok resetting domain accounts student* passwords to " + password + "....");
+        bot.reply(message, "ok resetting domain accounts student* passwords to " + password + "....");
 
-      execPSFile(`reset-WorkshopUser-Passwords-Bender.ps1 ${password}`, function callback(results) {
-        console.log("stdout again: ", results);
-        var chnl = '#vmc-workshops';
-        bot.reply(message, "Results:\n" + results);
-        bot.say({
-          channel: chnl,
-          text: "Please note the student# accounts have all been updated with a new password `" + password + "`. Please communicate this information to the students in your workshop."
+        execPSFile(`reset-WorkshopUser-Passwords-Bender.ps1 ${password}`, function callback(results) {
+          console.log("stdout again: ", results);
+          var chnl = '#vmc-workshops';
+          bot.reply(message, "Results:\n" + results);
+          bot.say({
+            channel: chnl,
+            text: "Please note the student# accounts have all been updated with a new password `" + password + "`. Please communicate this information to the students in your workshop."
+          });
         });
-      });
       } else {
         bot.reply(message, "Sorry you do not have access to perform this operation.");
       }
@@ -514,7 +591,7 @@ module.exports = function(controller) {
 
   function execPSFile(psFile, callback) {
     execSh([`pwsh -nologo -noprofile /data/bender/vmc/workshops/executeFile.ps1 "${psFile}"`], true,
-      function(err, stdout, stderr) {
+      function (err, stdout, stderr) {
         console.log("error: ", err);
         console.log("stdout: ", stdout);
         console.log("stderr: ", stderr);
@@ -524,7 +601,7 @@ module.exports = function(controller) {
 
   function deploySDDC(sddc, callback) {
     execSh([`/data/bender/vmc/create_sddc.sh ${sddc}`], true,
-      function(err, stdout, stderr) {
+      function (err, stdout, stderr) {
         console.log("error: ", err);
         console.log("stdout: ", stdout);
         console.log("stderr: ", stderr);
@@ -534,7 +611,7 @@ module.exports = function(controller) {
 
   function deployELWSDDC(sddc, callback) {
     execSh([`/data/bender/vmc/create_elw_sddc.sh ${sddc}`], true,
-      function(err, stdout, stderr) {
+      function (err, stdout, stderr) {
         console.log("error: ", err);
         console.log("stdout: ", stdout);
         console.log("stderr: ", stderr);
@@ -544,7 +621,7 @@ module.exports = function(controller) {
 
   function deleteSDDC(callback) {
     execSh(["/data/bender/vmc/delete_sddc.sh"], true,
-      function(err, stdout, stderr) {
+      function (err, stdout, stderr) {
         console.log("error: ", err);
         console.log("stdout: ", stdout);
         console.log("stderr: ", stderr);
@@ -554,7 +631,7 @@ module.exports = function(controller) {
 
   function deleteELWSDDC(callback) {
     execSh(["/data/bender/vmc/delete_elw_sddc.sh"], true,
-      function(err, stdout, stderr) {
+      function (err, stdout, stderr) {
         console.log("error: ", err);
         console.log("stdout: ", stdout);
         console.log("stderr: ", stderr);
