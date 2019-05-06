@@ -55,7 +55,7 @@ module.exports = function (controller) {
 
       '\n' +
       '_BU Data Collection:_\n' + //dataCollection + '' +
-      '`' + botName + ' add|new|create feedback for <Account Name>`: Provide feedback to CPBU regarding VMware Cloud on AWS.\n' +
+      '`' + botName + ' add|new|create feedback for <Customer or Partner Name>`: Provide feedback to CPBU regarding VMware Cloud on AWS.\n' +
 
       //valFunc.validateUser(bot, message, function(cb) {
       //  if (cb == 1) {
