@@ -55,7 +55,8 @@ module.exports = function (controller) {
           placeholder: 'Provide a summary of the feedback'
         })
         .addTextarea('Loss Summary', 'lossSummary', '', {
-          placeholder: '(Optional) If this is a lost opportunity, please provide addtional details.'
+          placeholder: 'If this is a lost opportunity, please provide addtional details.',
+          optional: true
         });
 
       bot.replyWithDialog(trigger, dialog.asObject(), function (err, res) {
@@ -81,6 +82,12 @@ module.exports = function (controller) {
         })
         .addTextarea('Summary', 'summary', jsonResults, {
           placeholder: 'Provide a summary of the feedback'
+        })
+        .addTextarea('Loss Summary', 'lossSummary', '', {
+          placeholder: '(Optional) If this is a lost opportunity, please provide addtional details.'
+        })
+        .addSelect('Status', 'Urgency', timeline, fbTime, {
+          placeholder: 'Select One'
         });
 
       bot.replyWithDialog(trigger, dialog.asObject(), function (err, res) {
@@ -133,6 +140,7 @@ module.exports = function (controller) {
             "sentiment_score": jsonParse.SentimentScore,
             "keyPhrases": jsonParse.KeyPhrases,
             "loss_summary": submission.lossSummary,
+            "status": "New",
             "origin": "slack",
             "submitted_by": real_name
           }
