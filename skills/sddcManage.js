@@ -568,6 +568,31 @@ module.exports = function (controller) {
     });
   });
 
+  controller.hears(['refresh (workshop|elw) hcx'], 'direct_message,direct_mention,mention', (bot, message) => {
+    //var customer = message.match[1];
+    valFunc.validateUser(bot, message, function (cb) {
+      if (cb == 1) {
+        bot.reply(message, "Ok refreshing migration VMs and rebooting HCX components.  This will take up to 10 minutes to complete....");
+        var env = message.match[1].toLowerCase();
+        if (env == 'elw') {
+          var jsonWKS = require("../json/elw.json");
+        } else {
+          var jsonWKS = require("../json/workshop.json");
+        }
+        execPSFile('workshop-refresh-migrate-vms.ps1', function callback(results) {
+          console.log("stdout again: ", results);
+          bot.reply(message, "Results:\n" + results);
+          /*bot.say({
+            channel: chnl,
+            text: "Deleting workshops SDDCs 1 thru 20.  The following have been started: \n" + results
+          });*/
+        });
+      } else {
+        bot.reply(message, "Sorry you do not have access to perform this operation.");
+      }
+    });
+  });
+
   controller.hears(['reset workshop password to (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
     var password = message.match[1];
     valFunc.validateUser(bot, message, function (cb) {
